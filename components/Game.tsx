@@ -59,7 +59,6 @@ const Game = ({
 
     const handleEnableGame = (e: React.MouseEvent) => {
         e.stopPropagation();
-        // Redireciona para a página de pacotes com filtro pelo provedor do jogo
         router.push(`/pacotes?provedor=${game.provedorId}&page=1`);
     };
 

@@ -156,7 +156,6 @@ export default function JogosClient({ initialData }: JogosClientProps) {
             page: params.get("page") ? Number(params.get("page")) : 1,
         };
 
-        // Se carteira está na URL, converter para provedores
         if (parsedFilters.carteira?.length && carteiras.length > 0) {
             const selectedCarteiras = carteiras.filter((c) =>
                 parsedFilters.carteira?.includes(String(c.id))
@@ -165,7 +164,6 @@ export default function JogosClient({ initialData }: JogosClientProps) {
                 c.provedores.map((p) => String(p.id))
             );
 
-            // Remover duplicatas e combinar com provedores existentes
             const uniqueProvedores = [
                 ...new Set([
                     ...(parsedFilters.provedor || []),

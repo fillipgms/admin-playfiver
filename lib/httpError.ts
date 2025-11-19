@@ -5,7 +5,6 @@ export async function redirectOnAuthError(error: unknown) {
     if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         if (status === 401 || status === 403) {
-            // Just redirect to login - the middleware will handle invalid sessions
             redirect("/login");
         }
     }

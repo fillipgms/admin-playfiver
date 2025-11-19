@@ -80,7 +80,7 @@ const IpTable = ({
         try {
             const { deleteIp } = await import("@/actions/ipWhitelist");
             await deleteIp(id);
-            onIpCreated?.(); // Refresh the list
+            onIpCreated?.();
         } catch (error) {
             console.error("Failed to delete IP:", error);
             alert("Erro ao deletar IP. Tente novamente.");

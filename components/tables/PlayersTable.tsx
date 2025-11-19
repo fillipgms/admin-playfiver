@@ -84,7 +84,6 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
     const handleInfluencerConfirm = async () => {
         if (!pendingPlayer) return;
 
-        // Encontrar o node do grid para este jogador
         const node = gridRef.current?.api?.getRowNode(String(pendingPlayer.id));
         if (!node) return;
 
@@ -104,14 +103,12 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
         const isInfluencer = p.value === 1;
         const nextVal = isInfluencer ? 0 : 1;
 
-        // Se está tentando marcar como influenciador, mostrar modal
         if (nextVal === 1) {
             setPendingPlayer(playerData);
             setShowInfluencerModal(true);
             return;
         }
 
-        // Se está removendo influenciador, fazer direto
         await updatePlayerType(playerData, nextVal, p);
     };
 
@@ -317,7 +314,6 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
             params.set("page", "1");
 
             router.push(`/jogadores?${params.toString()}`);
-            // Reset isSearching after navigation
             setTimeout(() => setIsSearching(false), 100);
         }, 500);
     };

@@ -70,7 +70,6 @@ export default function BettingLimitsModal({
         distributor_free_spins_quantity: "",
     });
 
-    // Reset form when modal opens with new user
     useEffect(() => {
         if (isOpen) {
             setLimitEnabled(user.limit || false);

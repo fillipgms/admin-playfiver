@@ -58,7 +58,7 @@ const AgentList = ({ agents, maxVisible = 3 }: AgentListProps) => {
     const sortedAgents = [...visibleAgents].sort((a, b) => {
         const totalA = parseWalletBalance(a.total);
         const totalB = parseWalletBalance(b.total);
-        return totalA - totalB; // Menor valor primeiro (maior perda)
+        return totalA - totalB;
     });
 
     return (
