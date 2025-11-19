@@ -1,0 +1,253 @@
+{
+    "title": "Termos de Uso e Abertura de Conta da Playfiver",
+    "version": "31/10/2025",
+    "sections": [
+        {
+            "id": "1",
+            "title": "Partes e Aceite",
+            "content": [
+                "Estes Termos regem o uso da plataforma Playfiver (“Plataforma”) pelo Cliente (pessoa jurídica ou pessoa física maior de 18 anos).",
+                "O aceite é eletrônico: ao criar a conta e marcar “Li e concordo”, o Cliente adere integralmente a estes Termos.",
+                "O aceite eletrônico tem validade jurídica equivalente à assinatura (MP 2.200-2/2001, art. 10, §2º)."
+            ]
+        },
+        {
+            "id": "2",
+            "title": "Definições",
+            "content": [
+                "API Seamless: integração em que carteira/saldo do jogador ficam no sistema do Cliente; apostas são debitadas via API.",
+                "Saldo GGR: crédito interno operacional para cobrir o Gross Gaming Revenue de provedores integrados.",
+                "Provedores: terceiros que fornecem jogos (cassino, ao vivo, sportsbook etc.) integrados via Playfiver.",
+                "Canal de Notificações: grupo/canal oficial indicado pela Playfiver para avisos técnicos.",
+                "Modo Influenciador: modo para gravação de criativos/demonstrações, sem garantia de ganhos reais."
+            ]
+        },
+        {
+            "id": "3",
+            "title": "Objeto",
+            "content": [
+                "A Playfiver fornece acesso à Plataforma, APIs e painéis para que o Cliente opere seus jogos junto aos Provedores no modelo seamless.",
+                "O Cliente mantém a carteira de jogadores e o fluxo comercial."
+            ]
+        },
+        {
+            "id": "4",
+            "title": "Abertura de Conta e Verificação",
+            "content": [
+                "A conta é criada mediante cadastro e aceite destes Termos.",
+                "A Playfiver pode solicitar informações (KYC/AML), recusar, suspender ou encerrar contas por risco, fraude, ordem legal ou descumprimento."
+            ]
+        },
+        {
+            "id": "5",
+            "title": "Elegibilidade e Responsabilidade Regulatória",
+            "content": [
+                "Idade mínima: 18 anos.",
+                "O Cliente é integralmente responsável por licenças, autorizações e conformidade legal nas jurisdições onde atua (publicidade, Jogo Responsável, AML/PLD, georrestrição, regras locais).",
+                "A infraestrutura é focada no Brasil, podendo atender Argentina, Bolívia, Paraguai e países asiáticos sob responsabilidade regulatória do Cliente."
+            ]
+        },
+        {
+            "id": "6",
+            "title": "Operação via API Seamless",
+            "content": [
+                "O Cliente deve manter saldo suficiente e observar manuais técnicos, autenticação, limites de taxa e boas práticas de segurança."
+            ]
+        },
+        {
+            "id": "7",
+            "title": "Saldo GGR, Pagamentos e Tributos",
+            "content": [
+                "Carregamentos do Saldo GGR destinam-se exclusivamente ao custeio do GGR dos Provedores.",
+                "É crédito interno, sem conversão automática em moeda.",
+                "Tributos, taxas bancárias/cambiais e custos de terceiros são do Cliente."
+            ]
+        },
+        {
+            "id": "8",
+            "title": "Reembolso, Créditos e MED Pix",
+            "content": [
+                "Falhas de API imputáveis à Playfiver: ressarcimento apenas em crédito interno (Saldo GGR).",
+                "Desistência comercial: não há reembolso em R$, apenas consumo ou transferência conforme política vigente.",
+                "MED Pix: ao ser acionado pelo pagador, o valor é zerado e a conta pode ser suspensa/bloqueada.",
+                "Encargos de investigação, taxas de chargeback e bloqueios podem ser descontados do saldo."
+            ]
+        },
+        {
+            "id": "9",
+            "title": "Fraude, Bugs e Abusos",
+            "content": [
+                "Proibido explorar bugs/falhas, manipular GGR, contornar limites, adulterar logs, realizar ataques ou uso indevido da API.",
+                "Sanções: zeragem de saldo, bloqueio/suspensão de conta e medidas legais, com compartilhamento de evidências técnicas com autoridades e Provedores."
+            ]
+        },
+        {
+            "id": "10",
+            "title": "Modo Influenciador",
+            "content": [
+                "Responsabilidade do Cliente verificar se o modo está ligado/desligado antes de operar.",
+                "Gastos com o modo desligado por erro operacional não são reembolsáveis."
+            ]
+        },
+        {
+            "id": "11",
+            "title": "Suporte (Escopo Limitado)",
+            "content": [
+                "Suporte cobre a Plataforma (status, incidentes, dúvidas de API).",
+                "A Playfiver não revisa integrações do Cliente nem presta consultoria; pode sugerir melhorias a seu critério."
+            ]
+        },
+        {
+            "id": "12",
+            "title": "Manutenções e Atualizações",
+            "content": [
+                "Atualizações podem ocorrer sem aviso.",
+                "Manutenções rápidas de até 5 minutos podem ocorrer sem notificação.",
+                "Janelas maiores serão comunicadas no Canal de Notificações."
+            ]
+        },
+        {
+            "id": "13",
+            "title": "Catálogo e IDs",
+            "content": [
+                "Provedores podem alterar jogos/IDs a qualquer momento.",
+                "O Cliente deve sincronizar e acompanhar o Canal de Notificações."
+            ]
+        },
+        {
+            "id": "14",
+            "title": "Propriedade Intelectual",
+            "content": [
+                "Direitos sobre Plataforma, APIs, documentação e marcas pertencem à Playfiver.",
+                "O Cliente não adquire qualquer titularidade."
+            ]
+        },
+        {
+            "id": "15",
+            "title": "Proteção de Dados (LGPD)",
+            "content": [
+                "Papéis: Cliente = Controlador; Playfiver = Operadora.",
+                "Bases legais: execução de contrato, cumprimento legal, legítimo interesse e consentimento obtido pelo Cliente.",
+                "Direitos do titular: o Cliente atende solicitações, com apoio técnico da Playfiver.",
+                "Logs de IP, auditorias e detecção de abuso podem ser mantidos para prevenção de fraudes.",
+                "Contato (DPO): [email do Cliente] / [email da Playfiver]."
+            ]
+        },
+        {
+            "id": "16",
+            "title": "PLD/FT (Prevenção à Lavagem)",
+            "content": [
+                "O Cliente observará controles de PLD/FT, KYC e sanções.",
+                "A Playfiver pode solicitar informações adicionais e suspender operações diante de indícios de ilícitos."
+            ]
+        },
+        {
+            "id": "17",
+            "title": "Suspensão e Encerramento",
+            "content": [
+                "Pode ocorrer por inadimplemento, risco, fraude, ordem legal, violação destes Termos ou impacto na estabilidade/segurança.",
+                "Saldo GGR remanescente segue a Cláusula 8."
+            ]
+        },
+        {
+            "id": "18",
+            "title": "Limitação de Responsabilidade",
+            "content": [
+                "Sem responsabilidade por lucros cessantes, perda de dados ou danos indiretos.",
+                "Limite total: o menor entre R$ 5.000,00 ou o total pago pelo Cliente nos últimos 3 meses.",
+                "Não se aplica a dolo comprovado."
+            ]
+        },
+        {
+            "id": "19",
+            "title": "Indenização",
+            "content": [
+                "O Cliente indeniza a Playfiver por reclamações decorrentes do uso da Plataforma, violações legais/regulatórias e operação do Cliente."
+            ]
+        },
+        {
+            "id": "20",
+            "title": "Força Maior",
+            "content": [
+                "Nenhuma parte responde por falhas decorrentes de eventos fora de seu controle razoável."
+            ]
+        },
+        {
+            "id": "21",
+            "title": "Confidencialidade",
+            "content": [
+                "Informações técnicas, comerciais e de segurança são confidenciais por 5 anos após o término."
+            ]
+        },
+        {
+            "id": "22",
+            "title": "Comunicações",
+            "content": [
+                "Avisos técnicos e operacionais podem ocorrer via Canal de Notificações ou painel/website."
+            ]
+        },
+        {
+            "id": "23",
+            "title": "Cessão e Terceiros",
+            "content": [
+                "A Playfiver pode subcontratar hospedagem, processamento e suporte.",
+                "O Cliente não pode ceder sua conta sem autorização escrita."
+            ]
+        },
+        {
+            "id": "24",
+            "title": "Atualizações destes Termos",
+            "content": [
+                "A Playfiver pode atualizar estes Termos.",
+                "A nova versão entra em vigor na data indicada e o uso continuado configura aceite.",
+                "Alterações relevantes podem exigir novo aceite."
+            ]
+        },
+        {
+            "id": "25",
+            "title": "Lei e Foro",
+            "content": [
+                "Aplicam-se as leis brasileiras.",
+                "Foro: [Comarca/UF]."
+            ]
+        },
+        {
+            "id": "26",
+            "title": "Disposições Finais",
+            "content": [
+                "Tolerância não implica renúncia.",
+                "Nulidade parcial não afeta o restante.",
+                "O aceite eletrônico tem força vinculante."
+            ]
+        }
+    ],
+    "annexes": [
+        {
+            "title": "Anexo A — Política de Uso Aceitável",
+            "items": [
+                "Exploração de bugs e falhas.",
+                "Engenharia reversa da API ou scraping de endpoints privados.",
+                "Uso para fins ilícitos e falsificação de identidade/headers/IP.",
+                "Ataques à infraestrutura e manipulação de GGR."
+            ]
+        },
+        {
+            "title": "Anexo B — Diretrizes Técnicas",
+            "items": [
+                "Respeitar rate limits, timeouts e políticas de retries.",
+                "Proteger credenciais e segregar ambientes.",
+                "Monitorar saldo, logs e health-checks da API.",
+                "Manter rotinas de sincronização e registrar erros."
+            ]
+        },
+        {
+            "title": "Anexo C — Suporte",
+            "items": [
+                "Canais: [e-mail], [grupo oficial].",
+                "Horário: [definir].",
+                "Prioridades: P1 (indisponibilidade geral), P2 (degradação severa), P3 (dúvidas/baixa).",
+                "Escopo conforme Cláusula 11."
+            ]
+        }
+    ]
+}
