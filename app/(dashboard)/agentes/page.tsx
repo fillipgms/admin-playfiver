@@ -7,7 +7,9 @@ export const metadata: Metadata = {
     description: "Gerenciamento de agentes",
 };
 
-type AgentesSearchParams = Record<string, string | string[] | undefined>;
+type AgentesSearchParams = Promise<
+    Record<string, string | string[] | undefined>
+>;
 
 const getParamValue = (value?: string | string[]) =>
     Array.isArray(value) ? value[0] : value;
@@ -17,10 +19,12 @@ export default async function AgentesPage({
 }: {
     searchParams: AgentesSearchParams;
 }) {
-    const page = parseInt(getParamValue(searchParams.page) || "1", 10);
-    const search = getParamValue(searchParams.search) || "";
-    const user = getParamValue(searchParams.user) || undefined;
-    const filter = getParamValue(searchParams.filter) || undefined;
+    const params = await searchParams;
+
+    const page = parseInt(getParamValue(params.page) || "1", 10);
+    const search = getParamValue(params.search) || "";
+    const user = getParamValue(params.user) || undefined;
+    const filter = getParamValue(params.filter) || undefined;
 
     const response = (await getAgentsData({
         page,

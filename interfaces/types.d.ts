@@ -663,3 +663,52 @@ interface ipRelationProps {
     name: string;
     email: string;
 }
+
+interface SettingsResponse {
+    status: number;
+    data: ConfiguracoesProps;
+    msg: string;
+}
+
+interface SettingsProps {
+    id: number;
+    limit_enable: number;
+    limite_amount: string;
+    limit_hours: string;
+    created_at: string | null;
+    updated_at: string;
+    maintenance_panel: number;
+    maintenance_api: number;
+    limit_enable_distribuidor: number;
+    limite_amount_distribuidor: string;
+    limit_hours_distribuidor: string;
+    limit_max_distribuidor: string;
+    limit_max: string;
+    limit_hours_bonus: number;
+    limit_quantity_bonus: number;
+    number_of_hours: number;
+    quantity_rounds_free: number;
+    ezzepay_client_id: string;
+    ezzepay_client_secret: string;
+    ezzepay_user: string;
+    ezzepay_senha: string;
+    ezzepay_uri: string;
+    suitpay_client_id: string;
+    suitpay_client_secret: string;
+    suitpay_uri: string;
+    primary: string;
+    nowpayment_uriNow: string;
+    nowpayment_id: string;
+    nowpayment_secretNow: string;
+    digitopay_uri: string;
+    digitopay_cliente_id: string;
+    digitopay_cliente_secret: string;
+    digitopay_id_conta: string;
+}
+
+interface UsersFilters {
+    page?: number;
+    search?: string;
+    role?: string[];
+    filter?: string;
+}

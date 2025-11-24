@@ -3,16 +3,16 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import PaginationControls from "@/components/PaginationControls";
 import { getUsersData } from "@/actions/users";
-import UsersFilters from "./UsersFilters";
+import Button from "@/components/Button";
+import CreateUserModal from "./CreateUserModal";
 
 export const metadata: Metadata = {
     title: "Usuários",
     description: "Gerenciamento de usuários do sistema",
 };
 
-type UsuariosSearchParams = Record<
-    string,
-    string | string[] | undefined
+type UsuariosSearchParams = Promise<
+    Record<string, string | string[] | undefined>
 >;
 
 export default async function UsuariosPage({
@@ -23,22 +23,20 @@ export default async function UsuariosPage({
     const getParamValue = (param?: string | string[]) =>
         Array.isArray(param) ? param[0] : param;
 
-    const page = parseInt(getParamValue(searchParams.page) || "1", 10);
-    const search = getParamValue(searchParams.search) || "";
-    const role = getParamValue(searchParams.role) || undefined;
-    const filter = getParamValue(searchParams.filter) || undefined;
+    const params = await searchParams;
 
-    const {
-        data,
-        current_page,
-        last_page,
-        next_page_url,
-        prev_page_url,
-    } = (await getUsersData({ page, search, role, filter })) as UserResponseProps;
+    const page = parseInt(getParamValue(params.page) || "1", 10);
+    const search = getParamValue(params.search) || "";
+    const role = getParamValue(params.role) || undefined;
+    const filter = getParamValue(params.filter) || undefined;
 
-    const availableRoles = Array.from(
-        new Set(data.flatMap((user) => user.role || []))
-    ).filter(Boolean);
+    const { data, current_page, last_page, next_page_url, prev_page_url } =
+        (await getUsersData({
+            page,
+            search,
+            role,
+            filter,
+        })) as UserResponseProps;
 
     const searchParamsRecord = Object.fromEntries(
         Object.entries(searchParams).map(([key, value]) => [
@@ -49,7 +47,11 @@ export default async function UsuariosPage({
 
     return (
         <main className="space-y-8">
-            <UsersFilters roles={availableRoles} />
+            <section className="flex items-center justify-between flex-wrap ga-4">
+                <span />
+
+                <CreateUserModal />
+            </section>
 
             <section>
                 <Suspense fallback={<div>Carregando tabela...</div>}>

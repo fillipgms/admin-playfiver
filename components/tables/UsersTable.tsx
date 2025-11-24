@@ -5,11 +5,27 @@ import {
     ModuleRegistry,
     ColDef,
     ICellRendererParams,
+    SortChangedEvent,
 } from "ag-grid-community";
 import React, { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { twMerge } from "tailwind-merge";
+import RoleFilter from "./RoleFilter";
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import { deleteUser } from "@/actions/user";
+
 import {
     MagnifyingGlassIcon,
     PencilIcon,
@@ -23,6 +39,11 @@ import Link from "next/link";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
+import { IFilterParams, IDoesFilterPassParams } from "ag-grid-community";
+import { useImperativeHandle, forwardRef } from "react";
+import EditUserModal from "../EditUserModal";
+import UserLimits from "../UserLimits";
+
 const UsersTable = ({ users }: { users: UserProps[] }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -31,6 +52,9 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
     const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
     const gridRef = useRef<AgGridReact<UserProps>>(null);
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const [userToDelete, setUserToDelete] = useState<UserProps | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const urlSearch = searchParams?.get("search") || "";
     const [searchValue, setSearchValue] = useState(urlSearch);
@@ -51,15 +75,36 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
         }).format(date);
     };
 
-    const handleEdit = (user: UserProps) => {
-        toast.info(`Editando usuário: ${user.name}`);
-        // TODO: Implementar edição
+    const handleDeleteClick = (user: UserProps) => {
+        setUserToDelete(user);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!userToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            const result = await deleteUser(userToDelete.id);
+
+            if (result.success) {
+                toast.success(
+                    `Usuário ${userToDelete.name} excluído com sucesso`
+                );
+                router.refresh();
+            } else {
+                toast.error(result.error || "Erro ao excluir usuário");
+            }
+        } catch (error) {
+            toast.error("Erro inesperado ao excluir");
+        } finally {
+            setIsDeleting(false);
+            setUserToDelete(null);
+        }
     };
 
     const handleDelete = (user: UserProps) => {
         if (confirm(`Tem certeza que deseja excluir o usuário ${user.name}?`)) {
             toast.success(`Usuário ${user.name} excluído`);
-            // TODO: Implementar exclusão
         }
     };
 
@@ -68,9 +113,37 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
         setShowLimitsModal(true);
     };
 
-    const handleLimitsClose = () => {
-        setShowLimitsModal(false);
-        setSelectedUser(null);
+    const handleSortChanged = (event: SortChangedEvent) => {
+        const sortState = event.api
+            .getColumnState()
+            .find((s) => s.sort !== null);
+        const params = new URLSearchParams(searchParams?.toString() || "");
+
+        params.set("page", "1");
+
+        if (!sortState) {
+            params.delete("filter");
+        } else {
+            const { colId, sort } = sortState;
+
+            if (colId === "saldo") {
+                if (sort === "desc") {
+                    params.set("filter", "balanceBig");
+                } else {
+                    params.set("filter", "balanceLess");
+                }
+            } else if (colId === "created_at") {
+                if (sort === "desc") {
+                    params.set("filter", "last");
+                } else {
+                    params.set("filter", "primary");
+                }
+            } else {
+                params.delete("filter");
+            }
+        }
+
+        router.push(`/usuarios?${params.toString()}`);
     };
 
     const cols: ColDef<UserProps>[] = [
@@ -79,6 +152,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             field: "id",
             width: 5,
             pinned: "left",
+            sortable: true,
         },
         {
             headerName: "Nome",
@@ -86,6 +160,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             flex: 1.5,
             minWidth: 180,
             pinned: "left",
+            sortable: true,
             cellRenderer: (p: ICellRendererParams) => {
                 const { name, email } = p.data;
                 return (
@@ -103,6 +178,8 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             field: "saldo",
             flex: 1,
             minWidth: 120,
+            sortable: true,
+            comparator: () => 0,
             valueFormatter: (p) => formatCurrency(p.value || 0),
             cellClass: (p) => {
                 const value = p.value || 0;
@@ -143,6 +220,8 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             field: "role",
             flex: 1,
             minWidth: 120,
+            filter: RoleFilter,
+            filterParams: {},
             valueFormatter: (p) => {
                 const roles = p.value || [];
                 return roles.length > 0 ? roles.join(", ") : "N/A";
@@ -153,22 +232,29 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                     admin: "Admin",
                     suporte: "Suporte",
                     user: "Usuário",
+                    revendedor: "Revendedor",
                 };
+
+                const mainRole = roles[0] || "user";
+
+                let badgeClass = "bg-foreground/10 text-foreground";
+                if (mainRole === "admin")
+                    badgeClass = "bg-primary/20 text-primary";
+                if (mainRole === "suporte")
+                    badgeClass = "bg-blue-500/20 text-blue-500";
+                if (mainRole === "revendedor")
+                    badgeClass = "bg-purple-500/20 text-purple-500";
+
                 return (
                     <div className="flex items-center justify-center h-full w-full">
                         <div
                             className={twMerge(
-                                "flex items-center gap-1 justify-center max-w-32 py-1 w-full text-center px-3 rounded text-sm font-medium ",
-                                roles.length > 0
-                                    ? roleLabels[roles[0]] ||
-                                      roles[0] === "admin"
-                                        ? "bg-primary/20 text-primary"
-                                        : "bg-"
-                                    : "Usuário"
+                                "flex items-center gap-1 justify-center max-w-32 py-1 w-full text-center px-3 rounded text-sm font-medium",
+                                badgeClass
                             )}
                         >
                             {roles.length > 0
-                                ? roleLabels[roles[0]] || roles[0]
+                                ? roleLabels[mainRole] || mainRole
                                 : "Usuário"}
                         </div>
                     </div>
@@ -180,6 +266,8 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             field: "created_at",
             flex: 1,
             minWidth: 140,
+            sortable: true,
+            comparator: () => 0,
             valueFormatter: (p) => formatDate(p.value || ""),
         },
         {
@@ -227,30 +315,12 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                                 <span className="sr-only">Ver Completo</span>
                             </Link>
                         </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEdit(user)}
-                            className="h-8 px-3"
-                            title="Editar usuário"
-                        >
-                            <PencilIcon size={14} />
-                            <span className="sr-only">Editar</span>
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleLimits(user)}
-                            className="h-8 px-3"
-                            title="Configurar limites de apostas"
-                        >
-                            <ShieldCheckIcon size={14} />
-                            <span className="sr-only">Limites</span>
-                        </Button>
+                        <EditUserModal user={user} />
+                        {/* <UserLimits userId={user.id} initialData={{}} /> */}
                         <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleDelete(user)}
+                            onClick={() => handleDeleteClick(user)}
                             className="h-8 px-3"
                             title="Excluir usuário"
                         >
@@ -332,6 +402,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                         getRowId={(params) =>
                             String((params.data as UserProps).id)
                         }
+                        onSortChanged={handleSortChanged}
                         domLayout="autoHeight"
                         defaultColDef={{
                             flex: 1,
@@ -346,13 +417,43 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                 </div>
             </div>
 
-            {selectedUser && (
-                <BettingLimitsModal
-                    isOpen={showLimitsModal}
-                    onClose={handleLimitsClose}
-                    user={selectedUser}
-                />
-            )}
+            <AlertDialog
+                open={!!userToDelete}
+                onOpenChange={(open) => !open && setUserToDelete(null)}
+            >
+                <AlertDialogContent className="bg-background-primary">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Tem certeza absoluta?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Essa ação não pode ser desfeita. Isso excluirá
+                            permanentemente o usuário{" "}
+                            <span className="font-bold text-foreground">
+                                {userToDelete?.name}
+                            </span>
+                            e removerá seus dados dos servidores.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleConfirmDelete();
+                            }}
+                            disabled={isDeleting}
+                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        >
+                            {isDeleting
+                                ? "Excluindo..."
+                                : "Sim, excluir usuário"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

@@ -29,7 +29,7 @@ const DistribuidorCard = ({
     return (
         <Card className={!isActive ? "opacity-50" : ""}>
             <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <Icon>
                             <LinkIcon />

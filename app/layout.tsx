@@ -100,6 +100,7 @@ export default function RootLayout({
     return (
         <html lang="pt-br">
             <body
+                vaul-drawer-wrapper=""
                 className={`${selawik.className} antialiased bg-background-secondary text-foreground`}
             >
                 <SessionProvider>{children}</SessionProvider>

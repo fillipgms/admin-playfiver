@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { configuracoes } from "@/data/placeholder";
+import { getSettingsData } from "@/actions/settings";
 import ConfiguracoesClient from "./ConfiguracoesClient";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ConfiguracoesPage() {
-    const config = configuracoes as ConfiguracoesProps;
+    const config = (await getSettingsData()) as SettingsResponse;
 
     return (
         <main className="space-y-8">
@@ -19,7 +19,7 @@ export default async function ConfiguracoesPage() {
                 </p>
             </div>
 
-            <ConfiguracoesClient config={config} />
+            <ConfiguracoesClient config={config.data} />
         </main>
     );
 }

@@ -25,3 +25,9 @@ export const codeEmailSchema = z.object({
 export const verifyCodeSchema = z.object({
     verification_code: z.string().length(6, "Código deve ter 6 dígitos"),
 });
+
+export const createUserSchema = z.object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    email: z.email("Email inválido"),
+    password: z.string(),
+});
