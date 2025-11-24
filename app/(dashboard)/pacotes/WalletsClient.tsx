@@ -1,8 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Wallet from "@/components/Wallet";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { createGGR, deleteGGR } from "@/actions/ggr";
 
 interface WalletGgrProps {
     id: number;
@@ -20,6 +23,9 @@ const WalletsClient = ({
     ggrData: WalletGgrProps[];
 }) => {
     const { loading, hasPermission } = usePermissions();
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const canViewWallets = hasPermission(["wallet_view", "ggr_view"], {
         any: true,
     });
@@ -32,14 +38,43 @@ const WalletsClient = ({
         return null;
     }
 
-    const handleGgrAdded = () => {
-        // TODO: Recarregar dados após adicionar GGR
-        console.log("GGR adicionado, recarregar dados");
+    const handleGgrAdded = async (ggrData: {
+        above: string;
+        revendedor: string;
+        tax: string;
+        type: string;
+    }) => {
+        setIsSubmitting(true);
+        try {
+            await createGGR(ggrData);
+            toast.success("Regra de GGR criada com sucesso!");
+            router.refresh();
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Ocorreu um erro ao criar a regra de GGR."
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handleGgrDeleted = (id: number) => {
-        // TODO: Recarregar dados após deletar GGR
-        console.log("GGR deletado:", id);
+    const handleGgrDeleted = async (id: number) => {
+        setIsSubmitting(true);
+        try {
+            await deleteGGR(String(id));
+            toast.success("Regra de GGR deletada com sucesso!");
+            router.refresh();
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Ocorreu um erro ao deletar a regra de GGR."
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -55,6 +90,7 @@ const WalletsClient = ({
                         ggrData={ggrData}
                         onGgrAdded={handleGgrAdded}
                         onGgrDeleted={handleGgrDeleted}
+                        isSubmitting={isSubmitting}
                     />
                 ))}
             </div>

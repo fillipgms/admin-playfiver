@@ -43,7 +43,7 @@ interface SignaturesClientProps {
 }
 
 const filterOptions = [
-    { value: "", label: "Ordenação padrão" },
+    { value: "default", label: "Ordenação padrão" },
     { value: "last", label: "Recentes" },
     { value: "primary", label: "Primeiros" },
     { value: "modify", label: "Última modificação" },
@@ -118,7 +118,8 @@ const SignaturesClient = ({
     const applyFilters = () => {
         const users = parseInputValues(usersInput);
         updateQuery({
-            [queryKeys.users]: users.length > 0 ? `[${users.join(",")}]` : undefined,
+            [queryKeys.users]:
+                users.length > 0 ? `[${users.join(",")}]` : undefined,
         });
     };
 
@@ -172,7 +173,9 @@ const SignaturesClient = ({
                             <Icon>
                                 <StarIcon />
                             </Icon>
-                            <span className="text-xl font-bold">Assinaturas</span>
+                            <span className="text-xl font-bold">
+                                Assinaturas
+                            </span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
@@ -210,12 +213,16 @@ const SignaturesClient = ({
                             </label>
                             <Input
                                 value={usersInput}
-                                onChange={(event) => setUsersInput(event.target.value)}
+                                onChange={(event) =>
+                                    setUsersInput(event.target.value)
+                                }
                                 placeholder="Ex.: 100,200,300"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Ordenar por</label>
+                            <label className="text-sm font-medium">
+                                Ordenar por
+                            </label>
                             <Select
                                 value={searchParams.get(queryKeys.filter) ?? ""}
                                 onValueChange={handleOrderChange}
@@ -225,7 +232,10 @@ const SignaturesClient = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {filterOptions.map((option) => (
-                                        <SelectItem key={option.value} value={option.value}>
+                                        <SelectItem
+                                            key={option.value}
+                                            value={option.value}
+                                        >
                                             {option.label}
                                         </SelectItem>
                                     ))}
@@ -321,7 +331,9 @@ const SignaturesClient = ({
                                                 Expira em:
                                             </p>
                                             <p className="text-sm font-medium">
-                                                {formatDate(signature.expired_at)}
+                                                {formatDate(
+                                                    signature.expired_at
+                                                )}
                                             </p>
                                         </div>
                                     </div>

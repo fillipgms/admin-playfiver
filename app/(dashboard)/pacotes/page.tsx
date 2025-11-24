@@ -6,6 +6,12 @@ import { getWalletsData } from "@/actions/carteiras";
 import { getOrdersData } from "@/actions/order";
 import { getSignaturesData } from "@/actions/signatures";
 import { getGgrData } from "@/actions/ggr";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
 
 export const metadata: Metadata = {
     title: "Pacotes",
@@ -109,23 +115,30 @@ export default async function PacotesPage({
 
     return (
         <main className="space-y-8">
-            <WalletsClient wallets={walletsList} ggrData={ggrList} />
-
-            <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Outras Informações</h2>
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <Tabs defaultValue="wallets" className="space-y-4">
+                <TabsList>
+                    <TabsTrigger value="wallets">Carteiras</TabsTrigger>
+                    <TabsTrigger value="orders">Pedidos</TabsTrigger>
+                    <TabsTrigger value="signatures">Assinaturas</TabsTrigger>
+                </TabsList>
+                <TabsContent value="wallets">
+                    <WalletsClient wallets={walletsList} ggrData={ggrList} />
+                </TabsContent>
+                <TabsContent value="orders">
                     <OrdersClient
                         orders={ordersList}
                         pagination={ordersResponse as PaginationMeta}
                         queryKeys={ordersQueryKeys}
                     />
+                </TabsContent>
+                <TabsContent value="signatures">
                     <SignaturesClient
                         signatures={signaturesList}
                         pagination={signaturesResponse as PaginationMeta}
                         queryKeys={signaturesQueryKeys}
                     />
-                </div>
-            </div>
+                </TabsContent>
+            </Tabs>
         </main>
     );
 }

@@ -20,44 +20,45 @@ interface WalletGgrProps {
     revendedor: number;
 }
 
+interface CreateGgrFormData {
+    tax: string;
+    above: string;
+    revendedor: string;
+    type: string;
+}
+
 interface WalletProps {
     wallet: AdminWalletProps;
     ggrData: WalletGgrProps[];
-    onGgrAdded?: () => void;
+    onGgrAdded?: (data: CreateGgrFormData) => void;
     onGgrDeleted?: (id: number) => void;
+    isSubmitting?: boolean;
 }
 
 const CreateGgrForm = ({
     wallet,
     onClose,
     onGgrAdded,
+    isSubmitting,
 }: {
     wallet: AdminWalletProps;
     onClose: () => void;
-    onGgrAdded?: () => void;
+    onGgrAdded?: (data: CreateGgrFormData) => void;
+    isSubmitting?: boolean;
 }) => {
     const [tax, setTax] = useState("");
     const [above, setAbove] = useState("");
     const [revendedor, setRevendedor] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSubmitting(true);
-
-        // TODO: Implementar chamada à API
-        console.log("Criar GGR:", {
-            tax: parseFloat(tax),
+        onGgrAdded?.({
+            tax,
             above,
-            wallet: wallet.name_wallet,
-            revendedor: revendedor ? 1 : 0,
+            revendedor: revendedor ? "1" : "0",
+            type: wallet.name_wallet,
         });
-
-        setTimeout(() => {
-            setSubmitting(false);
-            onGgrAdded?.();
-            onClose();
-        }, 500);
+        onClose();
     };
 
     return (
@@ -76,6 +77,7 @@ const CreateGgrForm = ({
                     onChange={(e) => setTax(e.target.value)}
                     placeholder="Ex: 5.5"
                     required
+                    disabled={isSubmitting}
                 />
             </div>
 
@@ -92,6 +94,7 @@ const CreateGgrForm = ({
                     onChange={(e) => setAbove(e.target.value)}
                     placeholder="Ex: 1000.00"
                     required
+                    disabled={isSubmitting}
                 />
             </div>
 
@@ -102,6 +105,7 @@ const CreateGgrForm = ({
                     checked={revendedor}
                     onChange={(e) => setRevendedor(e.target.checked)}
                     className="rounded border-foreground/20"
+                    disabled={isSubmitting}
                 />
                 <label
                     htmlFor="revendedor"
@@ -117,18 +121,25 @@ const CreateGgrForm = ({
                     variant="outline"
                     onClick={onClose}
                     className="flex-1"
+                    disabled={isSubmitting}
                 >
                     Cancelar
                 </Button>
-                <Button type="submit" disabled={submitting} className="flex-1">
-                    {submitting ? "Criando..." : "Criar GGR"}
+                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                    {isSubmitting ? "Criando..." : "Criar GGR"}
                 </Button>
             </div>
         </form>
     );
 };
 
-const Wallet = ({ wallet, ggrData, onGgrAdded, onGgrDeleted }: WalletProps) => {
+const Wallet = ({
+    wallet,
+    ggrData,
+    onGgrAdded,
+    onGgrDeleted,
+    isSubmitting,
+}: WalletProps) => {
     const [isDesktop, setIsDesktop] = useState(false);
     const [showCreateGgr, setShowCreateGgr] = useState(false);
     const isDisabled = wallet.status !== 1;
@@ -199,7 +210,7 @@ const Wallet = ({ wallet, ggrData, onGgrAdded, onGgrDeleted }: WalletProps) => {
                                     size="sm"
                                     onClick={() => setShowCreateGgr(true)}
                                     className="h-8 text-xs"
-                                    disabled={isDisabled}
+                                    disabled={isDisabled || isSubmitting}
                                 >
                                     <PlusIcon size={14} className="mr-1" />
                                     Adicionar
@@ -261,6 +272,7 @@ const Wallet = ({ wallet, ggrData, onGgrAdded, onGgrDeleted }: WalletProps) => {
                                                         }
                                                         className="text-destructive hover:text-destructive/80 p-1"
                                                         aria-label="Excluir GGR"
+                                                        disabled={isSubmitting}
                                                     >
                                                         <TrashIcon size={18} />
                                                     </button>
@@ -288,6 +300,7 @@ const Wallet = ({ wallet, ggrData, onGgrAdded, onGgrDeleted }: WalletProps) => {
                         wallet={wallet}
                         onClose={() => setShowCreateGgr(false)}
                         onGgrAdded={onGgrAdded}
+                        isSubmitting={isSubmitting}
                     />
                 </DialogContent>
             </Dialog>
@@ -306,6 +319,7 @@ const Wallet = ({ wallet, ggrData, onGgrAdded, onGgrDeleted }: WalletProps) => {
                             wallet={wallet}
                             onClose={() => setShowCreateGgr(false)}
                             onGgrAdded={onGgrAdded}
+                            isSubmitting={isSubmitting}
                         />
                     </ScrollArea>
                 </DrawerContent>
