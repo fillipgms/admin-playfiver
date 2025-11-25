@@ -115,14 +115,15 @@ interface AgentResponse {
 interface GameProps {
     id: number;
     name: string;
+    views: number;
     game_code: string;
     image_url: string;
     status: number;
     provedor: string;
-    rodadasfree: number;
-    original: number;
-    blocked: boolean;
     provedorId: number;
+    original: number;
+    distribuidor: string;
+    distribuidorId: number;
     created_at: string;
 }
 
@@ -192,6 +193,10 @@ interface GamesResponse {
     to: number;
     total: number;
     provedor: Array<{
+        id: number;
+        name: string;
+    }>;
+    distribuidor: Array<{
         id: number;
         name: string;
     }>;
