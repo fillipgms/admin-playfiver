@@ -23,6 +23,10 @@ import { useMemo, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
 import { updateUser } from "@/actions/user";
 import { toast } from "sonner";
+import { Switch } from "./ui/switch";
+import { Label } from "./ui/label";
+import { MultiSelect } from "./ui/multi-select";
+import { useRouter } from "next/navigation";
 
 const EditUserModal = ({ user }: { user: UserProps }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -31,11 +35,14 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
     const [password, setPassword] = useState("");
+    const [ban, setBan] = useState(user.ban === 1);
+    const [roles, setRoles] = useState<string[]>(user.role || []);
 
     const [wallets, setWallets] = useState<UserWalletProps[]>(
         user.wallets || []
     );
     const [walletSearch, setWalletSearch] = useState("");
+    const router = useRouter();
 
     const filteredWallets = useMemo(() => {
         if (!walletSearch) return wallets;
@@ -66,8 +73,8 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                 email,
                 password: password || undefined,
                 saldo: user.saldo || 0,
-                ban: user.ban || 0,
-                role: user.role || [],
+                ban: ban ? 1 : 0,
+                role: roles,
                 wallets: wallets,
             };
 
@@ -77,6 +84,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                 toast.success("Usuário atualizado com sucesso!");
                 setIsOpen(false);
                 setPassword("");
+                router.refresh();
             } else {
                 toast.error(result.error || "Erro ao atualizar usuário");
             }
@@ -146,6 +154,43 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="h-9"
                             />
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-border w-full" />
+
+                    <div className="grid grid-cols-12 gap-4">
+                        <div className="col-span-6">
+                            <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
+                                Cargos
+                            </Label>
+                            <MultiSelect
+                                options={[
+                                    { label: "Admin", value: "admin" },
+                                    {
+                                        label: "Revendedor",
+                                        value: "revendedor",
+                                    },
+                                    { label: "Suporte", value: "suporte" },
+                                ]}
+                                onValueChange={setRoles}
+                                defaultValue={roles}
+                                placeholder="Selecione os cargos"
+                                className="h-9"
+                            />
+                        </div>
+                        <div className="col-span-6 flex items-center gap-2">
+                            <Switch
+                                id="ban-user"
+                                checked={ban}
+                                onCheckedChange={setBan}
+                            />
+                            <Label
+                                htmlFor="ban-user"
+                                className="text-sm font-medium"
+                            >
+                                Banir usuário
+                            </Label>
                         </div>
                     </div>
 

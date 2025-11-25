@@ -77,3 +77,35 @@ export async function getGamesData(
         );
     }
 }
+
+export async function updateGame(game: GameProps) {
+	const session = await getSession();
+	const myIp = await getClientIp();
+
+	if (!session) {
+		redirect("/login");
+	}
+
+	try {
+		const { data } = await axios.put(
+			`${process.env.API_ROUTES_BASE}/games/${game.id}`,
+			game,
+			{
+				headers: {
+					Accept: "application/json",
+					Authorization: `Bearer ${session.accessToken}`,
+					myip: myIp,
+				},
+			}
+		);
+        revalidateTag("games-data");
+		return { success: true, data };
+	} catch (error) {
+		console.error("Failed to update game:", error);
+		const errorMessage = getFriendlyHttpErrorMessage(
+			error,
+			"Falha ao atualizar o jogo"
+		);
+		return { success: false, error: errorMessage };
+	}
+}

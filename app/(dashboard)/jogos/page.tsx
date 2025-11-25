@@ -1,3 +1,4 @@
+import { getDistributorsData } from "@/actions/distribuidores";
 import { getGamesData } from "@/actions/jogos";
 import JogosClient from "./JogosClient";
 import { Metadata } from "next";
@@ -8,9 +9,12 @@ export const metadata: Metadata = {
 };
 
 export default async function JogosPage() {
-    const res = await getGamesData();
+    const [gamesRes, distributorsRes] = await Promise.all([
+        getGamesData(),
+        getDistributorsData(),
+    ]);
 
-    if (!res) {
+    if (!gamesRes) {
         return (
             <div className="flex items-center justify-center h-64">
                 <p className="text-red-500">Erro ao carregar jogos</p>
@@ -18,5 +22,7 @@ export default async function JogosPage() {
         );
     }
 
-    return <JogosClient initialData={res} />;
+    return (
+        <JogosClient initialData={gamesRes} distributors={distributorsRes} />
+    );
 }
