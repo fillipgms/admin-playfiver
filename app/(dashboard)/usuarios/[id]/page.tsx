@@ -291,9 +291,9 @@ export default async function UserPage({
                     <TabsTrigger value="orders">Pedidos</TabsTrigger>
                     <TabsTrigger value="wallets">Carteiras</TabsTrigger>
                     <TabsTrigger value="ips">Histórico de IPs</TabsTrigger>
-                    <TabsTrigger value="related">
+                    {/* <TabsTrigger value="related">
                         Usuários Relacionados
-                    </TabsTrigger>
+                    </TabsTrigger> */}
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-6 space-y-6">
