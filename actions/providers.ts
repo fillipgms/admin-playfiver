@@ -6,7 +6,12 @@ import { getClientIp } from "@/lib/ip";
 import { redirect } from "next/navigation";
 import { getFriendlyHttpErrorMessage } from "@/lib/httpError";
 
-export async function getProvidersData() {
+interface GetProvidersParams {
+    page?: number;
+    search?: string;
+}
+
+export async function getProvidersData(params: GetProvidersParams = {}) {
     const session = await getSession();
     const myIp = await getClientIp();
 
@@ -15,9 +20,20 @@ export async function getProvidersData() {
     }
 
     try {
+        const page = params.page || 1;
+        const search = params.search || "";
+
+        const query = new URLSearchParams();
+        query.set("page", page.toString());
+
+        if (search) {
+            query.set("search", search);
+        }
+
         const { data } = await axios.get(
-            `${process.env.API_ROUTES_BASE}/providers`,
+            `${process.env.API_ROUTES_BASE}/providers?${query.toString()}`,
             {
+                timeout: 5000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
