@@ -142,7 +142,11 @@ const DistribuidorCard = ({
                         >
                             {isActive ? "Ativo" : "Inativo"}
                         </Badge>
-                        <label className={`relative inline-flex items-center ${canEdit ? "cursor-pointer" : "cursor-default"}`}>
+                        <label
+                            className={`relative inline-flex items-center ${
+                                canEdit ? "cursor-pointer" : "cursor-default"
+                            }`}
+                        >
                             <input
                                 type="checkbox"
                                 className="sr-only peer"

@@ -1,7 +1,5 @@
 import { Metadata } from "next";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DistribuidoresClient from "./DistribuidoresClient";
-import ProvedoresClient from "./ProvedoresClient";
+import FornecedoresTabsWrapper from "./FornecedoresTabsWrapper";
 import { getProvidersData } from "@/actions/providers";
 import { getDistributorsData } from "@/actions/distribuidores";
 
@@ -10,9 +8,29 @@ export const metadata: Metadata = {
     description: "Gerenciamento de distribuidores e provedores",
 };
 
-export default async function FornecedoresPage() {
+type FornecedoresSearchParams = Promise<
+    Record<string, string | string[] | undefined>
+>;
+
+const getParamValue = (value?: string | string[]) =>
+    Array.isArray(value) ? value[0] : value;
+
+export default async function FornecedoresPage({
+    searchParams,
+}: {
+    searchParams: FornecedoresSearchParams;
+}) {
+    const params = await searchParams;
+
+    const activeTab = getParamValue(params.tab) || "distribuidores";
+    const page = parseInt(getParamValue(params.page) || "1", 10);
+    const search = getParamValue(params.search) || "";
+
     const distribuidoresData = await getDistributorsData();
-    const provedoresData = await getProvidersData();
+    const provedoresData = await getProvidersData({
+        page,
+        search,
+    });
 
     return (
         <main className="space-y-8">
@@ -23,22 +41,12 @@ export default async function FornecedoresPage() {
                 </p>
             </div>
 
-            <Tabs defaultValue="distribuidores" className="w-full">
-                <TabsList>
-                    <TabsTrigger value="distribuidores">
-                        Distribuidores
-                    </TabsTrigger>
-                    <TabsTrigger value="provedores">Provedores</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="distribuidores" className="mt-6">
-                    <DistribuidoresClient distribuidores={distribuidoresData} />
-                </TabsContent>
-
-                <TabsContent value="provedores" className="mt-6">
-                    <ProvedoresClient provedores={provedoresData.data} />
-                </TabsContent>
-            </Tabs>
+            <FornecedoresTabsWrapper
+                activeTab={activeTab}
+                distribuidoresData={distribuidoresData}
+                provedoresData={provedoresData}
+                searchParams={params}
+            />
         </main>
     );
 }

@@ -31,7 +31,10 @@ const DistribuidoresClient = ({
                     <WarningCircleIcon className="w-10 h-10 text-destructive mx-auto" />
                     <div>
                         <h3 className="text-lg font-semibold">Acesso Negado</h3>
-                        <p className="text-sm text-muted-foreground">Você não tem permissão para visualizar distribuidores.</p>
+                        <p className="text-sm text-muted-foreground">
+                            Você não tem permissão para visualizar
+                            distribuidores.
+                        </p>
                     </div>
                 </div>
             </Card>
