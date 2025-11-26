@@ -42,6 +42,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 import { IFilterParams, IDoesFilterPassParams } from "ag-grid-community";
 import { useImperativeHandle, forwardRef } from "react";
 import EditUserModal from "../EditUserModal";
+import { usePermissions } from "@/hooks/usePermissions";
 import UserLimits from "../UserLimits";
 
 const UsersTable = ({ users }: { users: UserProps[] }) => {
@@ -146,14 +147,33 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
         router.push(`/usuarios?${params.toString()}`);
     };
 
+    const { hasPermission, hasAnyPermission } = usePermissions();
+
+    const canView = hasPermission("user_view");
+    const canViewReport = hasPermission("user_view_report");
+    const canEdit = hasAnyPermission(
+        "user_edit_name",
+        "user_edit_email",
+        "user_edit_password",
+        "user_edit_banned",
+        "user_edit_role",
+        "user_edit_wallet"
+    );
+    const canDelete = hasPermission("user_delete");
+    const hasAnyAction = canViewReport || canEdit || canDelete;
+
     const cols: ColDef<UserProps>[] = [
-        {
-            headerName: "ID",
-            field: "id",
-            width: 5,
-            pinned: "left",
-            sortable: true,
-        },
+        ...(canView
+            ? [
+                  {
+                      headerName: "ID",
+                      field: "id",
+                      width: 5,
+                      pinned: "left",
+                      sortable: true,
+                  } as ColDef<UserProps>,
+              ]
+            : []),
         {
             headerName: "Nome",
             field: "name",
@@ -301,32 +321,50 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             pinned: "right",
             cellRenderer: (p: ICellRendererParams) => {
                 const user = p.data as UserProps;
+
+                if (!hasAnyAction) {
+                    return (
+                        <div className="flex items-center justify-center h-full w-full text-foreground/50">
+                            Nenhuma ação disponível
+                        </div>
+                    );
+                }
+
                 return (
                     <div className="flex items-center justify-center gap-2 h-full w-full">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 px-3"
-                            title="Ver Completo"
-                            asChild
-                        >
-                            <Link href={`/usuarios/${user.id}`}>
-                                <EyeIcon size={14} />
-                                <span className="sr-only">Ver Completo</span>
-                            </Link>
-                        </Button>
-                        <EditUserModal user={user} />
+                        {canViewReport && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-3"
+                                title="Ver Completo"
+                                asChild
+                            >
+                                <Link href={`/usuarios/${user.id}`}>
+                                    <EyeIcon size={14} />
+                                    <span className="sr-only">
+                                        Ver Completo
+                                    </span>
+                                </Link>
+                            </Button>
+                        )}
+
+                        {canEdit && <EditUserModal user={user} />}
+
                         {/* <UserLimits userId={user.id} initialData={{}} /> */}
-                        <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDeleteClick(user)}
-                            className="h-8 px-3"
-                            title="Excluir usuário"
-                        >
-                            <TrashIcon size={14} />
-                            <span className="sr-only">Excluir</span>
-                        </Button>
+
+                        {canDelete && (
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeleteClick(user)}
+                                className="h-8 px-3"
+                                title="Excluir usuário"
+                            >
+                                <TrashIcon size={14} />
+                                <span className="sr-only">Excluir</span>
+                            </Button>
+                        )}
                     </div>
                 );
             },

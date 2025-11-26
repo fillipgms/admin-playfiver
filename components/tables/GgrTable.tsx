@@ -8,6 +8,7 @@ import {
 } from "ag-grid-community";
 import React, { useRef } from "react";
 import { TrashIcon } from "@phosphor-icons/react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -27,6 +28,13 @@ const GgrTable = ({
     wallets: AdminWalletProps[];
 }) => {
     const gridRef = useRef<AgGridReact<GgrTableRowProps>>(null);
+    const { hasPermission } = usePermissions();
+
+    const canView = hasPermission("ggr_view");
+    const canEdit = hasPermission("ggr_edit");
+    const canDelete = hasPermission("ggr_delete");
+
+    if (!canView) return null;
 
     const getWalletName = (walletId: string) => {
         const wallet = wallets.find((w) => w.name_wallet === walletId);
@@ -79,9 +87,11 @@ const GgrTable = ({
                         className="w-full border rounded px-2 py-1 bg-background-primary text-foreground"
                         defaultValue={p.value}
                         onChange={(e) => {
+                            if (!canEdit) return;
                             // TODO: Implementar atualização via API
                             console.log("Atualizar carteira:", e.target.value);
                         }}
+                        disabled={!canEdit}
                     >
                         {wallets.map((wallet) => (
                             <option key={wallet.id} value={wallet.name_wallet}>
@@ -105,38 +115,46 @@ const GgrTable = ({
                             type="checkbox"
                             checked={isReseller}
                             onChange={(e) => {
+                                if (!canEdit) return;
                                 // TODO: Implementar atualização via API
                                 console.log(
                                     "Atualizar revendedor:",
                                     e.target.checked ? 1 : 0
                                 );
                             }}
-                            className="cursor-pointer"
+                            className={
+                                canEdit ? "cursor-pointer" : "cursor-default"
+                            }
+                            disabled={!canEdit}
                             aria-label="Revendedor"
                         />
                     </div>
                 );
             },
         },
-        {
-            headerName: "Ação",
-            field: "id",
-            flex: 0.8,
-            minWidth: 80,
-            cellRenderer: (p: ICellRendererParams) => {
-                return (
-                    <div className="flex items-center justify-center h-full w-full">
-                        <button
-                            onClick={() => handleDelete(p.value)}
-                            className="text-destructive hover:text-destructive/80 p-1"
-                            aria-label="Excluir"
-                        >
-                            <TrashIcon size={20} />
-                        </button>
-                    </div>
-                );
-            },
-        },
+        ...(canDelete
+            ? [
+                  {
+                      headerName: "Ação",
+                      field: "id",
+                      flex: 0.8,
+                      minWidth: 80,
+                      cellRenderer: (p: ICellRendererParams) => {
+                          return (
+                              <div className="flex items-center justify-center h-full w-full">
+                                  <button
+                                      onClick={() => handleDelete(p.value)}
+                                      className="text-destructive hover:text-destructive/80 p-1"
+                                      aria-label="Excluir"
+                                  >
+                                      <TrashIcon size={20} />
+                                  </button>
+                              </div>
+                          );
+                      },
+                  } as ColDef<GgrTableRowProps>,
+              ]
+            : []),
     ];
 
     return (

@@ -14,10 +14,15 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { createUser } from "@/actions/user";
 import { createUserSchema } from "@/schemas";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const initial = { name: "", email: "", password: "", confirmPassword: "" };
 
 const CreateUserModal = () => {
+    const { hasPermission } = usePermissions();
+    const canCreate = hasPermission("user_create");
+
+    if (!canCreate) return null;
     const [open, setOpen] = useState(false);
     const [values, setValues] = useState(initial);
     const [isLoading, setIsLoading] = useState(false);

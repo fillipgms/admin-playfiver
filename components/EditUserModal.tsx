@@ -27,10 +27,12 @@ import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { MultiSelect } from "./ui/multi-select";
 import { useRouter } from "next/navigation";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const EditUserModal = ({ user }: { user: UserProps }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { hasPermission } = usePermissions();
 
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
@@ -43,6 +45,17 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     );
     const [walletSearch, setWalletSearch] = useState("");
     const router = useRouter();
+
+    // Permission checks for each field
+    const canEditName = hasPermission("user_edit_name");
+    const canEditEmail = hasPermission("user_edit_email");
+    const canEditPassword = hasPermission("user_edit_password");
+    const canEditBan = hasPermission("user_edit_banned");
+    const canEditRole = hasPermission("user_edit_role");
+    const canEditWallet = hasPermission("user_edit_wallet");
+
+    // Check if user has any editable permission
+    const hasEditPermission = canEditName || canEditEmail || canEditPassword || canEditBan || canEditRole || canEditWallet;
 
     const filteredWallets = useMemo(() => {
         if (!walletSearch) return wallets;
@@ -69,13 +82,13 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         try {
             const payload = {
                 id_user: user.id,
-                name,
-                email,
-                password: password || undefined,
+                name: canEditName ? name : user.name,
+                email: canEditEmail ? email : user.email,
+                password: canEditPassword && password ? password : undefined,
                 saldo: user.saldo || 0,
-                ban: ban ? 1 : 0,
-                role: roles,
-                wallets: wallets,
+                ban: canEditBan ? (ban ? 1 : 0) : user.ban,
+                role: canEditRole ? roles : user.role,
+                wallets: canEditWallet ? wallets : user.wallets,
             };
 
             const result = await updateUser(payload);
@@ -118,6 +131,11 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                 <CredenzaHeader>
                     <CredenzaTitle>Editando {user.name}</CredenzaTitle>
                 </CredenzaHeader>
+                {!hasEditPermission && (
+                    <div className="px-6 py-3 bg-destructive/10 border-b border-destructive/20 text-sm text-destructive">
+                        Você não tem permissão para editar este usuário.
+                    </div>
+                )}
                 <CredenzaBody className="space-y-6 py-4">
                     <div className="grid grid-cols-12 gap-4">
                         <div className="col-span-12 md:col-span-4">
@@ -129,6 +147,8 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="h-9"
+                                disabled={!canEditName}
+                                readOnly={!canEditName}
                             />
                         </div>
                         <div className="col-span-12 md:col-span-4">
@@ -140,6 +160,8 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="h-9"
+                                disabled={!canEditEmail}
+                                readOnly={!canEditEmail}
                             />
                         </div>
                         <div className="col-span-12 md:col-span-4">
@@ -153,6 +175,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="h-9"
+                                disabled={!canEditPassword}
                             />
                         </div>
                     </div>
@@ -177,6 +200,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 defaultValue={roles}
                                 placeholder="Selecione os cargos"
                                 className="h-9"
+                                disabled={!canEditRole}
                             />
                         </div>
                         <div className="col-span-6 flex items-center gap-2">
@@ -184,10 +208,11 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 id="ban-user"
                                 checked={ban}
                                 onCheckedChange={setBan}
+                                disabled={!canEditBan}
                             />
                             <Label
                                 htmlFor="ban-user"
-                                className="text-sm font-medium"
+                                className={`text-sm font-medium ${!canEditBan ? "opacity-50" : ""}`}
                             >
                                 Banir usuário
                             </Label>
@@ -200,10 +225,10 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <WalletIcon
-                                    className="text-primary"
+                                    className={`text-primary ${!canEditWallet ? "opacity-50" : ""}`}
                                     size={18}
                                 />
-                                <label className="text-sm font-medium">
+                                <label className={`text-sm font-medium ${!canEditWallet ? "opacity-50" : ""}`}>
                                     Saldos das Carteiras
                                 </label>
                             </div>
@@ -271,6 +296,8 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                                         )
                                                     }
                                                     placeholder="0.00"
+                                                    disabled={!canEditWallet}
+                                                    readOnly={!canEditWallet}
                                                 />
                                             </div>
                                         </div>
@@ -296,7 +323,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                     </CredenzaClose>
                     <Button
                         onClick={handleSave}
-                        disabled={isLoading}
+                        disabled={isLoading || !hasEditPermission}
                         className="w-full sm:w-auto"
                     >
                         {isLoading ? "Salvando..." : "Salvar Alterações"}
