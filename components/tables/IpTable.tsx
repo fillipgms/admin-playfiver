@@ -10,6 +10,7 @@ import React, { useRef, useState, useEffect } from "react";
 
 import { MagnifyingGlassIcon, TrashIcon } from "@phosphor-icons/react";
 import CreateIp from "../CreateIp";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useRouter, useSearchParams } from "next/navigation";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -87,6 +88,9 @@ const IpTable = ({
         }
     };
 
+    const { hasPermission } = usePermissions();
+    const canEditSettings = hasPermission("setting_edit");
+
     const cols: ColDef<IpWhitelistProps>[] = [
         {
             headerName: "Ip",
@@ -129,21 +133,25 @@ const IpTable = ({
                 return <div className="text-foreground/50">{formatted}</div>;
             },
         },
-        {
-            headerName: "Ações",
-            minWidth: 100,
-            cellRenderer: (params: ICellRendererParams) => (
-                <button
-                    className="p-1.5 border border-[#E53935] rounded text-[#E53935] cursor-pointer hover:bg-red-50 hover:border-red-300 transition-colors"
-                    onClick={() => handleDeleteIp(params.data.id)}
-                >
-                    <TrashIcon />
-                </button>
-            ),
-            pinned: "right",
-            sortable: false,
-            filter: false,
-        },
+        ...(canEditSettings
+            ? [
+                  {
+                      headerName: "Ações",
+                      minWidth: 100,
+                      cellRenderer: (params: ICellRendererParams) => (
+                          <button
+                              className="p-1.5 border border-[#E53935] rounded text-[#E53935] cursor-pointer hover:bg-red-50 hover:border-red-300 transition-colors"
+                              onClick={() => handleDeleteIp(params.data.id)}
+                          >
+                              <TrashIcon />
+                          </button>
+                      ),
+                      pinned: "right",
+                      sortable: false,
+                      filter: false,
+                  } as ColDef<IpWhitelistProps>,
+              ]
+            : []),
     ];
 
     return (
@@ -166,10 +174,12 @@ const IpTable = ({
                             </div>
                         )}
                     </div>
-                    <CreateIp
-                        onIpCreated={onIpCreated}
-                        existingIps={whitelist.map((item) => item.ip)}
-                    />
+                    {canEditSettings && (
+                        <CreateIp
+                            onIpCreated={onIpCreated}
+                            existingIps={whitelist.map((item) => item.ip)}
+                        />
+                    )}
                 </div>
             </div>
             <div className="overflow-x-auto">

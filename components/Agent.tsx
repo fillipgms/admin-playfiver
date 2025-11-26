@@ -5,11 +5,25 @@ import Link from "next/link";
 import Icon from "./Icon";
 import { UserIcon } from "@phosphor-icons/react";
 import { Badge } from "./ui/badge";
+import EditAgentModal from "./EditAgentModal";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const Agent = React.forwardRef<
     HTMLDivElement,
     { agent: Agent; onActionHappen: () => void }
 >(({ agent, onActionHappen }, ref) => {
+    const { hasAnyPermission } = usePermissions();
+
+    const canEditAgent = hasAnyPermission(
+        "agent_edit_password",
+        "agent_edit_rtp",
+        "agent_edit_rtp_user",
+        "agent_edit_describe",
+        "agent_edit_webhook",
+        "agent_edit_hide",
+        "agent_edit_limits",
+        "agent_edit_influencers"
+    );
     return (
         <Card ref={ref}>
             <CardHeader>
@@ -28,6 +42,7 @@ const Agent = React.forwardRef<
                             {agent.agent_code}
                         </Badge>
                     </div>
+                    {canEditAgent && <EditAgentModal agent={agent} />}
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">

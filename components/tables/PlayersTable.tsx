@@ -8,6 +8,7 @@ import {
 } from "ag-grid-community";
 import React, { useRef, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Button } from "@/components/ui/button";
 import { updatePlayer } from "@/actions/players";
 import { twMerge } from "tailwind-merge";
@@ -98,10 +99,20 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
         setPendingPlayer(null);
     };
 
+    const { hasPermission } = usePermissions();
+
+    const canEditInfluencers = hasPermission("agent_edit_influencers");
+    const canEditRtpUser = hasPermission("agent_edit_rtp_user");
+
     const handleToggleInfluencer = async (p: ICellRendererParams) => {
         const playerData = p.data as PlayerProps;
         const isInfluencer = p.value === 1;
         const nextVal = isInfluencer ? 0 : 1;
+
+        if (!canEditInfluencers) {
+            toast.error("Sem permissão para editar influenciadores");
+            return;
+        }
 
         if (nextVal === 1) {
             setPendingPlayer(playerData);
@@ -164,6 +175,7 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
                                 isInfluencer ? "" : "text-foreground/70"
                             )}
                             aria-label="Alternar tipo do jogador"
+                            disabled={!canEditInfluencers}
                         >
                             {isInfluencer && (
                                 <div className="size-fit">
@@ -268,7 +280,8 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
                     <div className="flex items-center justify-center h-full w-full">
                         <input
                             defaultValue={current}
-                            onBlur={onBlur}
+                            onBlur={canEditRtpUser ? onBlur : undefined}
+                            readOnly={!canEditRtpUser}
                             inputMode="numeric"
                             className="w-full max-w-24 text-center bg-transparent border border-foreground/20 rounded py-1 text-sm text-foreground/80 focus:outline-none focus:border-primary"
                             aria-label="RTP do jogador"

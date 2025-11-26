@@ -15,6 +15,7 @@ import {
     XIcon,
 } from "@phosphor-icons/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { usePermissions } from "@/hooks/usePermissions";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -211,6 +212,10 @@ const TransactionsTable = ({
 }: {
     transactions: TransactionProps[];
 }) => {
+    const { hasPermission } = usePermissions();
+    const canView = hasPermission("orders_view");
+
+    if (!canView) return null;
     const [searchValue, setSearchValue] = useState("");
     const [isSearching, setIsSearching] = useState(false);
     const gridRef = useRef<AgGridReact<TransactionProps>>(null);

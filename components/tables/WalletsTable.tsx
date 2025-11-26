@@ -7,11 +7,18 @@ import {
     ICellRendererParams,
 } from "ag-grid-community";
 import React, { useRef } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const WalletsTable = ({ wallets }: { wallets: AdminWalletProps[] }) => {
     const gridRef = useRef<AgGridReact<AdminWalletProps>>(null);
+    const { hasPermission } = usePermissions();
+
+    const canView = hasPermission("wallet_view");
+    const canEditStatus = hasPermission("wallet_edit_status");
+
+    if (!canView) return null;
 
     const cols: ColDef<AdminWalletProps>[] = [
         {
@@ -49,8 +56,13 @@ const WalletsTable = ({ wallets }: { wallets: AdminWalletProps[] }) => {
                         <input
                             type="checkbox"
                             checked={isActive}
-                            readOnly
-                            className="cursor-default"
+                            readOnly={!canEditStatus}
+                            disabled={!canEditStatus}
+                            className={
+                                canEditStatus
+                                    ? "cursor-pointer"
+                                    : "cursor-default"
+                            }
                             aria-label={`Status ${
                                 isActive ? "ativo" : "inativo"
                             }`}
