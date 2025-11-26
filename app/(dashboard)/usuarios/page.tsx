@@ -39,7 +39,7 @@ export default async function UsuariosPage({
         })) as UserResponseProps;
 
     const searchParamsRecord = Object.fromEntries(
-        Object.entries(searchParams).map(([key, value]) => [
+        Object.entries(params).map(([key, value]) => [
             key,
             Array.isArray(value) ? value[0] : value,
         ])

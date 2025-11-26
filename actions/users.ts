@@ -174,6 +174,8 @@ export async function getSpcificUser(id: string) {
             }
         );
 
+        console.log(data);
+
         if (!data) {
             throw new Error("No valid data received from API");
         }

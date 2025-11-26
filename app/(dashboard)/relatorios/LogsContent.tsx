@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
     MagnifyingGlassIcon,
     CaretDownIcon,
@@ -20,18 +20,17 @@ import {
     XCircleIcon,
     InfoIcon,
     CheckCircleIcon,
+    FunnelIcon,
+    XIcon,
 } from "@phosphor-icons/react";
 import PaginationControls from "@/components/PaginationControls";
 import { Card } from "@/components/Card";
+
 interface LogsContentProps {
     initialData: LogsResponse;
     params: Record<string, string | string[] | undefined>;
 }
 
-type FilterType = "all" | "error" | "warning" | "info" | "success";
-type GravityFilter = "all" | string;
-
-// Format relative time (e.g., "12 min ago", "Today")
 function formatRelativeTime(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
@@ -55,7 +54,6 @@ function formatRelativeTime(dateString: string): string {
     }).format(date);
 }
 
-// Format date for grouping (e.g., "Today", "Mon, 01 Dec 2021")
 function formatDateGroup(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
@@ -73,7 +71,6 @@ function formatDateGroup(dateString: string): string {
     }).format(date);
 }
 
-// Format time (e.g., "8:20 am")
 function formatTime(dateString: string): string {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat("pt-BR", {
@@ -83,7 +80,6 @@ function formatTime(dateString: string): string {
     }).format(date);
 }
 
-// Get user initials for avatar
 function getInitials(name?: string, email?: string): string {
     if (name) {
         const parts = name.trim().split(" ");
@@ -98,7 +94,6 @@ function getInitials(name?: string, email?: string): string {
     return "?";
 }
 
-// Get gravity badge variant
 function getGravityVariant(
     gravity?: string
 ): "default" | "destructive" | "outline" {
@@ -110,7 +105,6 @@ function getGravityVariant(
     return "default";
 }
 
-// Get gravity icon
 function getGravityIcon(gravity?: string) {
     if (!gravity) return <InfoIcon className="size-4" />;
     const lower = gravity.toLowerCase();
@@ -131,20 +125,42 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     const searchParams = useSearchParams();
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    console.log(initialData);
+
     const getParamValue = (param?: string | string[]) =>
         Array.isArray(param) ? param[0] : param;
 
-    const [searchValue, setSearchValue] = useState(
-        getParamValue(params.search) || ""
+    const parseArrayParam = (param?: string | string[]): string[] => {
+        const value = getParamValue(param);
+        if (!value) return [];
+        try {
+            return JSON.parse(value);
+        } catch {
+            return [];
+        }
+    };
+
+    const [users, setUsers] = useState<string[]>(
+        parseArrayParam(params.user) || []
     );
-    const [gravityFilter, setGravityFilter] = useState<GravityFilter>(
-        getParamValue(params.gravity) || "all"
+    const [agents, setAgents] = useState<string[]>(
+        parseArrayParam(params.agent) || []
     );
-    const [typeFilter, setTypeFilter] = useState<string>(
-        getParamValue(params.type) || "all"
+    const [gravities, setGravities] = useState<string[]>(
+        parseArrayParam(params.gravity) || []
+    );
+    const [types, setTypes] = useState<string[]>(
+        parseArrayParam(params.type) || []
+    );
+    const [dateStart, setDateStart] = useState<string>(
+        getParamValue(params.dateStart) || ""
+    );
+    const [dateEnd, setDateEnd] = useState<string>(
+        getParamValue(params.dateEnd) || ""
     );
     const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
     const [data, setData] = useState<LogEntryProps[]>(initialData.data);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // Update data when initialData changes
     useEffect(() => {
@@ -169,61 +185,39 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         let filtered = data;
 
         // Filter by gravity
-        if (gravityFilter && gravityFilter !== "all") {
-            if (gravityFilter === "error") {
-                filtered = filtered.filter(
-                    (log) =>
-                        log.gravity?.toLowerCase().includes("error") ||
-                        log.gravity?.toLowerCase().includes("critical")
-                );
-            } else if (gravityFilter === "unresolved") {
-                filtered = filtered.filter((log) => log.data?.status !== 1);
-            } else if (gravityFilter === "resolved") {
-                filtered = filtered.filter((log) => log.data?.status === 1);
-            } else {
-                filtered = filtered.filter(
-                    (log) =>
-                        log.gravity?.toLowerCase() ===
-                        gravityFilter.toLowerCase()
-                );
-            }
-        }
-
-        // Filter by type
-        if (typeFilter && typeFilter !== "all") {
-            filtered = filtered.filter(
-                (log) => log.type?.toLowerCase() === typeFilter.toLowerCase()
+        if (gravities.length > 0) {
+            filtered = filtered.filter((log) =>
+                gravities.some((g) =>
+                    log.gravity?.toLowerCase().includes(g.toLowerCase())
+                )
             );
         }
 
-        // Filter by search
-        if (searchValue) {
-            const searchLower = searchValue.toLowerCase();
-            filtered = filtered.filter((log) => {
-                const userName = log.user?.name?.toLowerCase() || "";
-                const userEmail = log.user?.email?.toLowerCase() || "";
-                const agentCode = log.agente?.code?.toLowerCase() || "";
-                const agentMemo = log.agente?.memo?.toLowerCase() || "";
-                const message = log.data?.mensagem?.toLowerCase() || "";
-                const title = log.data?.titulo?.toLowerCase() || "";
-                const type = log.type?.toLowerCase() || "";
-                const gravity = log.gravity?.toLowerCase() || "";
+        // Filter by type
+        if (types.length > 0) {
+            filtered = filtered.filter((log) =>
+                types.some((t) => log.type?.toLowerCase() === t.toLowerCase())
+            );
+        }
 
-                return (
-                    userName.includes(searchLower) ||
-                    userEmail.includes(searchLower) ||
-                    agentCode.includes(searchLower) ||
-                    agentMemo.includes(searchLower) ||
-                    message.includes(searchLower) ||
-                    title.includes(searchLower) ||
-                    type.includes(searchLower) ||
-                    gravity.includes(searchLower)
-                );
+        // Filter by date range (for client-side refinement)
+        if (dateStart || dateEnd) {
+            filtered = filtered.filter((log) => {
+                const logDate = new Date(log.created_at).getTime();
+                if (dateStart) {
+                    const start = new Date(dateStart).getTime();
+                    if (logDate < start) return false;
+                }
+                if (dateEnd) {
+                    const end = new Date(dateEnd).getTime();
+                    if (logDate > end) return false;
+                }
+                return true;
             });
         }
 
         return filtered;
-    }, [data, gravityFilter, typeFilter, searchValue]);
+    }, [data, gravities, types, dateStart, dateEnd]);
 
     // Group filtered logs
     const filteredGroupedLogs = useMemo(() => {
@@ -272,62 +266,79 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         return { all, errors, warnings, resolved, unresolved };
     }, [data]);
 
-    const handleSearch = (value: string) => {
-        setSearchValue(value);
-
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
-
-        searchTimeoutRef.current = setTimeout(() => {
+    const updateUrlParams = useCallback(
+        (updates: Record<string, string>) => {
             const params = new URLSearchParams(searchParams?.toString() || "");
 
-            if (value.trim()) {
-                params.set("search", value.trim());
-            } else {
-                params.delete("search");
-            }
+            Object.entries(updates).forEach(([key, value]) => {
+                if (value) {
+                    params.set(key, value);
+                } else {
+                    params.delete(key);
+                }
+            });
 
             params.set("page", "1");
             params.set("tab", "logs");
 
             router.push(`/relatorios?${params.toString()}`);
-        }, 500);
-    };
+        },
+        [searchParams, router]
+    );
 
-    const handleGravityFilter = (value: GravityFilter) => {
-        setGravityFilter(value);
-        const params = new URLSearchParams(searchParams?.toString() || "");
+    const handleSearch = useCallback(
+        (value: string) => {
+            updateUrlParams({ search: value.trim() });
+        },
+        [updateUrlParams]
+    );
 
-        if (value && value !== "all") {
-            params.set("gravity", value);
-        } else {
-            params.delete("gravity");
-        }
+    const handleGravityChange = useCallback(
+        (gravity: string, checked: boolean) => {
+            const newGravities = checked
+                ? [...gravities, gravity]
+                : gravities.filter((g) => g !== gravity);
+            setGravities(newGravities);
 
-        params.set("page", "1");
-        params.set("tab", "logs");
+            updateUrlParams({
+                gravity:
+                    newGravities.length > 0 ? JSON.stringify(newGravities) : "",
+            });
+        },
+        [gravities, updateUrlParams]
+    );
 
-        router.push(`/relatorios?${params.toString()}`);
-    };
+    const handleTypeChange = useCallback(
+        (type: string, checked: boolean) => {
+            const newTypes = checked
+                ? [...types, type]
+                : types.filter((t) => t !== type);
+            setTypes(newTypes);
 
-    const handleTypeFilter = (value: string) => {
-        setTypeFilter(value);
-        const params = new URLSearchParams(searchParams?.toString() || "");
+            updateUrlParams({
+                type: newTypes.length > 0 ? JSON.stringify(newTypes) : "",
+            });
+        },
+        [types, updateUrlParams]
+    );
 
-        if (value && value !== "all") {
-            params.set("type", value);
-        } else {
-            params.delete("type");
-        }
+    const handleDateStartChange = useCallback(
+        (date: string) => {
+            setDateStart(date);
+            updateUrlParams({ dateStart: date });
+        },
+        [updateUrlParams]
+    );
 
-        params.set("page", "1");
-        params.set("tab", "logs");
+    const handleDateEndChange = useCallback(
+        (date: string) => {
+            setDateEnd(date);
+            updateUrlParams({ dateEnd: date });
+        },
+        [updateUrlParams]
+    );
 
-        router.push(`/relatorios?${params.toString()}`);
-    };
-
-    const toggleDateGroup = (dateGroup: string) => {
+    const toggleDateGroup = useCallback((dateGroup: string) => {
         setExpandedDates((prev) => {
             const newSet = new Set(prev);
             if (newSet.has(dateGroup)) {
@@ -337,13 +348,15 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             }
             return newSet;
         });
-    };
-
-    // Auto-expand today's group
-    useEffect(() => {
-        const today = formatDateGroup(new Date().toISOString());
-        setExpandedDates((prev) => new Set([...prev, today]));
     }, []);
+
+    // Auto-expand all groups on initialization
+    useEffect(() => {
+        if (!isInitialized && Object.keys(filteredGroupedLogs).length > 0) {
+            setExpandedDates(new Set(Object.keys(filteredGroupedLogs)));
+            setIsInitialized(true);
+        }
+    }, [filteredGroupedLogs, isInitialized]);
 
     useEffect(() => {
         return () => {
@@ -360,135 +373,277 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold">Logs de Erros</h2>
-                    <p className="text-sm text-foreground/60 mt-1">
-                        Visualize e gerencie logs do sistema
+                    <h2 className="text-3xl font-bold tracking-tight">
+                        Logs do Sistema
+                    </h2>
+                    <p className="text-sm text-foreground/60 mt-2">
+                        Monitore e analise os eventos do seu sistema
                     </p>
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                <div className="flex flex-wrap gap-2 flex-1">
-                    <button
-                        onClick={() => handleGravityFilter("all")}
-                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                            gravityFilter === "all"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-background border border-input hover:bg-accent"
-                        }`}
-                    >
-                        Todos ({stats.all})
-                    </button>
-                    {stats.errors > 0 && (
-                        <button
-                            onClick={() => handleGravityFilter("error")}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                gravityFilter === "error"
-                                    ? "bg-destructive text-white"
-                                    : "bg-background border border-input hover:bg-accent text-destructive"
-                            }`}
-                        >
-                            Erros ({stats.errors})
-                        </button>
-                    )}
-                    {stats.unresolved > 0 && (
-                        <button
-                            onClick={() => handleGravityFilter("unresolved")}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                gravityFilter === "unresolved"
-                                    ? "bg-destructive text-white"
-                                    : "bg-background border border-input hover:bg-accent text-destructive"
-                            }`}
-                        >
-                            Não Resolvidos ({stats.unresolved})
-                        </button>
-                    )}
-                    {stats.resolved > 0 && (
-                        <button
-                            onClick={() => handleGravityFilter("resolved")}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                gravityFilter === "resolved"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-background border border-input hover:bg-accent"
-                            }`}
-                        >
-                            Resolvidos ({stats.resolved})
-                        </button>
-                    )}
-                </div>
+            {/* Search and Filters */}
+            <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
+                <div className="space-y-4">
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Buscar logs por usuário, agente, mensagem..."
+                            onChange={(e) => handleSearch(e.target.value)}
+                            className="pl-9 bg-background/50"
+                        />
+                    </div>
 
-                {/* Search */}
-                <div className="relative w-full sm:w-auto sm:min-w-[300px]">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                    <Input
-                        type="search"
-                        placeholder="Buscar por usuário, agente, mensagem..."
-                        value={searchValue}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        className="pl-9"
-                    />
-                </div>
-            </div>
+                    {/* Filter Chips */}
+                    <div className="flex flex-wrap gap-2 items-center">
+                        {/* Gravity Filter Popover */}
+                        {uniqueGravities.length > 0 && (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2"
+                                    >
+                                        <FunnelIcon className="size-4" />
+                                        Gravidade
+                                        {gravities.length > 0 && (
+                                            <Badge
+                                                variant="secondary"
+                                                className="ml-1"
+                                            >
+                                                {gravities.length}
+                                            </Badge>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-60 p-0">
+                                    <ScrollArea className="h-64">
+                                        <div className="p-4 space-y-3">
+                                            <p className="text-sm font-medium leading-none mb-3">
+                                                Filtrar por Gravidade
+                                            </p>
+                                            {uniqueGravities.map((gravity) => (
+                                                <label
+                                                    key={gravity}
+                                                    className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded border-input"
+                                                        checked={gravities.includes(
+                                                            gravity
+                                                        )}
+                                                        onChange={(e) =>
+                                                            handleGravityChange(
+                                                                gravity,
+                                                                e.target.checked
+                                                            )
+                                                        }
+                                                    />
+                                                    <span className="text-sm font-medium flex-1">
+                                                        {gravity}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </PopoverContent>
+                            </Popover>
+                        )}
 
-            {/* Additional Filters */}
-            <div className="flex flex-wrap gap-3">
-                {uniqueGravities.length > 0 && (
-                    <Select
-                        value={gravityFilter}
-                        onValueChange={handleGravityFilter}
-                    >
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Gravidade" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">
-                                Todas as gravidades
-                            </SelectItem>
-                            {uniqueGravities.map((gravity) => (
-                                <SelectItem
+                        {/* Type Filter Popover */}
+                        {uniqueTypes.length > 0 && (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="gap-2"
+                                    >
+                                        <FunnelIcon className="size-4" />
+                                        Tipo
+                                        {types.length > 0 && (
+                                            <Badge
+                                                variant="secondary"
+                                                className="ml-1"
+                                            >
+                                                {types.length}
+                                            </Badge>
+                                        )}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-60 p-0">
+                                    <ScrollArea className="h-64">
+                                        <div className="p-4 space-y-3">
+                                            <p className="text-sm font-medium leading-none mb-3">
+                                                Filtrar por Tipo
+                                            </p>
+                                            {uniqueTypes.map((type) => (
+                                                <label
+                                                    key={type}
+                                                    className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded border-input"
+                                                        checked={types.includes(
+                                                            type
+                                                        )}
+                                                        onChange={(e) =>
+                                                            handleTypeChange(
+                                                                type,
+                                                                e.target.checked
+                                                            )
+                                                        }
+                                                    />
+                                                    <span className="text-sm font-medium flex-1">
+                                                        {type}
+                                                    </span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+                                </PopoverContent>
+                            </Popover>
+                        )}
+
+                        {/* Date Filters */}
+                        <div className="flex gap-2 ml-auto">
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-medium text-muted-foreground">
+                                    De:
+                                </label>
+                                <input
+                                    type="date"
+                                    value={dateStart}
+                                    onChange={(e) =>
+                                        handleDateStartChange(e.target.value)
+                                    }
+                                    className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-medium text-muted-foreground">
+                                    Até:
+                                </label>
+                                <input
+                                    type="date"
+                                    value={dateEnd}
+                                    onChange={(e) =>
+                                        handleDateEndChange(e.target.value)
+                                    }
+                                    className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Clear Filters */}
+                        {(gravities.length > 0 ||
+                            types.length > 0 ||
+                            dateStart ||
+                            dateEnd) && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setGravities([]);
+                                    setTypes([]);
+                                    setDateStart("");
+                                    setDateEnd("");
+                                    updateUrlParams({
+                                        gravity: "",
+                                        type: "",
+                                        dateStart: "",
+                                        dateEnd: "",
+                                    });
+                                }}
+                                className="gap-2"
+                            >
+                                <XIcon className="size-4" />
+                                Limpar
+                            </Button>
+                        )}
+                    </div>
+
+                    {/* Active Filters Display */}
+                    {(gravities.length > 0 ||
+                        types.length > 0 ||
+                        dateStart ||
+                        dateEnd) && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {gravities.map((gravity) => (
+                                <Badge
                                     key={gravity}
-                                    value={gravity.toLowerCase()}
+                                    variant="secondary"
+                                    className="gap-1"
                                 >
                                     {gravity}
-                                </SelectItem>
+                                    <XIcon
+                                        className="size-3 cursor-pointer hover:text-destructive"
+                                        onClick={() =>
+                                            handleGravityChange(gravity, false)
+                                        }
+                                    />
+                                </Badge>
                             ))}
-                        </SelectContent>
-                    </Select>
-                )}
-
-                {uniqueTypes.length > 0 && (
-                    <Select value={typeFilter} onValueChange={handleTypeFilter}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Todos os tipos</SelectItem>
-                            {uniqueTypes.map((type) => (
-                                <SelectItem
+                            {types.map((type) => (
+                                <Badge
                                     key={type}
-                                    value={type.toLowerCase()}
+                                    variant="secondary"
+                                    className="gap-1"
                                 >
                                     {type}
-                                </SelectItem>
+                                    <XIcon
+                                        className="size-3 cursor-pointer hover:text-destructive"
+                                        onClick={() =>
+                                            handleTypeChange(type, false)
+                                        }
+                                    />
+                                </Badge>
                             ))}
-                        </SelectContent>
-                    </Select>
-                )}
-            </div>
+                            {dateStart && (
+                                <Badge variant="secondary" className="gap-1">
+                                    De: {dateStart}
+                                    <XIcon
+                                        className="size-3 cursor-pointer hover:text-destructive"
+                                        onClick={() =>
+                                            handleDateStartChange("")
+                                        }
+                                    />
+                                </Badge>
+                            )}
+                            {dateEnd && (
+                                <Badge variant="secondary" className="gap-1">
+                                    Até: {dateEnd}
+                                    <XIcon
+                                        className="size-3 cursor-pointer hover:text-destructive"
+                                        onClick={() => handleDateEndChange("")}
+                                    />
+                                </Badge>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </Card>
 
             {/* Timeline */}
             <div className="space-y-4">
                 {Object.keys(filteredGroupedLogs).length === 0 ? (
-                    <Card className="p-12 text-center">
+                    <Card className="p-12 text-center border-dashed">
                         <WarningCircleIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                         <h3 className="text-lg font-semibold mb-2">
                             Nenhum log encontrado
                         </h3>
                         <p className="text-muted-foreground">
-                            {searchValue ||
-                            gravityFilter !== "all" ||
-                            typeFilter !== "all"
+                            {gravities.length > 0 ||
+                            types.length > 0 ||
+                            users.length > 0 ||
+                            agents.length > 0 ||
+                            dateStart ||
+                            dateEnd
                                 ? "Tente ajustar os filtros para encontrar mais logs."
                                 : "Não há logs disponíveis no momento."}
                         </p>
@@ -512,31 +667,38 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                             );
 
                             return (
-                                <div key={dateGroup} className="space-y-2">
+                                <div key={dateGroup} className="space-y-3">
                                     {/* Date Header */}
                                     <button
                                         onClick={() =>
                                             toggleDateGroup(dateGroup)
                                         }
-                                        className="flex items-center gap-2 w-full text-left px-2 py-2 hover:bg-accent/50 rounded-md transition-colors"
+                                        className="flex items-center gap-3 w-full text-left px-4 py-3 bg-linear-to-r from-primary/5 to-transparent hover:from-primary/10 rounded-lg transition-all duration-200 group"
                                     >
-                                        {isExpanded ? (
-                                            <CaretDownIcon className="size-4 text-muted-foreground" />
-                                        ) : (
-                                            <CaretUpIcon className="size-4 text-muted-foreground" />
-                                        )}
-                                        <span className="font-semibold text-foreground">
-                                            {dateGroup}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
-                                            ({logs.length} log
-                                            {logs.length !== 1 ? "s" : ""})
-                                        </span>
+                                        <div className="rounded-full bg-primary/10 p-1 group-hover:bg-primary/20 transition-colors">
+                                            {isExpanded ? (
+                                                <CaretDownIcon className="size-4 text-primary" />
+                                            ) : (
+                                                <CaretUpIcon className="size-4 text-primary" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-foreground">
+                                                {dateGroup}
+                                            </p>
+                                        </div>
+                                        <Badge
+                                            variant="outline"
+                                            className="ml-auto"
+                                        >
+                                            {logs.length} log
+                                            {logs.length !== 1 ? "s" : ""}
+                                        </Badge>
                                     </button>
 
                                     {/* Logs List */}
                                     {isExpanded && (
-                                        <div className="space-y-3 pl-6 border-l-2 border-muted ml-2">
+                                        <div className="space-y-2 pl-2">
                                             {sortedLogs.map((log, index) => {
                                                 const userName =
                                                     log.user?.name ||
@@ -559,136 +721,149 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                 );
 
                                                 return (
-                                                    <div
+                                                    <Card
                                                         key={`${log.created_at}-${index}`}
-                                                        className="flex gap-4 pb-4 last:pb-0"
+                                                        className="p-4 hover:shadow-md transition-all duration-200 border-l-4 border-l-primary/40 hover:border-l-primary bg-card/50 hover:bg-card/80 backdrop-blur-sm"
                                                     >
-                                                        {/* Avatar */}
-                                                        <div className="shrink-0">
-                                                            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
-                                                                {initials}
+                                                        <div className="flex gap-4">
+                                                            {/* Avatar */}
+                                                            <div className="shrink-0">
+                                                                <div className="size-10 rounded-full bg-linear-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-semibold text-sm shadow-md">
+                                                                    {initials}
+                                                                </div>
                                                             </div>
-                                                        </div>
 
-                                                        {/* Content */}
-                                                        <div className="flex-1 min-w-0 space-y-2">
-                                                            {/* Header */}
-                                                            <div className="flex flex-wrap items-start gap-2">
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="font-medium text-foreground">
-                                                                        {
-                                                                            userName
-                                                                        }
+                                                            {/* Content */}
+                                                            <div className="flex-1 min-w-0 space-y-2">
+                                                                {/* Header */}
+                                                                <div className="flex flex-wrap items-start justify-between gap-2">
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="font-semibold text-foreground">
+                                                                            {
+                                                                                userName
+                                                                            }
+                                                                        </p>
                                                                         {log
                                                                             .agente
                                                                             ?.code && (
-                                                                            <span className="text-muted-foreground font-normal">
-                                                                                {" "}
-                                                                                -
+                                                                            <p className="text-xs text-muted-foreground">
                                                                                 Agente:{" "}
+                                                                                <span className="font-medium">
+                                                                                    {
+                                                                                        log
+                                                                                            .agente
+                                                                                            .code
+                                                                                    }
+                                                                                </span>
+                                                                            </p>
+                                                                        )}
+                                                                        {userEmail && (
+                                                                            <p className="text-xs text-muted-foreground">
                                                                                 {
-                                                                                    log
-                                                                                        .agente
-                                                                                        .code
+                                                                                    userEmail
                                                                                 }
-                                                                            </span>
+                                                                            </p>
                                                                         )}
-                                                                    </p>
-                                                                    {userEmail && (
-                                                                        <p className="text-sm text-muted-foreground">
-                                                                            {
-                                                                                userEmail
-                                                                            }
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Badge
-                                                                        variant={getGravityVariant(
-                                                                            log.gravity
-                                                                        )}
-                                                                        className="gap-1"
-                                                                    >
-                                                                        {getGravityIcon(
-                                                                            log.gravity
-                                                                        )}
-                                                                        {log.gravity ||
-                                                                            "Info"}
-                                                                    </Badge>
-                                                                    {isLogResolved ? (
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 flex-wrap justify-end">
                                                                         <Badge
-                                                                            variant="default"
-                                                                            className="bg-green-500 hover:bg-green-600"
-                                                                        >
-                                                                            Resolvido
-                                                                        </Badge>
-                                                                    ) : (
-                                                                        <Badge
-                                                                            variant="destructive"
+                                                                            variant={getGravityVariant(
+                                                                                log.gravity
+                                                                            )}
                                                                             className="gap-1"
                                                                         >
-                                                                            <XCircleIcon className="size-3" />
-                                                                            Não
-                                                                            Resolvido
+                                                                            {getGravityIcon(
+                                                                                log.gravity
+                                                                            )}
+                                                                            {log.gravity ||
+                                                                                "Info"}
                                                                         </Badge>
-                                                                    )}
+                                                                        {isLogResolved ? (
+                                                                            <Badge
+                                                                                variant="default"
+                                                                                className="bg-green-500/80 hover:bg-green-500 gap-1"
+                                                                            >
+                                                                                <CheckCircleIcon className="size-3" />
+                                                                                Resolvido
+                                                                            </Badge>
+                                                                        ) : (
+                                                                            <Badge
+                                                                                variant="destructive"
+                                                                                className="gap-1"
+                                                                            >
+                                                                                <XCircleIcon className="size-3" />
+                                                                                Não
+                                                                                Resolvido
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
 
-                                                            {/* Message */}
-                                                            {(log.data
-                                                                ?.titulo ||
-                                                                log.data
-                                                                    ?.mensagem) && (
-                                                                <div className="bg-muted/50 rounded-md p-3">
-                                                                    {log.data
-                                                                        ?.titulo && (
-                                                                        <p className="font-medium text-sm mb-1">
-                                                                            {
-                                                                                log
-                                                                                    .data
-                                                                                    .titulo
-                                                                            }
-                                                                        </p>
-                                                                    )}
-                                                                    {log.data
-                                                                        ?.mensagem && (
-                                                                        <p className="text-sm text-foreground/80">
-                                                                            {
-                                                                                log
-                                                                                    .data
-                                                                                    .mensagem
-                                                                            }
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-                                                            )}
-
-                                                            {/* Metadata */}
-                                                            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                                                                <span>
-                                                                    {time}
-                                                                </span>
-                                                                <span>•</span>
-                                                                <span>
-                                                                    {timeAgo}
-                                                                </span>
-                                                                {log.type && (
-                                                                    <>
-                                                                        <span>
-                                                                            •
-                                                                        </span>
-                                                                        <span>
-                                                                            Tipo:{" "}
-                                                                            {
-                                                                                log.type
-                                                                            }
-                                                                        </span>
-                                                                    </>
+                                                                {/* Message */}
+                                                                {(log.data
+                                                                    ?.titulo ||
+                                                                    log.data
+                                                                        ?.mensagem) && (
+                                                                    <div className="bg-muted/30 rounded-lg p-3 border border-muted/50 space-y-1">
+                                                                        {log
+                                                                            .data
+                                                                            ?.titulo && (
+                                                                            <p className="font-medium text-sm text-foreground">
+                                                                                {
+                                                                                    log
+                                                                                        .data
+                                                                                        .titulo
+                                                                                }
+                                                                            </p>
+                                                                        )}
+                                                                        {log
+                                                                            .data
+                                                                            ?.mensagem && (
+                                                                            <p className="text-sm text-foreground/80 leading-relaxed">
+                                                                                {
+                                                                                    log
+                                                                                        .data
+                                                                                        .mensagem
+                                                                                }
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
                                                                 )}
+
+                                                                {/* Metadata */}
+                                                                <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-muted-foreground border-t border-muted/30">
+                                                                    <span className="font-medium">
+                                                                        {time}
+                                                                    </span>
+                                                                    <span>
+                                                                        •
+                                                                    </span>
+                                                                    <span>
+                                                                        {
+                                                                            timeAgo
+                                                                        }
+                                                                    </span>
+                                                                    {log.type && (
+                                                                        <>
+                                                                            <span>
+                                                                                •
+                                                                            </span>
+                                                                            <span>
+                                                                                <span className="text-muted-foreground">
+                                                                                    Tipo:
+                                                                                </span>{" "}
+                                                                                <span className="font-medium text-foreground/80">
+                                                                                    {
+                                                                                        log.type
+                                                                                    }
+                                                                                </span>
+                                                                            </span>
+                                                                        </>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </Card>
                                                 );
                                             })}
                                         </div>

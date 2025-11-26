@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircleIcon, XCircleIcon } from "@phosphor-icons/react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { editSettingsData } from "@/actions/settings";
 
 interface ConfiguracoesClientProps {
     config: ConfiguracoesProps;
@@ -94,13 +95,20 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
         setError(null);
         setSuccess(null);
 
-        // TODO: Implementar chamada à API
-        console.log("Salvar configurações:", formData);
+        try {
+            const payload: Record<string, string> = {};
+            Object.entries(formData).forEach(([key, value]) => {
+                payload[key] =
+                    value !== undefined && value !== null ? String(value) : "";
+            });
 
-        setTimeout(() => {
-            setIsSaving(false);
+            await editSettingsData(payload);
             setSuccess("Configurações atualizadas com sucesso!");
-        }, 1000);
+        } catch (err: any) {
+            setError(err?.message || "Erro ao atualizar configurações");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
