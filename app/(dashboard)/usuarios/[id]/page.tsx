@@ -291,6 +291,9 @@ export default async function UserPage({
                     <TabsTrigger value="orders">Pedidos</TabsTrigger>
                     <TabsTrigger value="wallets">Carteiras</TabsTrigger>
                     <TabsTrigger value="ips">Histórico de IPs</TabsTrigger>
+                    <TabsTrigger value="related">
+                        Usuários Relacionados
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-6 space-y-6">
@@ -614,6 +617,8 @@ export default async function UserPage({
                         </CardContent>
                     </Card>
                 </TabsContent>
+
+                <TabsContent value="related" className="mt-6"></TabsContent>
             </Tabs>
         </main>
     );

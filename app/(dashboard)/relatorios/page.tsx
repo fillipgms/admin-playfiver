@@ -25,26 +25,28 @@ export default async function RelatoriosPage({
     const getParamValue = (param?: string | string[]) =>
         Array.isArray(param) ? param[0] : param;
 
+    const parseArrayParam = (param?: string | string[]): string[] => {
+        const value = getParamValue(param);
+        if (!value) return [];
+        try {
+            return JSON.parse(value);
+        } catch {
+            return [];
+        }
+    };
+
     const activeTab = getParamValue(params.tab) || "logs";
 
     // Fetch logs data
     const page = parseInt(getParamValue(params.page) || "1", 10);
     const logsData = await getLogsData({
         page,
-        users: getParamValue(params.user)
-            ? [getParamValue(params.user)!]
-            : undefined,
-        agents: getParamValue(params.agent)
-            ? [getParamValue(params.agent)!]
-            : undefined,
+        users: parseArrayParam(params.user),
+        agents: parseArrayParam(params.agent),
         dateStart: getParamValue(params.dateStart),
         dateEnd: getParamValue(params.dateEnd),
-        gravity: getParamValue(params.gravity)
-            ? [getParamValue(params.gravity)!]
-            : undefined,
-        type: getParamValue(params.type)
-            ? [getParamValue(params.type)!]
-            : undefined,
+        gravity: parseArrayParam(params.gravity),
+        type: parseArrayParam(params.type),
     });
 
     // Fetch agents report data

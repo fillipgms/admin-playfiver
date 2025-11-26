@@ -53,3 +53,49 @@ export async function getProvidersData() {
         );
     }
 }
+
+export async function editProviderData(provider: Record<string, string>) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    try {
+        const { data } = await axios.put(
+            `${process.env.API_ROUTES_BASE}/providers`,
+            provider,
+            {
+                timeout: 5000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to edit provider:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        throw new Error(
+            apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao editar provedor")
+        );
+    }
+}
