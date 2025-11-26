@@ -55,7 +55,13 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const canEditWallet = hasPermission("user_edit_wallet");
 
     // Check if user has any editable permission
-    const hasEditPermission = canEditName || canEditEmail || canEditPassword || canEditBan || canEditRole || canEditWallet;
+    const hasEditPermission =
+        canEditName ||
+        canEditEmail ||
+        canEditPassword ||
+        canEditBan ||
+        canEditRole ||
+        canEditWallet;
 
     const filteredWallets = useMemo(() => {
         if (!walletSearch) return wallets;
@@ -212,7 +218,9 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                             />
                             <Label
                                 htmlFor="ban-user"
-                                className={`text-sm font-medium ${!canEditBan ? "opacity-50" : ""}`}
+                                className={`text-sm font-medium ${
+                                    !canEditBan ? "opacity-50" : ""
+                                }`}
                             >
                                 Banir usuário
                             </Label>
@@ -225,10 +233,16 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <WalletIcon
-                                    className={`text-primary ${!canEditWallet ? "opacity-50" : ""}`}
+                                    className={`text-primary ${
+                                        !canEditWallet ? "opacity-50" : ""
+                                    }`}
                                     size={18}
                                 />
-                                <label className={`text-sm font-medium ${!canEditWallet ? "opacity-50" : ""}`}>
+                                <label
+                                    className={`text-sm font-medium ${
+                                        !canEditWallet ? "opacity-50" : ""
+                                    }`}
+                                >
                                     Saldos das Carteiras
                                 </label>
                             </div>

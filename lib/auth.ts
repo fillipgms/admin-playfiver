@@ -141,23 +141,13 @@ export async function logout(): Promise<{
     message?: string;
 }> {
     try {
-        const session = await getSession();
         const myIp = await getClientIp();
-
-        if (!session?.accessToken) {
-            await deleteSession();
-            return {
-                success: true,
-                message: "No active session found. Cleared local session.",
-            };
-        }
 
         const response = await axios.post(
             `${process.env.API_ROUTES_BASE}/auth/logout`,
             {},
             {
                 headers: {
-                    Authorization: `Bearer ${session.accessToken}`,
                     "Content-Type": "application/json",
                     myip: myIp,
                 },

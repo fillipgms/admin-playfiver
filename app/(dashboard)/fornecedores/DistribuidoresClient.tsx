@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import DistribuidorCard from "./DistribuidorCard";
 import { editDistributorData } from "@/actions/distribuidores";
+import { usePermissions } from "@/hooks/usePermissions";
+import { Card } from "@/components/Card";
+import { WarningCircleIcon } from "@phosphor-icons/react";
 
 interface DistribuidoresClientProps {
     distribuidores: DistribuidorProps[];
@@ -14,6 +17,26 @@ const DistribuidoresClient = ({
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loadingId, setLoadingId] = useState<number | null>(null);
+    const { hasPermission, loading } = usePermissions();
+
+    const canViewDistributors = hasPermission("distributor_view");
+    const canEditDistributors = hasPermission("distributor_edit");
+
+    if (loading) return null;
+
+    if (!canViewDistributors) {
+        return (
+            <Card className="p-8 flex items-center justify-center min-h-[200px]">
+                <div className="text-center space-y-3">
+                    <WarningCircleIcon className="w-10 h-10 text-destructive mx-auto" />
+                    <div>
+                        <h3 className="text-lg font-semibold">Acesso Negado</h3>
+                        <p className="text-sm text-muted-foreground">Você não tem permissão para visualizar distribuidores.</p>
+                    </div>
+                </div>
+            </Card>
+        );
+    }
 
     const handleStatusChange = async (id: number, status: number) => {
         setLoadingId(id);
@@ -74,6 +97,7 @@ const DistribuidoresClient = ({
                         onStatusChange={handleStatusChange}
                         loading={loadingId === distribuidor.id}
                         onEdit={handleEdit}
+                        canEdit={canEditDistributors}
                     />
                 ))}
             </div>

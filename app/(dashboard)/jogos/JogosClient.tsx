@@ -25,12 +25,36 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/Card";
 import { useGameTourStep } from "@/data/toursteps";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface JogosClientProps {
     initialData: GamesResponse;
 }
 
 export default function JogosClient({ initialData }: JogosClientProps) {
+    const { hasPermission } = usePermissions();
+    const canViewGames = hasPermission("games_view");
+
+    if (!canViewGames) {
+        return (
+            <div className="space-y-6">
+                <Card className="p-8 flex items-center justify-center min-h-[400px]">
+                    <div className="text-center space-y-4">
+                        <WarningCircleIcon className="w-12 h-12 text-destructive mx-auto" />
+                        <div>
+                            <h3 className="text-lg font-semibold">
+                                Acesso Negado
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Você não tem permissão para visualizar os jogos.
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        );
+    }
+
     const [games, setGames] = useState<GameProps[]>(initialData.data);
     const [loading, setLoading] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);

@@ -14,6 +14,7 @@ interface ProvedorCardProps {
     onStatusChange?: (id: number, status: number) => void;
     loading?: boolean;
     onEdit?: (payload: Record<string, string>) => Promise<void>;
+    canEdit?: boolean;
 }
 
 const ProvedorCard = ({
@@ -21,6 +22,7 @@ const ProvedorCard = ({
     onStatusChange,
     loading = false,
     onEdit,
+    canEdit = false,
 }: ProvedorCardProps) => {
     const [editMode, setEditMode] = useState(false);
     const [form, setForm] = useState({
@@ -44,12 +46,14 @@ const ProvedorCard = ({
     };
 
     const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!canEdit) return;
         const newStatus = e.target.checked ? "1" : "0";
         setForm((prev) => ({ ...prev, status: newStatus }));
         onStatusChange?.(provedor.id, Number(newStatus));
     };
 
     const handleEdit = () => {
+        if (!canEdit) return;
         setEditMode(true);
         setError(null);
         setSuccess(null);
@@ -142,17 +146,17 @@ const ProvedorCard = ({
                         >
                             {isActive ? "Ativo" : "Inativo"}
                         </Badge>
-                        <label className="relative inline-flex items-center cursor-pointer">
+                        <label className={`relative inline-flex items-center ${canEdit ? "cursor-pointer" : "cursor-default"}`}>
                             <input
                                 type="checkbox"
                                 className="sr-only peer"
                                 checked={isActive}
                                 onChange={handleStatusChange}
-                                disabled={editMode}
+                                disabled={!canEdit || editMode}
                             />
-                            <div className="relative w-11 h-6 bg-foreground/20 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            <div className="relative w-11 h-6 bg-foreground/20 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                         </label>
-                        {!editMode && (
+                        {!editMode && canEdit && (
                             <Button
                                 size="sm"
                                 variant="outline"

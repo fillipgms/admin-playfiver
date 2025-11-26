@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { useRouter } from "next/navigation";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const EditGameModal = ({
     game,
@@ -38,6 +39,7 @@ const EditGameModal = ({
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { hasPermission } = usePermissions();
 
     const [name, setName] = useState(game.name);
     const [gameCode, setGameCode] = useState(game.game_code);
@@ -51,18 +53,48 @@ const EditGameModal = ({
     );
     const router = useRouter();
 
+    // Permission checks for each field
+    const canEditName = hasPermission("games_edit_name");
+    const canEditGameCode = hasPermission("games_edit_game_code");
+    const canEditImageUrl = hasPermission("games_edit_link_image");
+    const canEditStatus = hasPermission("games_edit_status");
+    const canEditProvider = hasPermission("games_edit_provider");
+    const canEditDistributor = hasPermission("games_edit_distributor");
+
+    // Check if user has any editable permission
+    const hasEditPermission =
+        canEditName ||
+        canEditGameCode ||
+        canEditImageUrl ||
+        canEditStatus ||
+        canEditProvider ||
+        canEditDistributor;
+
     const handleSave = async () => {
         setIsLoading(true);
         try {
             const payload: any = {
                 id: game.id,
-                name,
-                game_code: gameCode,
-                image_url: imageUrl,
-                status: status ? 1 : 0,
-                provedor: provider ? parseInt(provider) : undefined,
-                distribuidor: distributor ? parseInt(distributor) : null,
+                name: canEditName ? name : undefined,
+                game_code: canEditGameCode ? gameCode : undefined,
+                image_url: canEditImageUrl ? imageUrl : undefined,
+                status: canEditStatus ? (status ? 1 : 0) : undefined,
+                provedor: canEditProvider
+                    ? provider
+                        ? parseInt(provider)
+                        : undefined
+                    : undefined,
+                distribuidor: canEditDistributor
+                    ? distributor
+                        ? parseInt(distributor)
+                        : null
+                    : undefined,
             };
+
+            // Remove undefined values
+            Object.keys(payload).forEach(
+                (key) => payload[key] === undefined && delete payload[key]
+            );
 
             const result = await updateGame(payload);
 
@@ -97,6 +129,11 @@ const EditGameModal = ({
                 <CredenzaHeader>
                     <CredenzaTitle>Editando {game.name}</CredenzaTitle>
                 </CredenzaHeader>
+                {!hasEditPermission && (
+                    <div className="px-6 py-3 bg-destructive/10 border-b border-destructive/20 text-sm text-destructive">
+                        Você não tem permissão para editar este jogo.
+                    </div>
+                )}
                 <CredenzaBody className="space-y-4 py-4">
                     <div className="grid grid-cols-12 gap-4">
                         <div className="col-span-12">
@@ -108,6 +145,8 @@ const EditGameModal = ({
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="h-9"
+                                disabled={!canEditName}
+                                readOnly={!canEditName}
                             />
                         </div>
                         <div className="col-span-12 md:col-span-6">
@@ -119,6 +158,8 @@ const EditGameModal = ({
                                 value={gameCode}
                                 onChange={(e) => setGameCode(e.target.value)}
                                 className="h-9"
+                                disabled={!canEditGameCode}
+                                readOnly={!canEditGameCode}
                             />
                         </div>
                         <div className="col-span-12 md:col-span-6">
@@ -130,20 +171,30 @@ const EditGameModal = ({
                                 value={imageUrl}
                                 onChange={(e) => setImageUrl(e.target.value)}
                                 className="h-9"
+                                disabled={!canEditImageUrl}
+                                readOnly={!canEditImageUrl}
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-12 gap-4">
                         <div className="col-span-6">
-                            <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
+                            <Label
+                                className={`text-xs font-medium text-muted-foreground block mb-1.5 ${
+                                    !canEditProvider ? "opacity-50" : ""
+                                }`}
+                            >
                                 Provedor
                             </Label>
                             <Select
                                 value={provider}
                                 onValueChange={setProvider}
+                                disabled={!canEditProvider}
                             >
-                                <SelectTrigger className="h-9">
+                                <SelectTrigger
+                                    className="h-9"
+                                    disabled={!canEditProvider}
+                                >
                                     <SelectValue placeholder="Selecione um provedor" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -159,14 +210,22 @@ const EditGameModal = ({
                             </Select>
                         </div>
                         <div className="col-span-6">
-                            <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
+                            <Label
+                                className={`text-xs font-medium text-muted-foreground block mb-1.5 ${
+                                    !canEditDistributor ? "opacity-50" : ""
+                                }`}
+                            >
                                 Distribuidor (Opcional)
                             </Label>
                             <Select
                                 value={distributor}
                                 onValueChange={setDistributor}
+                                disabled={!canEditDistributor}
                             >
-                                <SelectTrigger className="h-9">
+                                <SelectTrigger
+                                    className="h-9"
+                                    disabled={!canEditDistributor}
+                                >
                                     <SelectValue placeholder="Selecione um distribuidor" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -189,10 +248,13 @@ const EditGameModal = ({
                             id="status-game"
                             checked={status}
                             onCheckedChange={setStatus}
+                            disabled={!canEditStatus}
                         />
                         <Label
                             htmlFor="status-game"
-                            className="text-sm font-medium"
+                            className={`text-sm font-medium ${
+                                !canEditStatus ? "opacity-50" : ""
+                            }`}
                         >
                             Ativo
                         </Label>
@@ -210,7 +272,7 @@ const EditGameModal = ({
                     </CredenzaClose>
                     <Button
                         onClick={handleSave}
-                        disabled={isLoading}
+                        disabled={isLoading || !hasEditPermission}
                         className="w-full sm:w-auto"
                     >
                         {isLoading ? "Salvando..." : "Salvar Alterações"}

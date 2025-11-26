@@ -6,6 +6,7 @@ import { twMerge } from "tailwind-merge";
 import { Card, CardContent, CardHeader } from "./Card";
 import { AspectRatio } from "./ui/aspect-ratio";
 import EditGameModal from "./EditGameModal";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const Game = ({
     game,
@@ -16,7 +17,17 @@ const Game = ({
     provedores: { id: number; name: string }[];
     distribuidores: { id: number; name: string }[];
 }) => {
+    const { hasAnyPermission } = usePermissions();
     const createdDate = new Date(game.created_at);
+
+    const canEditGame = hasAnyPermission(
+        "games_edit_name",
+        "games_edit_game_code",
+        "games_edit_status",
+        "games_edit_link_image",
+        "games_edit_provider",
+        "games_edit_distributor"
+    );
 
     return (
         <Card>
@@ -88,13 +99,15 @@ const Game = ({
                     </p>
                 </div>
 
-                <div>
-                    <EditGameModal
-                        game={game}
-                        provedores={provedores}
-                        distribuidores={distribuidores}
-                    />
-                </div>
+                {canEditGame && (
+                    <div>
+                        <EditGameModal
+                            game={game}
+                            provedores={provedores}
+                            distribuidores={distribuidores}
+                        />
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

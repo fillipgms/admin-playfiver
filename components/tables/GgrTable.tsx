@@ -34,6 +34,8 @@ const GgrTable = ({
     const canEdit = hasPermission("ggr_edit");
     const canDelete = hasPermission("ggr_delete");
 
+    const hasAnyAction = canEdit || canDelete;
+
     if (!canView) return null;
 
     const getWalletName = (walletId: string) => {
@@ -161,6 +163,11 @@ const GgrTable = ({
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <h2 className="font-semibold text-xl">Configuração de GGR</h2>
+                {!hasAnyAction && (
+                    <div className="text-sm text-foreground/60">
+                        Sem ações disponíveis
+                    </div>
+                )}
             </div>
             <div className="overflow-x-auto">
                 <div className="ag-theme-quartz" style={{ height: "auto" }}>
