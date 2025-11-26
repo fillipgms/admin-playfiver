@@ -1,4 +1,3 @@
-import { getDistributorsData } from "@/actions/distribuidores";
 import { getGamesData } from "@/actions/jogos";
 import JogosClient from "./JogosClient";
 import { Metadata } from "next";
@@ -9,10 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function JogosPage() {
-    const [gamesRes, distributorsRes] = await Promise.all([
-        getGamesData(),
-        getDistributorsData(),
-    ]);
+    const gamesRes = await getGamesData();
 
     if (!gamesRes) {
         return (
@@ -22,7 +18,5 @@ export default async function JogosPage() {
         );
     }
 
-    return (
-        <JogosClient initialData={gamesRes} distributors={distributorsRes} />
-    );
+    return <JogosClient initialData={gamesRes} />;
 }
