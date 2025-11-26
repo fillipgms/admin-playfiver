@@ -16,6 +16,8 @@ const UserButton = () => {
     }, []);
 
     const handleLogout = async () => {
+        console.log("Logging out user:", user?.name);
+
         await logout();
     };
 
@@ -71,13 +73,13 @@ const UserButton = () => {
 
             {isOpen && (
                 <div className="absolute top-[calc(100%_+_0.5rem)] left-0 w-xs bg-background-primary rounded shadow-lg border border-foreground/20">
-                    <div
+                    <button
                         onClick={handleLogout}
                         className="flex gap-5 items-center p-2 cursor-pointer"
                     >
                         <SignOutIcon className="text-lg" />
                         <p>Sair</p>
-                    </div>
+                    </button>
                 </div>
             )}
         </div>

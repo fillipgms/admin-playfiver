@@ -56,7 +56,15 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
     const canEditHide = hasPermission("agent_edit_hide");
 
     // Check if user has any editable permission
-    const hasEditPermission = canEditMemo || canEditPassword || canEditRtp || canEditRtpUser || canEditUrl || canEditLimits || canEditInfluencers || canEditHide;
+    const hasEditPermission =
+        canEditMemo ||
+        canEditPassword ||
+        canEditRtp ||
+        canEditRtpUser ||
+        canEditUrl ||
+        canEditLimits ||
+        canEditInfluencers ||
+        canEditHide;
 
     const handleSave = async () => {
         setIsLoading(true);
@@ -71,12 +79,16 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
                 limit_enable: canEditLimits ? (limitEnable ? 1 : 0) : undefined,
                 limite_amount: canEditLimits ? limiteAmount : undefined,
                 limit_hours: canEditLimits ? limitHours : undefined,
-                influencers: canEditInfluencers ? Number(influencers) || 0 : undefined,
+                influencers: canEditInfluencers
+                    ? Number(influencers) || 0
+                    : undefined,
                 hide: canEditHide ? (hide ? 1 : 0) : undefined,
             } as any;
 
             // Remove undefined values
-            Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+            Object.keys(payload).forEach(
+                (key) => payload[key] === undefined && delete payload[key]
+            );
 
             const result = await updateAgent(payload);
 
@@ -199,7 +211,9 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
                             />
                             <Label
                                 htmlFor="hide-agent"
-                                className={`text-sm font-medium ${!canEditHide ? "opacity-50" : ""}`}
+                                className={`text-sm font-medium ${
+                                    !canEditHide ? "opacity-50" : ""
+                                }`}
                             >
                                 Ocultar agente
                             </Label>
@@ -220,7 +234,9 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
                             />
                             <Label
                                 htmlFor="limit-enable"
-                                className={`text-sm font-medium ${!canEditLimits ? "opacity-50" : ""}`}
+                                className={`text-sm font-medium ${
+                                    !canEditLimits ? "opacity-50" : ""
+                                }`}
                             >
                                 Limite habilitado
                             </Label>
