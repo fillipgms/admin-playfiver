@@ -39,6 +39,11 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [password, setPassword] = useState("");
     const [ban, setBan] = useState(user.ban === 1);
     const [roles, setRoles] = useState<string[]>(user.role || []);
+    const [permissions, setPermissions] = useState<string[]>(
+        // backend may provide permissions array on the user
+        // fall back to empty array if not present
+        (user as any).permissions || []
+    );
 
     const [wallets, setWallets] = useState<UserWalletProps[]>(
         user.wallets || []
@@ -46,21 +51,21 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [walletSearch, setWalletSearch] = useState("");
     const router = useRouter();
 
-    // Permission checks for each field
     const canEditName = hasPermission("user_edit_name");
     const canEditEmail = hasPermission("user_edit_email");
     const canEditPassword = hasPermission("user_edit_password");
     const canEditBan = hasPermission("user_edit_banned");
     const canEditRole = hasPermission("user_edit_role");
+    const canEditPermissions = hasPermission("user_edit_permissions");
     const canEditWallet = hasPermission("user_edit_wallet");
 
-    // Check if user has any editable permission
     const hasEditPermission =
         canEditName ||
         canEditEmail ||
         canEditPassword ||
         canEditBan ||
         canEditRole ||
+        canEditPermissions ||
         canEditWallet;
 
     const filteredWallets = useMemo(() => {
@@ -94,6 +99,9 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                 saldo: user.saldo || 0,
                 ban: canEditBan ? (ban ? 1 : 0) : user.ban,
                 role: canEditRole ? roles : user.role,
+                permissions: canEditPermissions
+                    ? permissions
+                    : (user as any).permissions || [],
                 wallets: canEditWallet ? wallets : user.wallets,
             };
 
@@ -207,6 +215,198 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 placeholder="Selecione os cargos"
                                 className="h-9"
                                 disabled={!canEditRole}
+                            />
+                        </div>
+                        <div className="col-span-6">
+                            <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
+                                Permissões
+                            </Label>
+                            <MultiSelect
+                                options={[
+                                    { label: "user_view", value: "user_view" },
+                                    {
+                                        label: "user_edit_name",
+                                        value: "user_edit_name",
+                                    },
+                                    {
+                                        label: "user_edit_email",
+                                        value: "user_edit_email",
+                                    },
+                                    {
+                                        label: "user_edit_password",
+                                        value: "user_edit_password",
+                                    },
+                                    {
+                                        label: "user_edit_banned",
+                                        value: "user_edit_banned",
+                                    },
+                                    {
+                                        label: "user_edit_role",
+                                        value: "user_edit_role",
+                                    },
+                                    {
+                                        label: "user_edit_wallet",
+                                        value: "user_edit_wallet",
+                                    },
+                                    {
+                                        label: "user_create",
+                                        value: "user_create",
+                                    },
+                                    {
+                                        label: "user_delete",
+                                        value: "user_delete",
+                                    },
+                                    {
+                                        label: "user_view_report",
+                                        value: "user_view_report",
+                                    },
+
+                                    {
+                                        label: "agent_view",
+                                        value: "agent_view",
+                                    },
+                                    {
+                                        label: "agent_edit_password",
+                                        value: "agent_edit_password",
+                                    },
+                                    {
+                                        label: "agent_edit_rtp",
+                                        value: "agent_edit_rtp",
+                                    },
+                                    {
+                                        label: "agent_edit_rtp_user",
+                                        value: "agent_edit_rtp_user",
+                                    },
+                                    {
+                                        label: "agent_edit_influencers",
+                                        value: "agent_edit_influencers",
+                                    },
+                                    {
+                                        label: "agent_edit_describe",
+                                        value: "agent_edit_describe",
+                                    },
+                                    {
+                                        label: "agent_edit_webhook",
+                                        value: "agent_edit_webhook",
+                                    },
+                                    {
+                                        label: "agent_edit_hide",
+                                        value: "agent_edit_hide",
+                                    },
+                                    {
+                                        label: "agent_edit_limits",
+                                        value: "agent_edit_limits",
+                                    },
+                                    {
+                                        label: "agent_view_report",
+                                        value: "agent_view_report",
+                                    },
+
+                                    {
+                                        label: "orders_view",
+                                        value: "orders_view",
+                                    },
+
+                                    {
+                                        label: "signature_view",
+                                        value: "signature_view",
+                                    },
+                                    {
+                                        label: "signature_create",
+                                        value: "signature_create",
+                                    },
+
+                                    { label: "ggr_view", value: "ggr_view" },
+                                    { label: "ggr_edit", value: "ggr_edit" },
+                                    {
+                                        label: "ggr_create",
+                                        value: "ggr_create",
+                                    },
+                                    {
+                                        label: "ggr_delete",
+                                        value: "ggr_delete",
+                                    },
+
+                                    {
+                                        label: "games_view",
+                                        value: "games_view",
+                                    },
+                                    {
+                                        label: "games_edit_name",
+                                        value: "games_edit_name",
+                                    },
+                                    {
+                                        label: "games_edit_game_code",
+                                        value: "games_edit_game_code",
+                                    },
+                                    {
+                                        label: "games_edit_status",
+                                        value: "games_edit_status",
+                                    },
+                                    {
+                                        label: "games_edit_link_image",
+                                        value: "games_edit_link_image",
+                                    },
+                                    {
+                                        label: "games_edit_provider",
+                                        value: "games_edit_provider",
+                                    },
+                                    {
+                                        label: "games_edit_distributor",
+                                        value: "games_edit_distributor",
+                                    },
+
+                                    {
+                                        label: "provider_view",
+                                        value: "provider_view",
+                                    },
+                                    {
+                                        label: "provider_edit",
+                                        value: "provider_edit",
+                                    },
+
+                                    {
+                                        label: "distributor_view",
+                                        value: "distributor_view",
+                                    },
+                                    {
+                                        label: "distributor_edit",
+                                        value: "distributor_edit",
+                                    },
+
+                                    {
+                                        label: "wallet_view",
+                                        value: "wallet_view",
+                                    },
+                                    {
+                                        label: "wallet_edit_status",
+                                        value: "wallet_edit_status",
+                                    },
+
+                                    { label: "logs_view", value: "logs_view" },
+                                    {
+                                        label: "logs_agent_view",
+                                        value: "logs_agent_view",
+                                    },
+                                    {
+                                        label: "logs_ggr_view",
+                                        value: "logs_ggr_view",
+                                    },
+
+                                    {
+                                        label: "setting_view",
+                                        value: "setting_view",
+                                    },
+                                    {
+                                        label: "setting_edit",
+                                        value: "setting_edit",
+                                    },
+                                ]}
+                                onValueChange={setPermissions}
+                                defaultValue={permissions}
+                                placeholder="Selecione permissões"
+                                className="h-9"
+                                disabled={!canEditPermissions}
                             />
                         </div>
                         <div className="col-span-6 flex items-center gap-2">
