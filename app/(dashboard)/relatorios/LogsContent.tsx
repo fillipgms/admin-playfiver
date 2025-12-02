@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Popover,
     PopoverContent,
@@ -13,7 +13,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
-    MagnifyingGlassIcon,
     CaretDownIcon,
     CaretUpIcon,
     WarningCircleIcon,
@@ -25,6 +24,8 @@ import {
 } from "@phosphor-icons/react";
 import PaginationControls from "@/components/PaginationControls";
 import { Card } from "@/components/Card";
+import { searchUser } from "@/actions/user";
+import { getAgentsData } from "@/actions/agents";
 
 interface LogsContentProps {
     initialData: LogsResponse;
@@ -123,7 +124,6 @@ function getGravityIcon(gravity?: string) {
 export default function LogsContent({ initialData, params }: LogsContentProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const getParamValue = (param?: string | string[]) =>
         Array.isArray(param) ? param[0] : param;
@@ -159,6 +159,23 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
     const [data, setData] = useState<LogEntryProps[]>(initialData.data);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+
+    // User search state
+    const [userSearchTerm, setUserSearchTerm] = useState("");
+    const [foundUsers, setFoundUsers] = useState<
+        Array<{ id: number | string; name: string; email: string }>
+    >([]);
+    const [isUserSearching, setIsUserSearching] = useState(false);
+    const userSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Agent search state
+    const [agentSearchTerm, setAgentSearchTerm] = useState("");
+    const [foundAgents, setFoundAgents] = useState<
+        Array<{ id: number; code: string; memo: string }>
+    >([]);
+    const [isAgentSearching, setIsAgentSearching] = useState(false);
+    const agentSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Update data when initialData changes
     useEffect(() => {
@@ -264,12 +281,23 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         return { all, errors, warnings, resolved, unresolved };
     }, [data]);
 
+    const hasActiveFilters = useMemo(() => {
+        return !!(
+            gravities.length > 0 ||
+            types.length > 0 ||
+            users.length > 0 ||
+            agents.length > 0 ||
+            dateStart ||
+            dateEnd
+        );
+    }, [gravities, types, users, agents, dateStart, dateEnd]);
+
     const updateUrlParams = useCallback(
         (updates: Record<string, string>) => {
             const params = new URLSearchParams(searchParams?.toString() || "");
 
             Object.entries(updates).forEach(([key, value]) => {
-                if (value) {
+                if (value && value !== "") {
                     params.set(key, value);
                 } else {
                     params.delete(key);
@@ -279,16 +307,9 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             params.set("page", "1");
             params.set("tab", "logs");
 
-            router.push(`/relatorios?${params.toString()}`);
+            router.replace(`/relatorios?${params.toString()}`);
         },
         [searchParams, router]
-    );
-
-    const handleSearch = useCallback(
-        (value: string) => {
-            updateUrlParams({ search: value.trim() });
-        },
-        [updateUrlParams]
     );
 
     const handleGravityChange = useCallback(
@@ -336,6 +357,165 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         [updateUrlParams]
     );
 
+    const handleUserSearch = useCallback((value: string) => {
+        setUserSearchTerm(value);
+
+        if (userSearchTimeoutRef.current) {
+            clearTimeout(userSearchTimeoutRef.current);
+        }
+
+        if (value.length < 3) {
+            setFoundUsers([]);
+            return;
+        }
+
+        userSearchTimeoutRef.current = setTimeout(async () => {
+            setIsUserSearching(true);
+            try {
+                const result = await searchUser(value);
+                if (
+                    result.success &&
+                    result.data &&
+                    Array.isArray(result.data.data)
+                ) {
+                    setFoundUsers(
+                        result.data.data.map((u: any) => ({
+                            id: u.id,
+                            name: u.name || u.email,
+                            email: u.email,
+                        }))
+                    );
+                } else {
+                    setFoundUsers([]);
+                }
+            } catch (error) {
+                setFoundUsers([]);
+            } finally {
+                setIsUserSearching(false);
+            }
+        }, 300);
+    }, []);
+
+    const handleAgentSearch = useCallback((value: string) => {
+        setAgentSearchTerm(value);
+
+        if (agentSearchTimeoutRef.current) {
+            clearTimeout(agentSearchTimeoutRef.current);
+        }
+
+        if (value.length < 3) {
+            setFoundAgents([]);
+            return;
+        }
+
+        agentSearchTimeoutRef.current = setTimeout(async () => {
+            setIsAgentSearching(true);
+            try {
+                const result = await getAgentsData({ search: value, page: 1 });
+                if (result && result.data && Array.isArray(result.data)) {
+                    setFoundAgents(
+                        result.data.map((agent: Agent) => ({
+                            id: agent.id,
+                            code: agent.agent_code,
+                            memo: agent.agent_memo || agent.agent_code,
+                        }))
+                    );
+                } else {
+                    setFoundAgents([]);
+                }
+            } catch (error) {
+                setFoundAgents([]);
+            } finally {
+                setIsAgentSearching(false);
+            }
+        }, 300);
+    }, []);
+
+    const handleUserSelect = useCallback(
+        (user: { id: number | string; name: string; email: string }) => {
+            const userId = user.id.toString();
+            if (!users.includes(userId)) {
+                const newUsers = [...users, userId];
+                setUsers(newUsers);
+                updateUrlParams({
+                    user: JSON.stringify(newUsers),
+                });
+            }
+            setUserSearchTerm("");
+            setFoundUsers([]);
+        },
+        [users, updateUrlParams]
+    );
+
+    const handleAgentSelect = useCallback(
+        (agent: { id: number; code: string; memo: string }) => {
+            const agentId = agent.id.toString();
+            if (!agents.includes(agentId)) {
+                const newAgents = [...agents, agentId];
+                setAgents(newAgents);
+                updateUrlParams({
+                    agent: JSON.stringify(newAgents),
+                });
+            }
+            setAgentSearchTerm("");
+            setFoundAgents([]);
+        },
+        [agents, updateUrlParams]
+    );
+
+    const handleUserFilterClear = useCallback(() => {
+        setUsers([]);
+        setUserSearchTerm("");
+        updateUrlParams({ user: "" });
+    }, [updateUrlParams]);
+
+    const handleAgentFilterClear = useCallback(() => {
+        setAgents([]);
+        setAgentSearchTerm("");
+        updateUrlParams({ agent: "" });
+    }, [updateUrlParams]);
+
+    const clearAllFilters = useCallback(() => {
+        setGravities([]);
+        setTypes([]);
+        setUsers([]);
+        setAgents([]);
+        setDateStart("");
+        setDateEnd("");
+        setUserSearchTerm("");
+        setAgentSearchTerm("");
+        updateUrlParams({
+            gravity: "",
+            type: "",
+            user: "",
+            agent: "",
+            dateStart: "",
+            dateEnd: "",
+        });
+    }, [updateUrlParams]);
+
+    const handleRemoveUser = useCallback(
+        (userId: string) => {
+            const newUsers = users.filter((id) => id !== userId);
+            setUsers(newUsers);
+            updateUrlParams({
+                user: newUsers.length > 0 ? JSON.stringify(newUsers) : "",
+            });
+        },
+        [users, updateUrlParams]
+    );
+
+    const handleRemoveAgent = useCallback(
+        (agentId: string) => {
+            const newAgents = agents.filter((id) => id !== agentId);
+            setAgents(newAgents);
+            updateUrlParams({
+                agent: newAgents.length > 0 ? JSON.stringify(newAgents) : "",
+            });
+        },
+        [agents, updateUrlParams]
+    );
+
     const toggleDateGroup = useCallback((dateGroup: string) => {
         setExpandedDates((prev) => {
             const newSet = new Set(prev);
@@ -356,13 +536,30 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         }
     }, [filteredGroupedLogs, isInitialized]);
 
+    // Cleanup timeouts
     useEffect(() => {
         return () => {
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
+            if (userSearchTimeoutRef.current) {
+                clearTimeout(userSearchTimeoutRef.current);
+            }
+            if (agentSearchTimeoutRef.current) {
+                clearTimeout(agentSearchTimeoutRef.current);
             }
         };
     }, []);
+
+    // Sync state with URL params when they change
+    useEffect(() => {
+        const newUsers = parseArrayParam(params.user) || [];
+        const newAgents = parseArrayParam(params.agent) || [];
+        if (JSON.stringify(newUsers) !== JSON.stringify(users)) {
+            setUsers(newUsers);
+        }
+        if (JSON.stringify(newAgents) !== JSON.stringify(agents)) {
+            setAgents(newAgents);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [params.user, params.agent]);
 
     const isResolved = (log: LogEntryProps) => log.data?.status === 1;
 
@@ -380,252 +577,398 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 </div>
             </div>
 
-            {/* Search and Filters */}
-            <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
-                <div className="space-y-4">
-                    {/* Search Bar */}
-                    <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        <Input
-                            type="search"
-                            placeholder="Buscar logs por usuário, agente, mensagem..."
-                            onChange={(e) => handleSearch(e.target.value)}
-                            className="pl-9 bg-background/50"
-                        />
-                    </div>
-
-                    {/* Filter Chips */}
-                    <div className="flex flex-wrap gap-2 items-center">
-                        {/* Gravity Filter Popover */}
-                        {uniqueGravities.length > 0 && (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="gap-2"
-                                    >
-                                        <FunnelIcon className="size-4" />
-                                        Gravidade
-                                        {gravities.length > 0 && (
-                                            <Badge
-                                                variant="secondary"
-                                                className="ml-1"
-                                            >
-                                                {gravities.length}
-                                            </Badge>
-                                        )}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-60 p-0">
-                                    <ScrollArea className="h-64">
-                                        <div className="p-4 space-y-3">
-                                            <p className="text-sm font-medium leading-none mb-3">
-                                                Filtrar por Gravidade
-                                            </p>
-                                            {uniqueGravities.map((gravity) => (
-                                                <label
-                                                    key={gravity}
-                                                    className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        className="w-4 h-4 rounded border-input"
-                                                        checked={gravities.includes(
-                                                            gravity
-                                                        )}
-                                                        onChange={(e) =>
-                                                            handleGravityChange(
-                                                                gravity,
-                                                                e.target.checked
-                                                            )
-                                                        }
-                                                    />
-                                                    <span className="text-sm font-medium flex-1">
-                                                        {gravity}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </PopoverContent>
-                            </Popover>
+            {/* Filters Toggle */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div />
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowFilters(!showFilters)}
+                        className="flex items-center gap-2"
+                    >
+                        <FunnelIcon className="size-4" />
+                        Filtros
+                        {hasActiveFilters && (
+                            <div className="h-2 w-2 rounded-full bg-primary" />
                         )}
+                    </Button>
 
-                        {/* Type Filter Popover */}
-                        {uniqueTypes.length > 0 && (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="gap-2"
-                                    >
-                                        <FunnelIcon className="size-4" />
-                                        Tipo
-                                        {types.length > 0 && (
-                                            <Badge
-                                                variant="secondary"
-                                                className="ml-1"
-                                            >
-                                                {types.length}
-                                            </Badge>
-                                        )}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-60 p-0">
-                                    <ScrollArea className="h-64">
-                                        <div className="p-4 space-y-3">
-                                            <p className="text-sm font-medium leading-none mb-3">
-                                                Filtrar por Tipo
-                                            </p>
-                                            {uniqueTypes.map((type) => (
-                                                <label
-                                                    key={type}
-                                                    className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        className="w-4 h-4 rounded border-input"
-                                                        checked={types.includes(
-                                                            type
-                                                        )}
-                                                        onChange={(e) =>
-                                                            handleTypeChange(
-                                                                type,
-                                                                e.target.checked
-                                                            )
-                                                        }
-                                                    />
-                                                    <span className="text-sm font-medium flex-1">
-                                                        {type}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </PopoverContent>
-                            </Popover>
-                        )}
+                    {hasActiveFilters && (
+                        <Button
+                            variant="ghost"
+                            onClick={clearAllFilters}
+                            className="text-muted-foreground hover:text-foreground"
+                        >
+                            Limpar filtros
+                        </Button>
+                    )}
+                </div>
+            </div>
 
-                        {/* Date Filters */}
-                        <div className="flex gap-2 ml-auto">
-                            <div className="flex items-center gap-2">
-                                <label className="text-xs font-medium text-muted-foreground">
-                                    De:
+            {showFilters && (
+                <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
+                    <div className="space-y-4">
+                        {/* User and Agent Search */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* User Search */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-muted-foreground ml-1">
+                                    Filtrar por Usuário
                                 </label>
-                                <input
-                                    type="date"
-                                    value={dateStart}
-                                    onChange={(e) =>
-                                        handleDateStartChange(e.target.value)
-                                    }
-                                    className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        placeholder="Pesquise usuários (mín. 3 caracteres)"
+                                        value={userSearchTerm}
+                                        onChange={(e) =>
+                                            handleUserSearch(e.target.value)
+                                        }
+                                        className="bg-background h-9"
+                                    />
+                                    {(foundUsers.length > 0 || isUserSearching) &&
+                                        userSearchTerm.length >= 3 && (
+                                            <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
+                                                {isUserSearching && (
+                                                    <div className="flex items-center justify-center p-3 text-sm text-muted-foreground">
+                                                        Buscando...
+                                                    </div>
+                                                )}
+                                                {foundUsers.map((user) => (
+                                                    <div
+                                                        key={user.id}
+                                                        className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
+                                                        onClick={() =>
+                                                            handleUserSelect(user)
+                                                        }
+                                                    >
+                                                        <span className="font-medium">
+                                                            {user.name}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {user.email}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {foundUsers.length === 0 &&
+                                                    !isUserSearching && (
+                                                        <div className="p-3 text-sm text-muted-foreground">
+                                                            Nenhum usuário
+                                                            encontrado.
+                                                        </div>
+                                                    )}
+                                            </div>
+                                        )}
+                                </div>
+                                {users.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {users.map((userId) => (
+                                            <Badge
+                                                key={userId}
+                                                variant="secondary"
+                                                className="gap-1 cursor-pointer"
+                                                onClick={() =>
+                                                    handleRemoveUser(userId)
+                                                }
+                                            >
+                                                Usuário: {userId}
+                                                <XIcon className="size-3 " />
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <label className="text-xs font-medium text-muted-foreground">
-                                    Até:
+
+                            {/* Agent Search */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-muted-foreground ml-1">
+                                    Filtrar por Agente
                                 </label>
-                                <input
-                                    type="date"
-                                    value={dateEnd}
-                                    onChange={(e) =>
-                                        handleDateEndChange(e.target.value)
-                                    }
-                                    className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        placeholder="Pesquise agentes (mín. 3 caracteres)"
+                                        value={agentSearchTerm}
+                                        onChange={(e) =>
+                                            handleAgentSearch(e.target.value)
+                                        }
+                                        className="bg-background h-9"
+                                    />
+                                    {(foundAgents.length > 0 || isAgentSearching) &&
+                                        agentSearchTerm.length >= 3 && (
+                                            <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
+                                                {isAgentSearching && (
+                                                    <div className="flex items-center justify-center p-3 text-sm text-muted-foreground">
+                                                        Buscando...
+                                                    </div>
+                                                )}
+                                                {foundAgents.map((agent) => (
+                                                    <div
+                                                        key={agent.id}
+                                                        className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
+                                                        onClick={() =>
+                                                            handleAgentSelect(agent)
+                                                        }
+                                                    >
+                                                        <span className="font-medium">
+                                                            {agent.memo}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {agent.code}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {foundAgents.length === 0 &&
+                                                    !isAgentSearching && (
+                                                        <div className="p-3 text-sm text-muted-foreground">
+                                                            Nenhum agente
+                                                            encontrado.
+                                                        </div>
+                                                    )}
+                                            </div>
+                                        )}
+                                </div>
+                                {agents.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {agents.map((agentId) => (
+                                            <Badge
+                                                key={agentId}
+                                                variant="secondary"
+                                                className="gap-1 cursor-pointer"
+                                                onClick={() =>
+                                                    handleRemoveAgent(agentId)
+                                                }
+                                            >
+                                                Agente: {agentId}
+                                                <XIcon className="size-3 " />
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        {/* Clear Filters */}
+                        {/* Filter Chips */}
+                        <div className="flex flex-wrap gap-2 items-center">
+                            {/* Gravity Filter Popover */}
+                            {uniqueGravities.length > 0 && (
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2"
+                                        >
+                                            <FunnelIcon className="size-4" />
+                                            Gravidade
+                                            {gravities.length > 0 && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="ml-1"
+                                                >
+                                                    {gravities.length}
+                                                </Badge>
+                                            )}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-60 p-0">
+                                        <ScrollArea className="h-64">
+                                            <div className="p-4 space-y-3">
+                                                <p className="text-sm font-medium leading-none mb-3">
+                                                    Filtrar por Gravidade
+                                                </p>
+                                                {uniqueGravities.map((gravity) => (
+                                                    <label
+                                                        key={gravity}
+                                                        className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded border-input"
+                                                            checked={gravities.includes(
+                                                                gravity
+                                                            )}
+                                                            onChange={(e) =>
+                                                                handleGravityChange(
+                                                                    gravity,
+                                                                    e.target.checked
+                                                                )
+                                                            }
+                                                        />
+                                                        <span className="text-sm font-medium flex-1">
+                                                            {gravity}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
+                                    </PopoverContent>
+                                </Popover>
+                            )}
+
+                            {/* Type Filter Popover */}
+                            {uniqueTypes.length > 0 && (
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2"
+                                        >
+                                            <FunnelIcon className="size-4" />
+                                            Tipo
+                                            {types.length > 0 && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className="ml-1"
+                                                >
+                                                    {types.length}
+                                                </Badge>
+                                            )}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-60 p-0">
+                                        <ScrollArea className="h-64">
+                                            <div className="p-4 space-y-3">
+                                                <p className="text-sm font-medium leading-none mb-3">
+                                                    Filtrar por Tipo
+                                                </p>
+                                                {uniqueTypes.map((type) => (
+                                                    <label
+                                                        key={type}
+                                                        className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded border-input"
+                                                            checked={types.includes(
+                                                                type
+                                                            )}
+                                                            onChange={(e) =>
+                                                                handleTypeChange(
+                                                                    type,
+                                                                    e.target.checked
+                                                                )
+                                                            }
+                                                        />
+                                                        <span className="text-sm font-medium flex-1">
+                                                            {type}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
+                                    </PopoverContent>
+                                </Popover>
+                            )}
+
+                            {/* Date Filters */}
+                            <div className="flex gap-2 ml-auto">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs font-medium text-muted-foreground">
+                                        De:
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={dateStart}
+                                        onChange={(e) =>
+                                            handleDateStartChange(e.target.value)
+                                        }
+                                        className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs font-medium text-muted-foreground">
+                                        Até:
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={dateEnd}
+                                        onChange={(e) =>
+                                            handleDateEndChange(e.target.value)
+                                        }
+                                        className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Clear Filters */}
+                            {(gravities.length > 0 ||
+                                types.length > 0 ||
+                                users.length > 0 ||
+                                agents.length > 0 ||
+                                dateStart ||
+                                dateEnd) && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={clearAllFilters}
+                                    className="gap-2"
+                                >
+                                    <XIcon className="size-4" />
+                                    Limpar
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Active Filters Display */}
                         {(gravities.length > 0 ||
                             types.length > 0 ||
                             dateStart ||
                             dateEnd) && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    setGravities([]);
-                                    setTypes([]);
-                                    setDateStart("");
-                                    setDateEnd("");
-                                    updateUrlParams({
-                                        gravity: "",
-                                        type: "",
-                                        dateStart: "",
-                                        dateEnd: "",
-                                    });
-                                }}
-                                className="gap-2"
-                            >
-                                <XIcon className="size-4" />
-                                Limpar
-                            </Button>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                {gravities.map((gravity) => (
+                                    <Badge
+                                        key={gravity}
+                                        variant="secondary"
+                                        className="gap-1"
+                                    >
+                                        {gravity}
+                                        <XIcon
+                                            className="size-3 cursor-pointer hover:text-destructive"
+                                            onClick={() =>
+                                                handleGravityChange(gravity, false)
+                                            }
+                                        />
+                                    </Badge>
+                                ))}
+                                {types.map((type) => (
+                                    <Badge
+                                        key={type}
+                                        variant="secondary"
+                                        className="gap-1"
+                                    >
+                                        {type}
+                                        <XIcon
+                                            className="size-3 cursor-pointer hover:text-destructive"
+                                            onClick={() =>
+                                                handleTypeChange(type, false)
+                                            }
+                                        />
+                                    </Badge>
+                                ))}
+                                {dateStart && (
+                                    <Badge variant="secondary" className="gap-1">
+                                        De: {dateStart}
+                                        <XIcon
+                                            className="size-3 cursor-pointer hover:text-destructive"
+                                            onClick={() =>
+                                                handleDateStartChange("")
+                                            }
+                                        />
+                                    </Badge>
+                                )}
+                                {dateEnd && (
+                                    <Badge variant="secondary" className="gap-1">
+                                        Até: {dateEnd}
+                                        <XIcon
+                                            className="size-3 cursor-pointer hover:text-destructive"
+                                            onClick={() => handleDateEndChange("")}
+                                        />
+                                    </Badge>
+                                )}
+                            </div>
                         )}
                     </div>
-
-                    {/* Active Filters Display */}
-                    {(gravities.length > 0 ||
-                        types.length > 0 ||
-                        dateStart ||
-                        dateEnd) && (
-                        <div className="flex flex-wrap gap-2 pt-2">
-                            {gravities.map((gravity) => (
-                                <Badge
-                                    key={gravity}
-                                    variant="secondary"
-                                    className="gap-1"
-                                >
-                                    {gravity}
-                                    <XIcon
-                                        className="size-3 cursor-pointer hover:text-destructive"
-                                        onClick={() =>
-                                            handleGravityChange(gravity, false)
-                                        }
-                                    />
-                                </Badge>
-                            ))}
-                            {types.map((type) => (
-                                <Badge
-                                    key={type}
-                                    variant="secondary"
-                                    className="gap-1"
-                                >
-                                    {type}
-                                    <XIcon
-                                        className="size-3 cursor-pointer hover:text-destructive"
-                                        onClick={() =>
-                                            handleTypeChange(type, false)
-                                        }
-                                    />
-                                </Badge>
-                            ))}
-                            {dateStart && (
-                                <Badge variant="secondary" className="gap-1">
-                                    De: {dateStart}
-                                    <XIcon
-                                        className="size-3 cursor-pointer hover:text-destructive"
-                                        onClick={() =>
-                                            handleDateStartChange("")
-                                        }
-                                    />
-                                </Badge>
-                            )}
-                            {dateEnd && (
-                                <Badge variant="secondary" className="gap-1">
-                                    Até: {dateEnd}
-                                    <XIcon
-                                        className="size-3 cursor-pointer hover:text-destructive"
-                                        onClick={() => handleDateEndChange("")}
-                                    />
-                                </Badge>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </Card>
+                </Card>
+            )}
 
             {/* Timeline */}
             <div className="space-y-4">

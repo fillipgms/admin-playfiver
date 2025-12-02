@@ -47,24 +47,44 @@ export default function GgrContent({ initialData }: GgrContentProps) {
         );
     }
 
-    const wallets = Object.entries(initialData);
-    const totalBet = wallets.reduce(
-        (sum, [, data]) => sum + parseFloat(data.bet || "0"),
+    // normalize and parse numbers coming as strings in pt-BR format (e.g. "1.234,56")
+    function parseBrazilianNumber(
+        value: string | number | null | undefined
+    ): number {
+        if (value === null || value === undefined) return 0;
+        if (typeof value === "number") return value;
+        const s = String(value).trim();
+        if (s === "") return 0;
+        // remove thousand separators (.) and replace decimal comma with dot
+        const normalized = s.replace(/\./g, "").replace(/,/g, ".");
+        const n = Number(normalized);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    // Extract wallet entries. Some responses come as { status: true, data: [ ... ] }
+    const raw: any = initialData as any;
+    const walletEntries: [string, any][] = Array.isArray(raw?.data)
+        ? raw.data.map((w: any) => [w.walletName || "Unknown", w])
+        : Array.isArray(raw)
+        ? (raw as [string, any][])
+        : Object.entries(raw || {});
+
+    const totalBet = walletEntries.reduce(
+        (sum, [, data]) => sum + parseBrazilianNumber(data?.bet),
         0
     );
-    const totalWin = wallets.reduce(
-        (sum, [, data]) => sum + parseFloat(data.win || "0"),
+    const totalWin = walletEntries.reduce(
+        (sum, [, data]) => sum + parseBrazilianNumber(data?.win),
         0
     );
-    const totalGgr = wallets.reduce(
-        (sum, [, data]) => sum + parseFloat(data.ggrConsumido || "0"),
+    const totalGgr = walletEntries.reduce(
+        (sum, [, data]) => sum + parseBrazilianNumber(data?.ggrConsumido),
         0
     );
     const netGgr = totalBet - totalWin;
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold">Relatório GGR</h2>
@@ -74,7 +94,6 @@ export default function GgrContent({ initialData }: GgrContentProps) {
                 </div>
             </div>
 
-            {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                     <CardHeader className="pb-2">
@@ -141,18 +160,16 @@ export default function GgrContent({ initialData }: GgrContentProps) {
                 </Card>
             </div>
 
-            {/* Wallets Grid */}
             <div>
-                <h3 className="text-lg font-semibold mb-4">
-                    Por Carteira ({wallets.length})
-                </h3>
+                <h3 className="text-lg font-semibold mb-4">Por Carteira</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {wallets.map(([walletName, data]) => {
-                        const bet = parseFloat(data.bet || "0");
-                        const win = parseFloat(data.win || "0");
-                        const ggr = parseFloat(data.ggrConsumido || "0");
+                    {walletEntries.map(([walletName, data]) => {
+                        const bet = parseBrazilianNumber(data?.bet);
+                        const win = parseBrazilianNumber(data?.win);
+                        const ggr = parseBrazilianNumber(data?.ggrConsumido);
                         const net = bet - win;
-                        const margin = bet > 0 ? ((net / bet) * 100).toFixed(2) : "0.00";
+                        const margin =
+                            bet > 0 ? ((net / bet) * 100).toFixed(2) : "0.00";
 
                         return (
                             <Card
@@ -169,7 +186,6 @@ export default function GgrContent({ initialData }: GgrContentProps) {
                                 </CardHeader>
 
                                 <CardContent className="space-y-4">
-                                    {/* Stats */}
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm text-muted-foreground">
@@ -233,7 +249,6 @@ export default function GgrContent({ initialData }: GgrContentProps) {
                                         )}
                                     </div>
 
-                                    {/* Visual Bar */}
                                     <div className="pt-3 border-t border-foreground/10">
                                         <div className="h-2 bg-muted rounded-full overflow-hidden">
                                             <div
@@ -247,7 +262,8 @@ export default function GgrContent({ initialData }: GgrContentProps) {
                                                         bet > 0
                                                             ? Math.min(
                                                                   Math.abs(
-                                                                      (net / bet) *
+                                                                      (net /
+                                                                          bet) *
                                                                           100
                                                                   ),
                                                                   100

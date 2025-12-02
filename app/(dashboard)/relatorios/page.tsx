@@ -1,8 +1,5 @@
 import { Metadata } from "next";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LogsContent from "./LogsContent";
-import AgentsContent from "./AgentsContent";
-import GgrContent from "./GgrContent";
+import RelatoriosTabs from "./RelatoriosTabs";
 import { getLogsData } from "@/actions/logs";
 import { getRelatorioData, getGGRRelatorioData } from "@/actions/relatorio";
 
@@ -50,8 +47,13 @@ export default async function RelatoriosPage({
     });
 
     // Fetch agents report data
+    const agentsPage = parseInt(getParamValue(params.page) || "1", 10);
     const agentsDataResult = await getRelatorioData({
-        page: 1,
+        page: agentsPage,
+        users: parseArrayParam(params.user),
+        dateStart: getParamValue(params.dateStart),
+        dateEnd: getParamValue(params.dateEnd),
+        type: getParamValue(params.type),
     });
 
     // Fetch GGR report data
@@ -66,25 +68,12 @@ export default async function RelatoriosPage({
                 </p>
             </div>
 
-            <Tabs defaultValue={activeTab} className="w-full">
-                <TabsList className="w-full">
-                    <TabsTrigger value="logs">Logs</TabsTrigger>
-                    <TabsTrigger value="agentes">Agentes</TabsTrigger>
-                    <TabsTrigger value="ggr">GGR</TabsTrigger>
-                </TabsList>
-                <TabsContent value="logs">
-                    <LogsContent
-                        initialData={logsData as LogsResponse}
-                        params={params}
-                    />
-                </TabsContent>
-                <TabsContent value="agentes">
-                    <AgentsContent initialData={agentsDataResult.data} />
-                </TabsContent>
-                <TabsContent value="ggr">
-                    <GgrContent initialData={ggrDataResult.data} />
-                </TabsContent>
-            </Tabs>
+            <RelatoriosTabs
+                logsData={logsData as LogsResponse}
+                agentsData={agentsDataResult.data}
+                ggrData={ggrDataResult.data}
+                params={params}
+            />
         </main>
     );
 }
