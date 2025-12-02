@@ -718,7 +718,7 @@ interface UsersFilters {
     filter?: string;
 }
 
-export interface TransactionResponse {
+interface TransactionResponse {
     current_page: number;
     data: TransactionItem[];
     first_page_url: string;
@@ -735,7 +735,7 @@ export interface TransactionResponse {
     players: PlayerItem[];
 }
 
-export interface TransactionItem {
+interface TransactionItem {
     id: number;
     game: string;
     game_original: number;
@@ -761,13 +761,13 @@ export interface TransactionItem {
     created_at: string;
 }
 
-export interface PaginationLink {
+interface PaginationLink {
     url: string | null;
     label: string;
     active: boolean;
 }
 
-export interface PlayerItem {
+interface PlayerItem {
     id: number;
     username: string;
     saldo: string;
