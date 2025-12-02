@@ -1,12 +1,17 @@
 import React from "react";
 import { Card, CardContent, CardHeader } from "./Card";
-import { LinkSimpleIcon, RobotIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+    CashRegisterIcon,
+    LinkSimpleIcon,
+    RobotIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import Icon from "./Icon";
 import { UserIcon } from "@phosphor-icons/react";
 import { Badge } from "./ui/badge";
 import EditAgentModal from "./EditAgentModal";
 import { usePermissions } from "@/hooks/usePermissions";
+import { Button } from "./ui/button";
 
 const Agent = React.forwardRef<
     HTMLDivElement,
@@ -24,6 +29,8 @@ const Agent = React.forwardRef<
         "agent_edit_limits",
         "agent_edit_influencers"
     );
+
+    const canViewTransactions = hasAnyPermission("agent_view_report");
     return (
         <Card ref={ref}>
             <CardHeader>
@@ -43,6 +50,19 @@ const Agent = React.forwardRef<
                         </Badge>
                     </div>
                     {canEditAgent && <EditAgentModal agent={agent} />}
+                    {canViewTransactions && (
+                        <Link href={`/agentes/${agent.id}`}>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-3"
+                                title="Editar agente"
+                            >
+                                <CashRegisterIcon size={14} />
+                                <span className="sr-only">Ver Transações</span>
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">

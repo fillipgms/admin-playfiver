@@ -870,7 +870,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                 <div className="flex justify-between items-center w-full">
                                     <div
                                         className={cn(
-                                            "flex items-center gap-1",
+                                            "flex items-center gap-1 min-w-0 flex-1",
                                             singleLine
                                                 ? "overflow-x-auto multiselect-singleline-scroll"
                                                 : "flex-wrap",
@@ -1056,7 +1056,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                             </Badge>
                                         )}
                                     </div>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between shrink-0">
                                         <div
                                             role="button"
                                             tabIndex={0}
