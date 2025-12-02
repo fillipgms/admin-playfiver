@@ -624,7 +624,8 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         }
                                         className="bg-background h-9"
                                     />
-                                    {(foundUsers.length > 0 || isUserSearching) &&
+                                    {(foundUsers.length > 0 ||
+                                        isUserSearching) &&
                                         userSearchTerm.length >= 3 && (
                                             <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
                                                 {isUserSearching && (
@@ -637,7 +638,9 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                         key={user.id}
                                                         className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
                                                         onClick={() =>
-                                                            handleUserSelect(user)
+                                                            handleUserSelect(
+                                                                user
+                                                            )
                                                         }
                                                     >
                                                         <span className="font-medium">
@@ -691,7 +694,8 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         }
                                         className="bg-background h-9"
                                     />
-                                    {(foundAgents.length > 0 || isAgentSearching) &&
+                                    {(foundAgents.length > 0 ||
+                                        isAgentSearching) &&
                                         agentSearchTerm.length >= 3 && (
                                             <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
                                                 {isAgentSearching && (
@@ -704,7 +708,9 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                         key={agent.id}
                                                         className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
                                                         onClick={() =>
-                                                            handleAgentSelect(agent)
+                                                            handleAgentSelect(
+                                                                agent
+                                                            )
                                                         }
                                                     >
                                                         <span className="font-medium">
@@ -774,29 +780,32 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                 <p className="text-sm font-medium leading-none mb-3">
                                                     Filtrar por Gravidade
                                                 </p>
-                                                {uniqueGravities.map((gravity) => (
-                                                    <label
-                                                        key={gravity}
-                                                        className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            className="w-4 h-4 rounded border-input"
-                                                            checked={gravities.includes(
-                                                                gravity
-                                                            )}
-                                                            onChange={(e) =>
-                                                                handleGravityChange(
-                                                                    gravity,
-                                                                    e.target.checked
-                                                                )
-                                                            }
-                                                        />
-                                                        <span className="text-sm font-medium flex-1">
-                                                            {gravity}
-                                                        </span>
-                                                    </label>
-                                                ))}
+                                                {uniqueGravities.map(
+                                                    (gravity) => (
+                                                        <label
+                                                            key={gravity}
+                                                            className="flex items-center space-x-2 cursor-pointer hover:bg-accent/50 p-2 rounded transition-colors"
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                className="w-4 h-4 rounded border-input"
+                                                                checked={gravities.includes(
+                                                                    gravity
+                                                                )}
+                                                                onChange={(e) =>
+                                                                    handleGravityChange(
+                                                                        gravity,
+                                                                        e.target
+                                                                            .checked
+                                                                    )
+                                                                }
+                                                            />
+                                                            <span className="text-sm font-medium flex-1">
+                                                                {gravity}
+                                                            </span>
+                                                        </label>
+                                                    )
+                                                )}
                                             </div>
                                         </ScrollArea>
                                     </PopoverContent>
@@ -844,7 +853,8 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                             onChange={(e) =>
                                                                 handleTypeChange(
                                                                     type,
-                                                                    e.target.checked
+                                                                    e.target
+                                                                        .checked
                                                                 )
                                                             }
                                                         />
@@ -869,7 +879,9 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         type="date"
                                         value={dateStart}
                                         onChange={(e) =>
-                                            handleDateStartChange(e.target.value)
+                                            handleDateStartChange(
+                                                e.target.value
+                                            )
                                         }
                                         className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
                                     />
@@ -924,7 +936,10 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         <XIcon
                                             className="size-3 cursor-pointer hover:text-destructive"
                                             onClick={() =>
-                                                handleGravityChange(gravity, false)
+                                                handleGravityChange(
+                                                    gravity,
+                                                    false
+                                                )
                                             }
                                         />
                                     </Badge>
@@ -945,7 +960,10 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                     </Badge>
                                 ))}
                                 {dateStart && (
-                                    <Badge variant="secondary" className="gap-1">
+                                    <Badge
+                                        variant="secondary"
+                                        className="gap-1"
+                                    >
                                         De: {dateStart}
                                         <XIcon
                                             className="size-3 cursor-pointer hover:text-destructive"
@@ -956,11 +974,16 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                     </Badge>
                                 )}
                                 {dateEnd && (
-                                    <Badge variant="secondary" className="gap-1">
+                                    <Badge
+                                        variant="secondary"
+                                        className="gap-1"
+                                    >
                                         Até: {dateEnd}
                                         <XIcon
                                             className="size-3 cursor-pointer hover:text-destructive"
-                                            onClick={() => handleDateEndChange("")}
+                                            onClick={() =>
+                                                handleDateEndChange("")
+                                            }
                                         />
                                     </Badge>
                                 )}
