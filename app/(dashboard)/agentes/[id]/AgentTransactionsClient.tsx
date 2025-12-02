@@ -18,7 +18,6 @@ import {
     FunnelSimpleIcon,
     XIcon,
 } from "@phosphor-icons/react";
-import { TransactionResponse } from "@/interfaces/types";
 import AgentTransactionsTable from "./AgentTransactionsTable";
 import PaginationControls from "@/components/PaginationControls";
 

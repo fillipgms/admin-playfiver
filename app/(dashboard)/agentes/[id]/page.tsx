@@ -1,5 +1,4 @@
 import { getAgentTransactions } from "@/actions/agents";
-import { TransactionResponse } from "@/interfaces/types";
 import AgentTransactionsClient from "./AgentTransactionsClient";
 import { Metadata } from "next";
 
@@ -12,15 +11,6 @@ export const metadata: Metadata = {
     title: "Transações do Agente",
     description: "Visualize e filtre as transações do agente",
 };
-
-interface GetAgentTransactionsParams {
-    page?: number;
-    filter?: string;
-    dateStart?: string;
-    dateEnd?: string;
-    player?: string;
-    search?: string;
-}
 
 export default async function AgentTransactionsPage({
     params,
