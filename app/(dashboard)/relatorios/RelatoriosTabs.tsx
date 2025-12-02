@@ -8,7 +8,7 @@ import GgrContent from "./GgrContent";
 
 interface RelatoriosTabsProps {
     logsData: LogsResponse;
-    agentsData: RelatorioAgentesResponse | null;
+    agentsData: RelatorioAgentesResponse;
     ggrData: RelatorioGgrResponse;
     params: Record<string, string | string[] | undefined>;
 }
