@@ -9,7 +9,6 @@ import {
 import React, { useRef } from "react";
 import { twMerge } from "tailwind-merge";
 import { CheckIcon, StarIcon, XIcon } from "@phosphor-icons/react";
-import { TransactionItem } from "@/interfaces/types";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
