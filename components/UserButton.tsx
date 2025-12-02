@@ -16,8 +16,6 @@ const UserButton = () => {
     }, []);
 
     const handleLogout = async () => {
-        console.log("Logging out user:", user?.name);
-
         await logout();
     };
 

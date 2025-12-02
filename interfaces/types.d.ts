@@ -717,3 +717,66 @@ interface UsersFilters {
     role?: string[];
     filter?: string;
 }
+
+export interface TransactionResponse {
+    current_page: number;
+    data: TransactionItem[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: PaginationLink[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+    players: PlayerItem[];
+}
+
+export interface TransactionItem {
+    id: number;
+    game: string;
+    game_original: number;
+    provedor: string;
+    user: string;
+    agente: string;
+    id_transaction: string;
+    bet_amount: string;
+    win_amount: string;
+    tipo: string;
+    status: number;
+    balance_wallet_before: string;
+    balance_wallet_after: string;
+    balance_player_before: string;
+    balance_player_after: string;
+    walletName: string;
+    influencer: number;
+    reembolsada: number;
+    rtpUser: string;
+    rtpAgent: string;
+    status_code: number;
+    obs: string | null;
+    created_at: string;
+}
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+export interface PlayerItem {
+    id: number;
+    username: string;
+    saldo: string;
+    valor_debitado: string;
+    valor_ganho: string;
+    rtp: string | null;
+    is_influencer: number | null;
+    atk: string | null;
+    token: string | null;
+    agentCode: string | null;
+    status: string;
+}

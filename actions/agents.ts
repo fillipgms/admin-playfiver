@@ -164,3 +164,106 @@ export async function updateAgent(agentData: UpdateAgentPayload) {
         };
     }
 }
+
+interface GetAgentTransactionsParams {
+    page?: number;
+    filter?: string;
+    dateStart?: string;
+    dateEnd?: string;
+    player?: string | string[];
+    search?: string;
+}
+
+export async function getAgentTransactions(
+    agentId: string,
+    params: GetAgentTransactionsParams = {}
+) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    try {
+        const page = params.page || 1;
+        const filter = params.filter;
+        const dateStart = params.dateStart;
+        const dateEnd = params.dateEnd;
+        const player = params.player;
+        const search = params.search;
+
+        const query = new URLSearchParams();
+        query.set("page", page.toString());
+
+        if (filter) {
+            query.set("filter", filter);
+        }
+
+        if (dateStart) {
+            query.set("dateStart", dateStart);
+        }
+
+        if (dateEnd) {
+            query.set("dateEnd", dateEnd);
+        }
+
+        if (player) {
+            // Handle array format: if it's already formatted as [id1,id2], use it directly
+            // Otherwise, if it's an array, format it
+            if (Array.isArray(player)) {
+                if (player.length > 0) {
+                    query.set("player", `[${player.join(",")}]`);
+                }
+            } else {
+                // If it's already in [id1,id2] format, use it directly
+                query.set("player", player);
+            }
+        }
+
+        if (search) {
+            query.set("search", search);
+        }
+
+        const queryString = query.toString();
+        const url = `${
+            process.env.API_ROUTES_BASE
+        }/agentes/transactions/${agentId}${
+            queryString ? `?${queryString}` : ""
+        }`;
+
+        const { data } = await axios.get(url, {
+            timeout: 5000,
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${session.accessToken}`,
+                myip: myIp,
+            },
+        });
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch agent transactions:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        throw new Error(
+            apiMessage ||
+                getFriendlyHttpErrorMessage(
+                    error,
+                    "Falha ao buscar transações do agente"
+                )
+        );
+    }
+}

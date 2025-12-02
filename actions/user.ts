@@ -27,8 +27,6 @@ export async function getUser() {
             }
         );
 
-        console.log(data);
-
         return data as User;
     } catch (error) {
         if (axios.isAxiosError(error)) {
