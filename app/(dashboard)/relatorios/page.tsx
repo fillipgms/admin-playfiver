@@ -33,31 +33,34 @@ export default async function RelatoriosPage({
     };
 
     const activeTab = getParamValue(params.tab) || "logs";
-
-    // Fetch logs data
     const page = parseInt(getParamValue(params.page) || "1", 10);
-    const logsData = await getLogsData({
-        page,
-        users: parseArrayParam(params.user),
-        agents: parseArrayParam(params.agent),
-        dateStart: getParamValue(params.dateStart),
-        dateEnd: getParamValue(params.dateEnd),
-        gravity: parseArrayParam(params.gravity),
-        type: parseArrayParam(params.type),
-    });
 
-    // Fetch agents report data
-    const agentsPage = parseInt(getParamValue(params.page) || "1", 10);
-    const agentsDataResult = await getRelatorioData({
-        page: agentsPage,
-        users: parseArrayParam(params.user),
-        dateStart: getParamValue(params.dateStart),
-        dateEnd: getParamValue(params.dateEnd),
-        type: getParamValue(params.type),
-    });
+    // Only fetch data for the active tab to improve performance
+    let logsData = null;
+    let agentsDataResult = null;
+    let ggrDataResult = null;
 
-    // Fetch GGR report data
-    const ggrDataResult = await getGGRRelatorioData({});
+    if (activeTab === "logs") {
+        logsData = await getLogsData({
+            page,
+            users: parseArrayParam(params.user),
+            agents: parseArrayParam(params.agent),
+            dateStart: getParamValue(params.dateStart),
+            dateEnd: getParamValue(params.dateEnd),
+            gravity: parseArrayParam(params.gravity),
+            type: parseArrayParam(params.type),
+        });
+    } else if (activeTab === "agentes") {
+        agentsDataResult = await getRelatorioData({
+            page,
+            users: parseArrayParam(params.user),
+            dateStart: getParamValue(params.dateStart),
+            dateEnd: getParamValue(params.dateEnd),
+            type: getParamValue(params.type),
+        });
+    } else if (activeTab === "ggr") {
+        ggrDataResult = await getGGRRelatorioData({});
+    }
 
     return (
         <main className="space-y-8">
@@ -70,8 +73,8 @@ export default async function RelatoriosPage({
 
             <RelatoriosTabs
                 logsData={logsData as LogsResponse}
-                agentsData={agentsDataResult.data}
-                ggrData={ggrDataResult.data}
+                agentsData={agentsDataResult?.data}
+                ggrData={ggrDataResult?.data}
                 params={params}
             />
         </main>
