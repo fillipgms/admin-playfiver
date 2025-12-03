@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import RelatoriosTabs from "./RelatoriosTabs";
 import { getLogsData } from "@/actions/logs";
-import { getRelatorioData, getGGRRelatorioData } from "@/actions/relatorio";
+import { getRelatorioData } from "@/actions/relatorio";
 
 export const metadata: Metadata = {
     title: "Relatórios",
@@ -35,10 +35,10 @@ export default async function RelatoriosPage({
     const activeTab = getParamValue(params.tab) || "logs";
     const page = parseInt(getParamValue(params.page) || "1", 10);
 
-    // Only fetch data for the active tab to improve performance
     let logsData = null;
     let agentsDataResult = null;
-    let ggrDataResult = null;
+    // GGR data is now fetched client-side for better performance
+    const ggrDataResult = null;
 
     if (activeTab === "logs") {
         logsData = await getLogsData({
@@ -58,8 +58,6 @@ export default async function RelatoriosPage({
             dateEnd: getParamValue(params.dateEnd),
             type: getParamValue(params.type),
         });
-    } else if (activeTab === "ggr") {
-        ggrDataResult = await getGGRRelatorioData({});
     }
 
     return (
@@ -74,7 +72,7 @@ export default async function RelatoriosPage({
             <RelatoriosTabs
                 logsData={logsData as LogsResponse}
                 agentsData={agentsDataResult?.data}
-                ggrData={ggrDataResult?.data}
+                ggrData={null}
                 params={params}
             />
         </main>

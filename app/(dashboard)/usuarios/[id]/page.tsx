@@ -49,6 +49,7 @@ export default async function UserPage({
         agentes,
         orders,
         ip,
+        ipRelations,
         wallets,
     } = data;
 
@@ -61,6 +62,16 @@ export default async function UserPage({
     }
     const ipList: IPItem[] =
         typeof ip === "string" ? JSON.parse(ip || "[]") : ip || [];
+
+    interface RelatedUser {
+        id: number;
+        name: string;
+        email: string;
+    }
+    const relatedUsers: RelatedUser[] =
+        typeof ipRelations === "string"
+            ? JSON.parse(ipRelations || "[]")
+            : ipRelations || [];
 
     function formatDate(dateString: string) {
         const date = new Date(dateString);
@@ -291,9 +302,9 @@ export default async function UserPage({
                     <TabsTrigger value="orders">Pedidos</TabsTrigger>
                     <TabsTrigger value="wallets">Carteiras</TabsTrigger>
                     <TabsTrigger value="ips">Histórico de IPs</TabsTrigger>
-                    {/* <TabsTrigger value="related">
+                    <TabsTrigger value="related">
                         Usuários Relacionados
-                    </TabsTrigger> */}
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-6 space-y-6">
@@ -618,7 +629,63 @@ export default async function UserPage({
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="related" className="mt-6"></TabsContent>
+                <TabsContent value="related" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center w-full justify-between pb-4 border-b border-foreground/20">
+                                <h2 className="font-semibold text-lg">
+                                    Usuários Relacionados
+                                </h2>
+                                <span className="text-sm text-foreground/60">
+                                    {relatedUsers?.length || 0} usuários
+                                </span>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {relatedUsers && relatedUsers.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                    {relatedUsers.map((relatedUser) => (
+                                        <a
+                                            key={relatedUser.id}
+                                            href={`/usuarios/${relatedUser.id}`}
+                                            className="bg-background-secondary rounded-lg p-4 border border-foreground/10 hover:border-foreground/20 transition-colors group"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex items-center justify-center size-10 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                                    <UserIcon
+                                                        className="text-primary"
+                                                        size={20}
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-base truncate group-hover:text-primary transition-colors">
+                                                        {relatedUser.name}
+                                                    </h3>
+                                                    <p className="text-sm text-foreground/60 truncate mt-1">
+                                                        {relatedUser.email}
+                                                    </p>
+                                                    <p className="text-xs text-foreground/40 font-mono mt-2">
+                                                        ID: {relatedUser.id}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-8 text-center">
+                                    <UserIcon
+                                        className="mx-auto text-foreground/30 mb-4"
+                                        size={48}
+                                    />
+                                    <p className="text-foreground/60">
+                                        Nenhum usuário relacionado encontrado
+                                    </p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
             </Tabs>
         </main>
     );

@@ -7,9 +7,9 @@ import AgentsContent from "./AgentsContent";
 import GgrContent from "./GgrContent";
 
 interface RelatoriosTabsProps {
-    logsData: LogsResponse;
-    agentsData: RelatorioAgentesResponse;
-    ggrData: RelatorioGgrResponse;
+    logsData: LogsResponse | null;
+    agentsData: RelatorioAgentesResponse | null;
+    ggrData: RelatorioGgrResponse | null;
     params: Record<string, string | string[] | undefined>;
 }
 
@@ -32,6 +32,14 @@ export default function RelatoriosTabs({
         params.set("tab", value);
         router.replace(`/relatorios?${params.toString()}`);
     };
+
+    if (
+        typeof logsData === null ||
+        typeof agentsData === null ||
+        typeof ggrData === null
+    ) {
+        return null;
+    }
 
     return (
         <Tabs
