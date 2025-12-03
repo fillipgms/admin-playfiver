@@ -445,56 +445,83 @@ export default async function UserPage({
                                             key={order.id}
                                             className="bg-background-secondary rounded-lg p-4 border border-foreground/10 hover:border-foreground/20 transition-colors"
                                         >
-                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                                <div className="flex-1 space-y-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className={twMerge(
-                                                                order.status ===
-                                                                    1
-                                                                    ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20"
-                                                                    : "bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20",
-                                                                "px-3 py-1 rounded-lg border text-xs font-medium"
-                                                            )}
-                                                        >
-                                                            {order.status === 1
-                                                                ? "Aprovado"
-                                                                : "Pendente"}
-                                                        </div>
-                                                        <span className="text-sm text-foreground/60 font-mono">
-                                                            #{order.id}
-                                                        </span>
+                                            <div className="flex flex-col gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div
+                                                        className={twMerge(
+                                                            order.status === 1
+                                                                ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20"
+                                                                : "bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20",
+                                                            "px-3 py-1 rounded-lg border text-xs font-medium"
+                                                        )}
+                                                    >
+                                                        {order.status === 1
+                                                            ? "Aprovado"
+                                                            : "Pendente"}
                                                     </div>
+                                                    <span className="text-sm text-foreground/60 font-mono">
+                                                        #{order.id}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                     <div className="space-y-1">
-                                                        <p className="font-semibold">
+                                                        <p className="text-xs text-foreground/60">
+                                                            Valor do Pedido
+                                                        </p>
+                                                        <p className="text-base font-semibold">
                                                             {formatCurrency(
                                                                 order.amount
                                                             )}
                                                         </p>
-                                                        <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/60">
-                                                            <span>
-                                                                {order.getaway}
-                                                            </span>
-                                                            {order.type_wallet && (
-                                                                <>
-                                                                    <span>
-                                                                        •
-                                                                    </span>
-                                                                    <span>
-                                                                        {
-                                                                            order.type_wallet
-                                                                        }
-                                                                    </span>
-                                                                </>
-                                                            )}
-                                                            <span>•</span>
-                                                            <span>
-                                                                {formatDateTime(
-                                                                    order.created_at
-                                                                )}
-                                                            </span>
-                                                        </div>
                                                     </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-xs text-foreground/60">
+                                                            Fichas Adicionadas
+                                                        </p>
+                                                        <p className="text-base font-bold text-primary">
+                                                            {formatCurrency(
+                                                                order.amount_add
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <p className="text-xs text-foreground/60">
+                                                            Gateway
+                                                        </p>
+                                                        <p className="text-sm font-medium">
+                                                            {order.getaway}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/60 pt-2 border-t border-foreground/10">
+                                                    {order.type_wallet && (
+                                                        <>
+                                                            <span>
+                                                                {
+                                                                    order.type_wallet
+                                                                }
+                                                            </span>
+                                                            <span>•</span>
+                                                        </>
+                                                    )}
+                                                    <span>
+                                                        {formatDateTime(
+                                                            order.created_at
+                                                        )}
+                                                    </span>
+                                                    {order.payment_id && (
+                                                        <>
+                                                            <span>•</span>
+                                                            <span className="font-mono">
+                                                                ID:{" "}
+                                                                {order.payment_id.slice(
+                                                                    0,
+                                                                    8
+                                                                )}
+                                                                ...
+                                                            </span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
