@@ -28,7 +28,7 @@ import { searchUser } from "@/actions/user";
 import { getAgentsData } from "@/actions/agents";
 
 interface LogsContentProps {
-    initialData: LogsResponse;
+    initialData: LogsResponse | null;
     params: Record<string, string | string[] | undefined>;
 }
 
@@ -122,6 +122,14 @@ function getGravityIcon(gravity?: string) {
 }
 
 export default function LogsContent({ initialData, params }: LogsContentProps) {
+    if (!initialData) {
+        return (
+            <div className="py-10 text-center text-muted-foreground">
+                Nenhum dado de logs disponível.
+            </div>
+        );
+    }
+
     const router = useRouter();
     const searchParams = useSearchParams();
 
