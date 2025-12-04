@@ -412,24 +412,31 @@ interface ProvedoresResponse {
 
 interface LogEntryProps {
     agente?: {
-        code: string;
-        memo?: string;
+        code: string | null;
+        memo?: string | null;
     };
     user?: {
-        name: string;
-        email: string;
+        name: string | null;
+        email: string | null;
     };
     gravity?: string;
     type?: string;
-    data?: {
-        titulo?: string;
-        mensagem?: string;
-        status?: number;
-        body?: {
-            msg?: string;
-            balance?: number;
-        };
-    };
+    data?:
+        | {
+              titulo?: string;
+              mensagem?: string;
+              status?: number;
+              body?: {
+                  msg?: string;
+                  balance?: number;
+              };
+          }
+        | Array<{
+              email: string;
+              diferenca: number;
+              total_recarga: string | number;
+              saldo_carteira: string;
+          }>;
     created_at: string;
 }
 

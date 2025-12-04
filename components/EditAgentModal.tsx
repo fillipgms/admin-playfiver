@@ -45,7 +45,6 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
 
     const router = useRouter();
 
-    // Permission checks for each field
     const canEditMemo = hasPermission("agent_edit_describe");
     const canEditPassword = hasPermission("agent_edit_password");
     const canEditRtp = hasPermission("agent_edit_rtp");
@@ -55,7 +54,6 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
     const canEditInfluencers = hasPermission("agent_edit_influencers");
     const canEditHide = hasPermission("agent_edit_hide");
 
-    // Check if user has any editable permission
     const hasEditPermission =
         canEditMemo ||
         canEditPassword ||
@@ -85,7 +83,6 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
                 hide: canEditHide ? (hide ? 1 : 0) : undefined,
             } as any;
 
-            // Remove undefined values
             Object.keys(payload).forEach(
                 (key) => payload[key] === undefined && delete payload[key]
             );
@@ -149,7 +146,7 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
                         </div>
                         <div className="col-span-12 md:col-span-6">
                             <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
-                                Senha (Opcional)
+                                Senha
                             </Label>
                             <Input
                                 type="password"
