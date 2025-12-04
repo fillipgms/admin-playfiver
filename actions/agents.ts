@@ -104,7 +104,6 @@ export async function updateAgent(agentData: UpdateAgentPayload) {
             ...agentData,
         };
 
-        // Normalize booleans to 0/1 when applicable
         if (typeof payload.limit_enable === "boolean") {
             payload.limit_enable = payload.limit_enable ? 1 : 0;
         }
@@ -112,13 +111,10 @@ export async function updateAgent(agentData: UpdateAgentPayload) {
             payload.hide = payload.hide ? 1 : 0;
         }
 
-        // If password is empty or not provided, remove it
-        if (!payload.password) {
-            delete payload.password;
-        }
+        console.log(payload);
 
         const { data } = await axios.put(
-            `${process.env.API_ROUTES_BASE}/agente`,
+            `${process.env.API_ROUTES_BASE}/agentes`,
             payload,
             {
                 timeout: 10000,
@@ -209,14 +205,11 @@ export async function getAgentTransactions(
         }
 
         if (player) {
-            // Handle array format: if it's already formatted as [id1,id2], use it directly
-            // Otherwise, if it's an array, format it
             if (Array.isArray(player)) {
                 if (player.length > 0) {
                     query.set("player", `[${player.join(",")}]`);
                 }
             } else {
-                // If it's already in [id1,id2] format, use it directly
                 query.set("player", player);
             }
         }

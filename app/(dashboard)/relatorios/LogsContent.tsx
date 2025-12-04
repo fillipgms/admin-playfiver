@@ -273,6 +273,12 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     }, [data]);
 
     // Count statistics
+    const isResolved = (log: LogEntryProps) => {
+        if (!log.data) return false;
+        if (Array.isArray(log.data)) return false; // Array data doesn't have status
+        return log.data.status === 1;
+    };
+
     const stats = useMemo(() => {
         const all = data.length;
         const errors = data.filter(
@@ -283,7 +289,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         const warnings = data.filter((log) =>
             log.gravity?.toLowerCase().includes("warning")
         ).length;
-        const resolved = data.filter((log) => log.data?.status === 1).length;
+        const resolved = data.filter((log) => isResolved(log)).length;
         const unresolved = all - resolved;
 
         return { all, errors, warnings, resolved, unresolved };
@@ -568,8 +574,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.user, params.agent]);
-
-    const isResolved = (log: LogEntryProps) => log.data?.status === 1;
 
     return (
         <div className="space-y-6">
@@ -1172,34 +1176,136 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                 </div>
 
                                                                 {/* Message */}
-                                                                {(log.data
-                                                                    ?.titulo ||
+                                                                {log.type ===
+                                                                    "logs_check_wallet" &&
+                                                                Array.isArray(
                                                                     log.data
-                                                                        ?.mensagem) && (
-                                                                    <div className="bg-muted/30 rounded-lg p-3 border border-muted/50 space-y-1">
-                                                                        {log
-                                                                            .data
-                                                                            ?.titulo && (
-                                                                            <p className="font-medium text-sm text-foreground">
-                                                                                {
-                                                                                    log
-                                                                                        .data
-                                                                                        .titulo
-                                                                                }
-                                                                            </p>
-                                                                        )}
-                                                                        {log
-                                                                            .data
-                                                                            ?.mensagem && (
-                                                                            <p className="text-sm text-foreground/80 leading-relaxed">
-                                                                                {
-                                                                                    log
-                                                                                        .data
-                                                                                        .mensagem
-                                                                                }
-                                                                            </p>
-                                                                        )}
+                                                                ) ? (
+                                                                    <div className="bg-muted/30 rounded-lg p-3 border border-muted/50">
+                                                                        <p className="font-medium text-sm text-foreground mb-3">
+                                                                            Verificação
+                                                                            de
+                                                                            Carteira
+                                                                        </p>
+                                                                        <div className="overflow-x-auto">
+                                                                            <table className="w-full text-sm">
+                                                                                <thead>
+                                                                                    <tr className="border-b border-muted/50">
+                                                                                        <th className="text-left py-2 px-3 font-medium text-muted-foreground">
+                                                                                            Email
+                                                                                        </th>
+                                                                                        <th className="text-right py-2 px-3 font-medium text-muted-foreground">
+                                                                                            Diferença
+                                                                                        </th>
+                                                                                        <th className="text-right py-2 px-3 font-medium text-muted-foreground">
+                                                                                            Total
+                                                                                            Recarga
+                                                                                        </th>
+                                                                                        <th className="text-right py-2 px-3 font-medium text-muted-foreground">
+                                                                                            Saldo
+                                                                                            Carteira
+                                                                                        </th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    {log.data.map(
+                                                                                        (
+                                                                                            item,
+                                                                                            idx
+                                                                                        ) => (
+                                                                                            <tr
+                                                                                                key={
+                                                                                                    idx
+                                                                                                }
+                                                                                                className="border-b border-muted/30 last:border-0"
+                                                                                            >
+                                                                                                <td className="py-2 px-3 text-foreground">
+                                                                                                    {
+                                                                                                        item.email
+                                                                                                    }
+                                                                                                </td>
+                                                                                                <td className="py-2 px-3 text-right text-foreground">
+                                                                                                    {typeof item.diferenca ===
+                                                                                                    "number"
+                                                                                                        ? item.diferenca.toLocaleString(
+                                                                                                              "pt-BR"
+                                                                                                          )
+                                                                                                        : item.diferenca}
+                                                                                                </td>
+                                                                                                <td className="py-2 px-3 text-right text-foreground">
+                                                                                                    {typeof item.total_recarga ===
+                                                                                                    "number"
+                                                                                                        ? item.total_recarga.toLocaleString(
+                                                                                                              "pt-BR",
+                                                                                                              {
+                                                                                                                  minimumFractionDigits: 2,
+                                                                                                                  maximumFractionDigits: 2,
+                                                                                                              }
+                                                                                                          )
+                                                                                                        : parseFloat(
+                                                                                                              String(
+                                                                                                                  item.total_recarga
+                                                                                                              )
+                                                                                                          ).toLocaleString(
+                                                                                                              "pt-BR",
+                                                                                                              {
+                                                                                                                  minimumFractionDigits: 2,
+                                                                                                                  maximumFractionDigits: 2,
+                                                                                                              }
+                                                                                                          )}
+                                                                                                </td>
+                                                                                                <td className="py-2 px-3 text-right text-foreground">
+                                                                                                    {parseFloat(
+                                                                                                        item.saldo_carteira
+                                                                                                    ).toLocaleString(
+                                                                                                        "pt-BR",
+                                                                                                        {
+                                                                                                            minimumFractionDigits: 2,
+                                                                                                            maximumFractionDigits: 8,
+                                                                                                        }
+                                                                                                    )}
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        )
+                                                                                    )}
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
                                                                     </div>
+                                                                ) : (
+                                                                    log.data &&
+                                                                    !Array.isArray(
+                                                                        log.data
+                                                                    ) &&
+                                                                    (log.data
+                                                                        ?.titulo ||
+                                                                        log.data
+                                                                            ?.mensagem) && (
+                                                                        <div className="bg-muted/30 rounded-lg p-3 border border-muted/50 space-y-1">
+                                                                            {log
+                                                                                .data
+                                                                                ?.titulo && (
+                                                                                <p className="font-medium text-sm text-foreground">
+                                                                                    {
+                                                                                        log
+                                                                                            .data
+                                                                                            .titulo
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                            {log
+                                                                                .data
+                                                                                ?.mensagem && (
+                                                                                <p className="text-sm text-foreground/80 leading-relaxed">
+                                                                                    {
+                                                                                        log
+                                                                                            .data
+                                                                                            .mensagem
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    )
                                                                 )}
 
                                                                 {/* Metadata */}
@@ -1253,7 +1359,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                     lastPage={initialData.last_page}
                     hasNextPage={!!initialData.next_page_url}
                     hasPrevPage={!!initialData.prev_page_url}
-                    baseUrl="/relatorios?tab=logs"
+                    baseUrl="/relatorios"
                     searchParams={params}
                 />
             )}
