@@ -170,7 +170,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                   {
                       headerName: "ID",
                       field: "id",
-                      width: 5,
+                      width: 1,
                       pinned: "left",
                       sortable: true,
                   } as ColDef<UserProps>,
@@ -373,7 +373,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
 
                         {canEdit && <EditUserModal user={user} />}
 
-                        {/* <UserLimits userId={user.id} initialData={{}} /> */}
+                        <UserLimits userId={user.id} initialData={{}} />
 
                         {canDelete && (
                             <Button
