@@ -36,6 +36,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import BettingLimitsModal from "@/components/BettingLimitsModal";
 import Link from "next/link";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -48,6 +49,7 @@ import UserLimits from "../UserLimits";
 const UsersTable = ({ users }: { users: UserProps[] }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const isMobile = !useMediaQuery("(min-width: 768px)");
     const [isSearching, setIsSearching] = useState(false);
     const [showLimitsModal, setShowLimitsModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserProps | null>(null);
@@ -163,7 +165,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
     const hasAnyAction = canViewReport || canEdit || canDelete;
 
     const cols: ColDef<UserProps>[] = [
-        ...(canView
+        ...(canView && !isMobile
             ? [
                   {
                       headerName: "ID",
@@ -178,17 +180,21 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Nome",
             field: "name",
             flex: 1.5,
-            minWidth: 180,
+            minWidth: isMobile ? 120 : 180,
             pinned: "left",
             sortable: true,
             cellRenderer: (p: ICellRendererParams) => {
                 const { name, email } = p.data;
                 return (
                     <div className="flex flex-col h-full w-full justify-center">
-                        <p className="leading-none font-medium">{name}</p>
-                        <p className="text-xs text-foreground/50 truncate">
-                            {email}
+                        <p className="leading-none font-medium text-sm">
+                            {name}
                         </p>
+                        {!isMobile && (
+                            <p className="text-xs text-foreground/50 truncate">
+                                {email}
+                            </p>
+                        )}
                     </div>
                 );
             },
@@ -197,7 +203,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Saldo",
             field: "saldo",
             flex: 1,
-            minWidth: 120,
+            minWidth: isMobile ? 100 : 120,
             sortable: true,
             comparator: () => 0,
             valueFormatter: (p) => formatCurrency(p.value || 0),
@@ -216,14 +222,18 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Status",
             field: "ban",
             flex: 1,
-            minWidth: 120,
+            minWidth: isMobile ? 90 : 120,
             cellRenderer: (p: ICellRendererParams) => {
                 const isBanned = p.value === 1;
                 return (
                     <div className="flex items-center justify-center h-full w-full">
                         <div
                             className={twMerge(
-                                "flex items-center gap-1 justify-center max-w-32 py-1 w-full text-center px-3 rounded text-sm font-medium",
+                                `flex items-center gap-1 justify-center max-w-32 w-full text-center rounded font-medium ${
+                                    isMobile
+                                        ? "py-0.5 px-2 text-xs"
+                                        : "py-1 px-3 text-sm"
+                                }`,
                                 isBanned
                                     ? "bg-[#E53935]/20 text-[#E53935]"
                                     : "bg-[#95BD2B]/20 text-[#95BD2B]"
@@ -239,7 +249,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Cargo",
             field: "role",
             flex: 1,
-            minWidth: 120,
+            minWidth: isMobile ? 100 : 120,
             filter: RoleFilter,
             filterParams: {},
             valueFormatter: (p) => {
@@ -269,7 +279,11 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                     <div className="flex items-center justify-center h-full w-full">
                         <div
                             className={twMerge(
-                                "flex items-center gap-1 justify-center max-w-32 py-1 w-full text-center px-3 rounded text-sm font-medium",
+                                `flex items-center gap-1 justify-center max-w-32 w-full text-center rounded font-medium ${
+                                    isMobile
+                                        ? "py-0.5 px-2 text-xs"
+                                        : "py-1 px-3 text-sm"
+                                }`,
                                 badgeClass
                             )}
                         >
@@ -285,7 +299,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Data de Criação",
             field: "created_at",
             flex: 1,
-            minWidth: 140,
+            minWidth: isMobile ? 110 : 140,
             sortable: true,
             comparator: () => 0,
             valueFormatter: (p) => formatDate(p.value || ""),
@@ -294,14 +308,18 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Limite",
             field: "limit",
             flex: 0.8,
-            minWidth: 100,
+            minWidth: isMobile ? 80 : 100,
             cellRenderer: (p: ICellRendererParams) => {
                 const hasLimit = p.value === true;
                 return (
                     <div className="flex items-center justify-center h-full w-full">
                         <div
                             className={twMerge(
-                                "flex items-center gap-1 justify-center max-w-24 py-1 w-full text-center px-2 rounded text-xs font-medium",
+                                `flex items-center gap-1 justify-center max-w-24 w-full text-center rounded font-medium ${
+                                    isMobile
+                                        ? "py-0.5 px-1.5 text-[10px]"
+                                        : "py-1 px-2 text-xs"
+                                }`,
                                 hasLimit
                                     ? "bg-primary/20 text-primary"
                                     : "bg-foreground/10 text-foreground/50"
@@ -317,31 +335,35 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Ações",
             field: "id",
             flex: 1.5,
-            minWidth: 200,
+            minWidth: isMobile ? 140 : 200,
             pinned: "right",
             cellRenderer: (p: ICellRendererParams) => {
                 const user = p.data as UserProps;
 
                 if (!hasAnyAction) {
                     return (
-                        <div className="flex items-center justify-center h-full w-full text-foreground/50">
-                            Nenhuma ação disponível
+                        <div className="flex items-center justify-center h-full w-full text-foreground/50 text-xs">
+                            {isMobile ? "N/A" : "Nenhuma ação disponível"}
                         </div>
                     );
                 }
 
                 return (
-                    <div className="flex items-center justify-center gap-2 h-full w-full">
+                    <div
+                        className={`flex items-center justify-center ${
+                            isMobile ? "gap-1" : "gap-2"
+                        } h-full w-full`}
+                    >
                         {canViewReport && (
                             <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 px-3"
+                                className={isMobile ? "h-7 px-2" : "h-8 px-3"}
                                 title="Ver Completo"
                                 asChild
                             >
                                 <Link href={`/usuarios/${user.id}`}>
-                                    <EyeIcon size={14} />
+                                    <EyeIcon size={isMobile ? 12 : 14} />
                                     <span className="sr-only">
                                         Ver Completo
                                     </span>
@@ -358,10 +380,10 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleDeleteClick(user)}
-                                className="h-8 px-3"
+                                className={isMobile ? "h-7 px-2" : "h-8 px-3"}
                                 title="Excluir usuário"
                             >
-                                <TrashIcon size={14} />
+                                <TrashIcon size={isMobile ? 12 : 14} />
                                 <span className="sr-only">Excluir</span>
                             </Button>
                         )}
