@@ -161,6 +161,10 @@ export async function getSpcificUser(id: string) {
         throw new Error("id incorreto");
     }
 
+    console.log(`${process.env.API_ROUTES_BASE}/user/details/${id}`);
+
+    console.log(`Bearer ${session.accessToken}`);
+
     try {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/user/details/${id}`,

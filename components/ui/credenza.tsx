@@ -140,8 +140,23 @@ const CredenzaTitle = ({ className, children, ...props }: CredenzaProps) => {
 };
 
 const CredenzaBody = ({ className, children, ...props }: CredenzaProps) => {
+    const { isDesktop } = useCredenzaContext();
+
+    if (isDesktop) {
+        return (
+            <div className={cn("px-4 md:px-0", className)} {...props}>
+                {children}
+            </div>
+        );
+    }
+
+    // On mobile, make it scrollable with overflow-y-auto
+    // flex-1 makes it take remaining space, min-h-0 allows it to shrink below content size
     return (
-        <div className={cn("px-4 md:px-0", className)} {...props}>
+        <div
+            className={cn("px-4 flex-1 min-h-0 overflow-y-auto", className)}
+            {...props}
+        >
             {children}
         </div>
     );

@@ -29,8 +29,10 @@ import { MultiSelect } from "./ui/multi-select";
 import { useRouter } from "next/navigation";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getPermissions } from "@/actions/permission";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const EditUserModal = ({ user }: { user: UserProps }) => {
+    const isMobile = !useMediaQuery("(min-width: 768px)");
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { hasPermission } = usePermissions();
@@ -274,10 +276,10 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                 <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 px-3"
+                    className={isMobile ? "h-7 px-2" : "h-8 px-3"}
                     title="Editar usuário"
                 >
-                    <PencilIcon size={14} />
+                    <PencilIcon size={isMobile ? 12 : 14} />
                     <span className="sr-only">Editar</span>
                 </Button>
             </CredenzaTrigger>
