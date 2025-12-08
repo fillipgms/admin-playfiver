@@ -373,7 +373,10 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
 
                         {canEdit && <EditUserModal user={user} />}
 
-                        <UserLimits userId={user.id} initialData={{}} />
+                        <UserLimits
+                            userId={user.id}
+                            initialData={user.limits || {}}
+                        />
 
                         {canDelete && (
                             <Button

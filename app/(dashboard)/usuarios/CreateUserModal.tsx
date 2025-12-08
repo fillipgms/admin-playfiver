@@ -21,8 +21,6 @@ const initial = { name: "", email: "", password: "", confirmPassword: "" };
 const CreateUserModal = () => {
     const { hasPermission } = usePermissions();
     const canCreate = hasPermission("user_create");
-
-    if (!canCreate) return null;
     const [open, setOpen] = useState(false);
     const [values, setValues] = useState(initial);
     const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +28,8 @@ const CreateUserModal = () => {
     const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>(
         {}
     );
+
+    if (!canCreate) return null;
 
     const handleChange = (k: string, v: string) => {
         setValues((s) => ({ ...s, [k]: v }));

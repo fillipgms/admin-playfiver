@@ -257,7 +257,7 @@ export async function updateUserLimits(userId: number, limitsData: any) {
 
     try {
         const payload = {
-            id: userId,
+            id_user: userId,
             ...limitsData,
         };
 
@@ -280,9 +280,57 @@ export async function updateUserLimits(userId: number, limitsData: any) {
         const apiMessage = (error as { response?: { data?: { msg?: string } } })
             ?.response?.data?.msg;
 
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
         return {
             success: false,
             error: apiMessage || "Falha ao atualizar os limites do usuário",
+        };
+    }
+}
+
+export async function deleteUserLimits(userId: number) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    try {
+        const { data } = await axios.delete(
+            `${process.env.API_ROUTES_BASE}/user/limits/${userId}`,
+            {
+                timeout: 5000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        return { success: true, data };
+    } catch (error) {
+        console.error("Failed to delete user limits:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            success: false,
+            error: apiMessage || "Falha ao deletar os limites do usuário",
         };
     }
 }
