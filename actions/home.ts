@@ -8,7 +8,6 @@ import { getClientIp } from "@/lib/ip";
 
 const fetchHomeDataCached = unstable_cache(
     async (accessToken: string, myIp: string) => {
-        console.log("fetchHomeDataCached");
         console.log(`${process.env.API_ROUTES_BASE}/home`);
         console.log(accessToken);
         console.log(myIp);
