@@ -15,7 +15,7 @@ const fetchHomeDataCached = unstable_cache(
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${accessToken}`,
-                    myip: myIp,
+                    "x-forwarded-for": myIp,
                 },
             }
         );
@@ -29,6 +29,8 @@ const fetchHomeDataCached = unstable_cache(
 export async function getHomeData() {
     const session = await getSession();
     const myIp = await getClientIp();
+
+    console.log("Home myIp", myIp);
 
     if (!session) {
         redirect("/login");
