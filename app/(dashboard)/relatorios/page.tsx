@@ -56,12 +56,10 @@ export default async function RelatoriosPage({
             users: parseArrayParam(params.user),
             dateStart: getParamValue(params.dateStart),
             dateEnd: getParamValue(params.dateEnd),
-            type: getParamValue(params.type),
+            type: parseArrayParam(params.type),
         });
     }
 
-
-    
     return (
         <main className="space-y-8">
             <div>
