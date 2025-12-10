@@ -22,8 +22,6 @@ export default function RelatoriosTabs({
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    console.log(logsData);
-
     const getParamValue = (param?: string | string[]) =>
         Array.isArray(param) ? param[0] : param;
 
@@ -42,8 +40,6 @@ export default function RelatoriosTabs({
     ) {
         return null;
     }
-
-    console.log(logsData?.data[6]);
 
     return (
         <Tabs

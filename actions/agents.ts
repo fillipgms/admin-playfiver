@@ -111,8 +111,6 @@ export async function updateAgent(agentData: UpdateAgentPayload) {
             payload.hide = payload.hide ? 1 : 0;
         }
 
-        console.log(payload);
-
         const { data } = await axios.put(
             `${process.env.API_ROUTES_BASE}/agentes`,
             payload,
