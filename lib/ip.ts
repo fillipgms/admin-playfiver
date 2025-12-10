@@ -46,7 +46,5 @@ export async function getClientIp() {
         myIp = process.env.LOCAL_IP || null;
     }
 
-    console.log("myIp", myIp);
-
     return myIp;
 }

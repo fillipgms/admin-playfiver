@@ -30,8 +30,6 @@ export async function getHomeData() {
     const session = await getSession();
     const myIp = await getClientIp();
 
-    console.log("Home myIp", myIp);
-
     if (!session) {
         redirect("/login");
     }
