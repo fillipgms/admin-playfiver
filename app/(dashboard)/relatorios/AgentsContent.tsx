@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/Card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import {
     UserIcon,
     CurrencyDollarIcon,
@@ -63,6 +64,15 @@ const parseArrayParam = (param?: string | string[]): string[] => {
     }
 };
 
+// Opções de tipos disponíveis para filtro
+const typeOptions = [
+    {
+        label: "Agentes com Mais Erros",
+        value: "bigError",
+    },
+    // Adicione mais tipos aqui conforme necessário
+];
+
 export default function AgentsContent({
     initialData,
     params,
@@ -84,7 +94,9 @@ export default function AgentsContent({
         getParamValue(params.dateStart) || ""
     );
     const [dateEnd, setDateEnd] = useState(getParamValue(params.dateEnd) || "");
-    const [type, setType] = useState(getParamValue(params.type) || "");
+    const [types, setTypes] = useState<string[]>(
+        parseArrayParam(params.type) || []
+    );
     const [showFilters, setShowFilters] = useState(false);
 
     const [userSearchTerm, setUserSearchTerm] = useState("");
@@ -206,29 +218,29 @@ export default function AgentsContent({
         updateUrlParams({ dateEnd: value });
     };
 
-    const handleTypeChange = (value: string) => {
-        setType(value);
-        updateUrlParams({ type: value || "" });
+    const handleTypesChange = (value: string[]) => {
+        setTypes(value);
+        updateUrlParams({ type: value.length > 0 ? value : [] });
     };
 
     const clearAllFilters = () => {
         setUsers([]);
         setDateStart("");
         setDateEnd("");
-        setType("");
+        setTypes([]);
         setUserSearchTerm("");
         setFoundUsers([]);
         updateUrlParams({
             user: [],
             dateStart: "",
             dateEnd: "",
-            type: "",
+            type: [],
         });
     };
 
     const hasActiveFilters = useMemo(() => {
-        return !!(users.length > 0 || dateStart || dateEnd || type);
-    }, [users, dateStart, dateEnd, type]);
+        return !!(users.length > 0 || dateStart || dateEnd || types.length > 0);
+    }, [users, dateStart, dateEnd, types]);
 
     // Sync agentsData with initialData when it changes
     useEffect(() => {
@@ -242,12 +254,12 @@ export default function AgentsContent({
         const urlUsers = parseArrayParam(params.user) || [];
         const urlDateStart = getParamValue(params.dateStart) || "";
         const urlDateEnd = getParamValue(params.dateEnd) || "";
-        const urlType = getParamValue(params.type) || "";
+        const urlTypes = parseArrayParam(params.type) || [];
 
         setUsers(urlUsers);
         setDateStart(urlDateStart);
         setDateEnd(urlDateEnd);
-        setType(urlType);
+        setTypes(urlTypes);
     }, [params.user, params.dateStart, params.dateEnd, params.type]);
 
     useEffect(() => {
@@ -406,13 +418,12 @@ export default function AgentsContent({
                                     <label className="text-sm font-medium">
                                         Tipo
                                     </label>
-                                    <Input
-                                        type="text"
-                                        value={type}
-                                        onChange={(e) =>
-                                            handleTypeChange(e.target.value)
-                                        }
-                                        placeholder="Filtrar por tipo..."
+                                    <MultiSelect
+                                        options={typeOptions}
+                                        onValueChange={handleTypesChange}
+                                        defaultValue={types}
+                                        placeholder="Selecione os tipos..."
+                                        searchable={true}
                                     />
                                 </div>
                             </div>
@@ -582,13 +593,12 @@ export default function AgentsContent({
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Tipo</label>
-                            <Input
-                                type="text"
-                                value={type}
-                                onChange={(e) =>
-                                    handleTypeChange(e.target.value)
-                                }
-                                placeholder="Filtrar por tipo..."
+                            <MultiSelect
+                                options={typeOptions}
+                                onValueChange={handleTypesChange}
+                                defaultValue={types}
+                                placeholder="Selecione os tipos..."
+                                searchable={true}
                             />
                         </div>
                     </div>

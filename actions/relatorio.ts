@@ -11,7 +11,7 @@ interface GetRelatorioParams {
     users?: string[];
     dateStart?: string;
     dateEnd?: string;
-    type?: string;
+    type?: string[];
 }
 
 interface GetGgrRelatorioParams {
@@ -29,13 +29,10 @@ export async function getRelatorioData(filters: GetRelatorioParams = {}) {
 
     try {
         const params = new URLSearchParams();
+        const queryParts: string[] = [];
 
         if (filters.page) {
             params.set("page", filters.page.toString());
-        }
-
-        if (filters.users && filters.users.length > 0) {
-            params.set("user", `[${filters.users.join(",")}]`);
         }
 
         if (filters.dateStart) {
@@ -46,11 +43,25 @@ export async function getRelatorioData(filters: GetRelatorioParams = {}) {
             params.set("dateEnd", filters.dateEnd);
         }
 
-        if (filters.type) {
-            params.set("type", filters.type);
+        // Construir query string base (parâmetros normais)
+        const baseQuery = params.toString();
+        if (baseQuery) {
+            queryParts.push(baseQuery);
         }
 
-        const query = params.toString();
+        // Adicionar user sem codificação (com colchetes literais)
+        if (filters.users && filters.users.length > 0) {
+            const userValue = `[${filters.users.join(",")}]`;
+            queryParts.push(`user=${userValue}`);
+        }
+
+        // Adicionar type sem codificação (com colchetes e aspas literais)
+        if (filters.type && filters.type.length > 0) {
+            const typeValue = `["${filters.type.join('","')}"]`;
+            queryParts.push(`type=${typeValue}`);
+        }
+
+        const query = queryParts.join("&");
 
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/relatorio${
@@ -98,9 +109,7 @@ export async function getRelatorioData(filters: GetRelatorioParams = {}) {
     }
 }
 
-export async function getGGRRelatorioData(
-    filters: GetGgrRelatorioParams = {}
-) {
+export async function getGGRRelatorioData(filters: GetGgrRelatorioParams = {}) {
     const session = await getSession();
     const myIp = await getClientIp();
 
