@@ -11,7 +11,7 @@ const fetchHomeDataCached = unstable_cache(
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/home`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${accessToken}`,

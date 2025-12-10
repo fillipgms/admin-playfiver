@@ -22,7 +22,7 @@ export async function getTransactionsData(
                 process.env.API_ROUTES_BASE
             }/transactions?page=${page}&search=${encodeURIComponent(search)}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

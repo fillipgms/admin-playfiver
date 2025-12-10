@@ -33,7 +33,7 @@ export async function getProvidersData(params: GetProvidersParams = {}) {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/providers?${query.toString()}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -83,7 +83,7 @@ export async function editProviderData(provider: Record<string, string>) {
             `${process.env.API_ROUTES_BASE}/providers`,
             provider,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

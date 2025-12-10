@@ -101,7 +101,7 @@ export async function createUser({
             `${process.env.API_ROUTES_BASE}/user`,
             { email, name, password },
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -265,7 +265,7 @@ export async function updateUserLimits(userId: number, limitsData: any) {
             `${process.env.API_ROUTES_BASE}/user/limits`,
             payload,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -306,7 +306,7 @@ export async function deleteUserLimits(userId: number) {
         const { data } = await axios.delete(
             `${process.env.API_ROUTES_BASE}/user/limits/${userId}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -347,7 +347,7 @@ export async function deleteUser(userId: number) {
         const { data } = await axios.delete(
             `${process.env.API_ROUTES_BASE}/user/${userId}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -400,7 +400,7 @@ export async function searchUser(query: string) {
                 query
             )}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

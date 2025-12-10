@@ -18,7 +18,7 @@ export async function updateProfile(payload: { profile: ProfilePayload }) {
             `${process.env.API_ROUTES_BASE}/profile`,
             payload.profile,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

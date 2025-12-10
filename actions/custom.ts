@@ -18,7 +18,7 @@ export async function getCustomData() {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/custom`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -71,7 +71,7 @@ export async function updateCustomData(payload: {
             `${process.env.API_ROUTES_BASE}/custom`,
             payload.customization,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

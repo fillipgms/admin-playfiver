@@ -44,7 +44,7 @@ export async function getUsersData({
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/user?${params.toString()}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -102,7 +102,7 @@ export async function updatePlayer(params: {
             `${process.env.API_ROUTES_BASE}/player`,
             payload,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -169,7 +169,7 @@ export async function getSpcificUser(id: string) {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/user/details/${id}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

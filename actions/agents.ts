@@ -44,7 +44,7 @@ export async function getAgentsData(params: GetAgentsParams = {}) {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/agentes?${query.toString()}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -226,7 +226,7 @@ export async function getAgentTransactions(
         }`;
 
         const { data } = await axios.get(url, {
-            timeout: 5000,
+            timeout: 10000,
             headers: {
                 Accept: "application/json",
                 Authorization: `Bearer ${session.accessToken}`,

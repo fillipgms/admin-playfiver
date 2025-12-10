@@ -170,7 +170,6 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                   {
                       headerName: "ID",
                       field: "id",
-                      width: 1,
                       pinned: "left",
                       sortable: true,
                   } as ColDef<UserProps>,
@@ -179,7 +178,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
         {
             headerName: "Nome",
             field: "name",
-            flex: 1.5,
+            flex: 1,
             minWidth: isMobile ? 120 : 180,
             pinned: "left",
             sortable: true,
@@ -190,14 +189,17 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                         <p className="leading-none font-medium text-sm">
                             {name}
                         </p>
-                        {!isMobile && (
-                            <p className="text-xs text-foreground/50 truncate">
-                                {email}
-                            </p>
-                        )}
                     </div>
                 );
             },
+        },
+        {
+            headerName: "Email",
+            field: "email",
+            flex: 1,
+            minWidth: isMobile ? 100 : 200,
+            sortable: true,
+            comparator: () => 0,
         },
         {
             headerName: "Saldo",
