@@ -19,7 +19,7 @@ export async function getIpWhitelist(page: number = 1, search: string = "") {
                 process.env.API_ROUTES_BASE
             }/ip?page=${page}&search=${encodeURIComponent(search)}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -69,7 +69,7 @@ export async function createNewIp(payload: { ip: string }) {
             `https://api.playfivers.com/api/panel/ip`,
             payload,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -138,7 +138,7 @@ export async function deleteIp(id: number) {
         const { data } = await axios.delete(
             `https://api.playfivers.com/api/panel/ip/${id}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

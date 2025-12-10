@@ -17,7 +17,7 @@ export async function getSettingsData() {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/setting`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -66,7 +66,7 @@ export async function editSettingsData(settings: Record<string, string>) {
             `${process.env.API_ROUTES_BASE}/setting`,
             settings,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

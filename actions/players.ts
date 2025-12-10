@@ -19,7 +19,7 @@ export async function getPlayersData(page: number = 1, search: string = "") {
                 process.env.API_ROUTES_BASE
             }/player?page=${page}&search=${encodeURIComponent(search)}`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -77,7 +77,7 @@ export async function updatePlayer(params: {
             `${process.env.API_ROUTES_BASE}/player`,
             payload,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

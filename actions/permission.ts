@@ -15,7 +15,7 @@ export async function getPermissions() {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/permission`,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,

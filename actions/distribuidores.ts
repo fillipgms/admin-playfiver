@@ -18,6 +18,7 @@ export async function getDistributorsData() {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/distributors`,
             {
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,
@@ -67,7 +68,7 @@ export async function editDistributorData(distributor: Record<string, string>) {
             `${process.env.API_ROUTES_BASE}/distributors`,
             distributor,
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     Authorization: `Bearer ${session.accessToken}`,

@@ -43,7 +43,7 @@ export async function signIn(formData: FormData): Promise<SignInResult> {
             `${process.env.API_ROUTES_BASE}/auth/login`,
             { email, password },
             {
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     Accept: "application/json",
                     myip: myIp,
