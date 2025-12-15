@@ -179,7 +179,6 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             headerName: "Nome",
             field: "name",
             flex: 1,
-            minWidth: isMobile ? 120 : 180,
             pinned: "left",
             sortable: true,
             cellRenderer: (p: ICellRendererParams) => {
