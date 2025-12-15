@@ -4,6 +4,7 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
     useTransition,
 } from "react";
@@ -11,12 +12,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/Card";
 import Icon from "@/components/Icon";
 import { ShoppingCartIcon } from "@phosphor-icons/react/dist/ssr";
-import { FunnelSimpleIcon } from "@phosphor-icons/react";
+import { FunnelSimpleIcon, XIcon } from "@phosphor-icons/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PaginationControls from "@/components/PaginationControls";
 import { usePermissions } from "@/hooks/usePermissions";
+import { searchUser } from "@/actions/user";
 
 interface PaginationMeta {
     current_page: number;
@@ -60,8 +62,8 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
     const [isPending, startTransition] = useTransition();
 
     const [showFilters, setShowFilters] = useState(false);
-    const [usersInput, setUsersInput] = useState(
-        formatArrayForInput(searchParams.get(queryKeys.users))
+    const [users, setUsers] = useState<string[]>(
+        parseArrayFromParam(searchParams.get(queryKeys.users))
     );
     const [walletsInput, setWalletsInput] = useState(
         formatArrayForInput(searchParams.get(queryKeys.wallets))
@@ -73,12 +75,31 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
         searchParams.get(queryKeys.dateEnd) ?? ""
     );
 
+    // User search state
+    const [userSearchTerm, setUserSearchTerm] = useState("");
+    const [foundUsers, setFoundUsers] = useState<
+        Array<{ id: number | string; name: string; email: string }>
+    >([]);
+    const [isUserSearching, setIsUserSearching] = useState(false);
+    const userSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
-        setUsersInput(formatArrayForInput(searchParams.get(queryKeys.users)));
-        setWalletsInput(formatArrayForInput(searchParams.get(queryKeys.wallets)));
+        setUsers(parseArrayFromParam(searchParams.get(queryKeys.users)));
+        setWalletsInput(
+            formatArrayForInput(searchParams.get(queryKeys.wallets))
+        );
         setDateStartValue(searchParams.get(queryKeys.dateStart) ?? "");
         setDateEndValue(searchParams.get(queryKeys.dateEnd) ?? "");
     }, [queryKeys, searchParams]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (userSearchTimeoutRef.current) {
+                clearTimeout(userSearchTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const updateQuery = useCallback(
         (updates: Record<string, string | undefined>) => {
@@ -111,9 +132,78 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
             .map((item) => item.trim())
             .filter(Boolean);
 
+    const handleUserSearch = useCallback((value: string) => {
+        setUserSearchTerm(value);
+
+        if (userSearchTimeoutRef.current) {
+            clearTimeout(userSearchTimeoutRef.current);
+        }
+
+        if (value.length < 3) {
+            setFoundUsers([]);
+            return;
+        }
+
+        userSearchTimeoutRef.current = setTimeout(async () => {
+            setIsUserSearching(true);
+            try {
+                const result = await searchUser(value);
+                if (
+                    result.success &&
+                    result.data &&
+                    Array.isArray(result.data.data)
+                ) {
+                    setFoundUsers(
+                        result.data.data.map((u: any) => ({
+                            id: u.id,
+                            name: u.name || u.email,
+                            email: u.email,
+                        }))
+                    );
+                } else {
+                    setFoundUsers([]);
+                }
+            } catch (error) {
+                setFoundUsers([]);
+            } finally {
+                setIsUserSearching(false);
+            }
+        }, 300);
+    }, []);
+
+    const handleUserSelect = useCallback(
+        (user: { id: number | string; name: string; email: string }) => {
+            const userId = user.id.toString();
+            if (!users.includes(userId)) {
+                const newUsers = [...users, userId];
+                setUsers(newUsers);
+                updateQuery({
+                    [queryKeys.users]:
+                        newUsers.length > 0
+                            ? `[${newUsers.join(",")}]`
+                            : undefined,
+                });
+            }
+            setUserSearchTerm("");
+            setFoundUsers([]);
+        },
+        [users, queryKeys.users, updateQuery]
+    );
+
+    const handleRemoveUser = useCallback(
+        (userId: string) => {
+            const newUsers = users.filter((id) => id !== userId);
+            setUsers(newUsers);
+            updateQuery({
+                [queryKeys.users]:
+                    newUsers.length > 0 ? `[${newUsers.join(",")}]` : undefined,
+            });
+        },
+        [users, queryKeys.users, updateQuery]
+    );
+
     const applyFilters = () => {
         const updates: Record<string, string | undefined> = {};
-        const users = parseInputValues(usersInput);
         const wallets = parseInputValues(walletsInput);
 
         updates[queryKeys.users] =
@@ -127,7 +217,9 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
     };
 
     const clearFilters = () => {
-        setUsersInput("");
+        setUsers([]);
+        setUserSearchTerm("");
+        setFoundUsers([]);
         setWalletsInput("");
         setDateStartValue("");
         setDateEndValue("");
@@ -217,17 +309,73 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
                 {showFilters && (
                     <div className="border-t border-border/60 px-6 py-4">
                         <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">
-                                    Usuários (IDs ou emails)
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-muted-foreground ml-1">
+                                    Filtrar por Usuário
                                 </label>
-                                <Input
-                                    value={usersInput}
-                                    onChange={(event) =>
-                                        setUsersInput(event.target.value)
-                                    }
-                                    placeholder="Ex.: 123,456,789"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        placeholder="Pesquise usuários (mín. 3 caracteres)"
+                                        value={userSearchTerm}
+                                        onChange={(e) =>
+                                            handleUserSearch(e.target.value)
+                                        }
+                                        className="bg-background h-9"
+                                    />
+                                    {(foundUsers.length > 0 ||
+                                        isUserSearching) &&
+                                        userSearchTerm.length >= 3 && (
+                                            <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
+                                                {isUserSearching && (
+                                                    <div className="flex items-center justify-center p-3 text-sm text-muted-foreground">
+                                                        Buscando...
+                                                    </div>
+                                                )}
+                                                {foundUsers.map((user) => (
+                                                    <div
+                                                        key={user.id}
+                                                        className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
+                                                        onClick={() =>
+                                                            handleUserSelect(
+                                                                user
+                                                            )
+                                                        }
+                                                    >
+                                                        <span className="font-medium">
+                                                            {user.name}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {user.email}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {foundUsers.length === 0 &&
+                                                    !isUserSearching && (
+                                                        <div className="p-3 text-sm text-muted-foreground">
+                                                            Nenhum usuário
+                                                            encontrado.
+                                                        </div>
+                                                    )}
+                                            </div>
+                                        )}
+                                </div>
+                                {users.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {users.map((userId) => (
+                                            <Badge
+                                                key={userId}
+                                                variant="secondary"
+                                                className="gap-1 cursor-pointer"
+                                                onClick={() =>
+                                                    handleRemoveUser(userId)
+                                                }
+                                            >
+                                                Usuário: {userId}
+                                                <XIcon className="size-3 " />
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">
@@ -355,7 +503,9 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
                                                 Valor Adicional:
                                             </p>
                                             <p className="text-sm font-medium">
-                                                {formatCurrency(order.amount_add)}
+                                                {formatCurrency(
+                                                    order.amount_add
+                                                )}
                                             </p>
                                         </div>
                                         <div className="space-y-1">

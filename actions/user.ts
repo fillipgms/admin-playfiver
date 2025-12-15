@@ -166,6 +166,8 @@ interface UpdateUserPayload {
     saldo?: number;
     ban?: number;
     role?: any[];
+    motived_ban?: string;
+    permissions?: string[];
     wallets: UserWalletProps[];
 }
 
