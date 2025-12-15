@@ -95,12 +95,14 @@ const IpTable = ({
         {
             headerName: "Ip",
             field: "ip",
+            suppressMovable: true,
             flex: 1,
             minWidth: 150,
             pinned: "left",
         },
         {
             headerName: "Adicionado Em",
+            suppressMovable: true,
             field: "created_at",
             flex: 1,
             minWidth: 150,
@@ -118,6 +120,7 @@ const IpTable = ({
         },
         {
             headerName: "último acesso",
+            suppressMovable: true,
             field: "created_at",
             flex: 1,
             minWidth: 150,
@@ -138,6 +141,7 @@ const IpTable = ({
                   {
                       headerName: "Ações",
                       minWidth: 100,
+                      suppressMovable: true,
                       cellRenderer: (params: ICellRendererParams) => (
                           <button
                               className="p-1.5 border border-[#E53935] rounded text-[#E53935] cursor-pointer hover:bg-red-50 hover:border-red-300 transition-colors"

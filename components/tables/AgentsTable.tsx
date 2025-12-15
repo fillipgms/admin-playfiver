@@ -33,10 +33,12 @@ const AgentTable = ({ agents }: { agents: SpecificUserAgent[] }) => {
             field: "agent_code",
             flex: 1,
             minWidth: 150,
+            suppressMovable: true,
             pinned: "left",
         },
         {
             headerName: "Rtp",
+            suppressMovable: true,
             field: "rtp_user",
             flex: 1,
             minWidth: 150,
@@ -45,6 +47,7 @@ const AgentTable = ({ agents }: { agents: SpecificUserAgent[] }) => {
         {
             headerName: "Limite",
             field: "limit_enable",
+            suppressMovable: true,
             flex: 1,
             minWidth: 100,
             cellRenderer: (p: ICellRendererParams) => {
@@ -62,6 +65,7 @@ const AgentTable = ({ agents }: { agents: SpecificUserAgent[] }) => {
             headerName: "Criado Em",
             field: "created_date",
             flex: 1,
+            suppressMovable: true,
             minWidth: 150,
             cellRenderer: (p: ICellRendererParams) => {
                 const date = new Date(p.value);
