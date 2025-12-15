@@ -130,7 +130,7 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
             flex: 1,
             minWidth: 150,
             pinned: "left",
-
+            suppressMovable: true,
             cellRenderer: (p: ICellRendererParams) => {
                 const { atk, username, status } = p.data;
                 const isOnline = status !== "off";
@@ -160,6 +160,7 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
             field: "is_influencer",
             flex: 1,
             minWidth: 130,
+            suppressMovable: true,
             valueFormatter: (p) => (p.value === 1 ? "Influencer" : "Padrão"),
             cellRenderer: (p: ICellRendererParams) => {
                 const isInfluencer = p.value === 1;
@@ -192,6 +193,7 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
             headerName: "Apostas",
             field: "valor_debitado",
             flex: 1,
+            suppressMovable: true,
             minWidth: 120,
         },
         {
@@ -209,15 +211,18 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
                     ? "text-[#E53935] bg-background-primary "
                     : "text-foreground bg-background-primary";
             },
+            suppressMovable: true,
         },
         {
             headerName: "Saldo",
             field: "saldo",
             flex: 1,
+            suppressMovable: true,
             minWidth: 120,
         },
         {
             headerName: "RTP",
+            suppressMovable: true,
             field: "rtp",
             flex: 1,
             minWidth: 120,
@@ -295,6 +300,7 @@ const PlayersTable = ({ players }: { players: PlayerProps[] }) => {
         },
         {
             headerName: "Agente",
+            suppressMovable: true,
             field: "agentCode",
             flex: 1,
             minWidth: 120,

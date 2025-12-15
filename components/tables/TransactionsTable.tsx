@@ -52,7 +52,7 @@ const cols: ColDef<TransactionProps>[] = [
         flex: 1,
         minWidth: 150,
         pinned: "left",
-
+        suppressMovable: true,
         cellRenderer: (p: ICellRendererParams) => {
             const { id_transaction, user } = p.data;
 
@@ -74,6 +74,7 @@ const cols: ColDef<TransactionProps>[] = [
         flex: 1,
         minWidth: 130,
         valueFormatter: (p) => (p.value === 1 ? "Influencer" : "Padrão"),
+        suppressMovable: true,
         cellRenderer: (p: ICellRendererParams) => {
             const isInfluencer = p.value === 1;
 
@@ -105,6 +106,7 @@ const cols: ColDef<TransactionProps>[] = [
         field: "game",
         flex: 1,
         minWidth: 120,
+        suppressMovable: true,
         cellStyle: () => {
             return {
                 fontWeight: "medium",
@@ -116,12 +118,14 @@ const cols: ColDef<TransactionProps>[] = [
         field: "bet_amount",
         flex: 1,
         minWidth: 120,
+        suppressMovable: true,
     },
     {
         headerName: "Resultado",
         field: "win_amount",
         flex: 1,
         minWidth: 120,
+        suppressMovable: true,
         cellRenderer: (p: ICellRendererParams) => {
             const { tipo, bet_amount, win_amount } = p.data;
             const value = tipo === "Perca" ? bet_amount : win_amount;
@@ -142,6 +146,7 @@ const cols: ColDef<TransactionProps>[] = [
         field: "status",
         flex: 1,
         minWidth: 120,
+        suppressMovable: true,
         cellRenderer: (p: ICellRendererParams) => {
             const isSuccess = p.value === 1;
 
@@ -177,6 +182,7 @@ const cols: ColDef<TransactionProps>[] = [
         field: "rtpUser",
         flex: 1,
         minWidth: 100,
+        suppressMovable: true,
         cellRenderer: (p: ICellRendererParams) => {
             const value = `${p.value}%`;
             return <div className="text-foreground/50">{value}</div>;
@@ -187,12 +193,14 @@ const cols: ColDef<TransactionProps>[] = [
         field: "agente",
         flex: 1,
         minWidth: 100,
+        suppressMovable: true,
     },
     {
         headerName: "Data e Hora",
         field: "created_at",
         flex: 1,
         minWidth: 150,
+        suppressMovable: true,
         cellRenderer: (p: ICellRendererParams) => {
             if (!p.value) return null;
             const date = new Date(p.value);

@@ -200,6 +200,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             minWidth: isMobile ? 100 : 200,
             sortable: true,
             comparator: () => 0,
+            suppressMovable: true,
         },
         {
             headerName: "Saldo",
@@ -219,12 +220,14 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                         : "text-foreground";
                 return `bg-background-primary ${colorClass}`;
             },
+            suppressMovable: true,
         },
         {
             headerName: "Status",
             field: "ban",
             flex: 1,
             minWidth: isMobile ? 90 : 120,
+            suppressMovable: true,
             cellRenderer: (p: ICellRendererParams) => {
                 const isBanned = p.value === 1;
                 return (
@@ -254,6 +257,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             minWidth: isMobile ? 100 : 120,
             filter: RoleFilter,
             filterParams: {},
+            suppressMovable: true,
             valueFormatter: (p) => {
                 const roles = p.value || [];
                 return roles.length > 0 ? roles.join(", ") : "N/A";
@@ -305,12 +309,14 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             sortable: true,
             comparator: () => 0,
             valueFormatter: (p) => formatDate(p.value || ""),
+            suppressMovable: true,
         },
         {
             headerName: "Limite",
             field: "limit",
             flex: 0.8,
             minWidth: isMobile ? 80 : 100,
+            suppressMovable: true,
             cellRenderer: (p: ICellRendererParams) => {
                 const hasLimit = p.value === true;
                 return (
@@ -339,6 +345,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
             flex: 1.5,
             minWidth: isMobile ? 140 : 200,
             pinned: "right",
+            suppressMovable: true,
             cellRenderer: (p: ICellRendererParams) => {
                 const user = p.data as UserProps;
 
