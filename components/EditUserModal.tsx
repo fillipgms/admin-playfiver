@@ -20,7 +20,13 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Input } from "./ui/input";
 import { useMemo, useState, useEffect } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "./ui/select";
 import { updateUser } from "@/actions/user";
 import { toast } from "sonner";
 import { Switch } from "./ui/switch";
@@ -46,6 +52,27 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         // backend may provide permissions array on the user
         // fall back to empty array if not present
         (user as any).permissions || []
+    );
+
+    // Ban reason state (predefined + custom)
+    const BAN_REASON_OPTIONS = [
+        "Praticar bug para aumentar saldo",
+        "Não recarregar os agentes",
+        "Integração errada causado vários erros",
+    ];
+
+    const existingBanReason = (user as any).motived_ban as string | undefined;
+    const isExistingPreset =
+        existingBanReason && BAN_REASON_OPTIONS.includes(existingBanReason);
+
+    const [banReasonSource, setBanReasonSource] = useState<"preset" | "custom">(
+        isExistingPreset ? "preset" : existingBanReason ? "custom" : "preset"
+    );
+    const [presetBanReason, setPresetBanReason] = useState<string>(
+        isExistingPreset ? (existingBanReason as string) : BAN_REASON_OPTIONS[0]
+    );
+    const [customBanReason, setCustomBanReason] = useState<string>(
+        !isExistingPreset && existingBanReason ? existingBanReason : ""
     );
 
     const [wallets, setWallets] = useState<UserWalletProps[]>(
@@ -240,6 +267,13 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                 password: canEditPassword && password ? password : undefined,
                 saldo: user.saldo || 0,
                 ban: canEditBan ? (ban ? 1 : 0) : user.ban,
+                motived_ban: canEditBan
+                    ? ban
+                        ? banReasonSource === "preset"
+                            ? presetBanReason
+                            : customBanReason || undefined
+                        : undefined
+                    : (user as any).motived_ban,
                 role: canEditRole ? roles : user.role,
                 permissions: canEditPermissions
                     ? permissions
@@ -418,21 +452,86 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 disabled={!canEditPermissions}
                             />
                         </div>
-                        <div className="col-span-6 flex items-center gap-2">
-                            <Switch
-                                id="ban-user"
-                                checked={ban}
-                                onCheckedChange={setBan}
-                                disabled={!canEditBan}
-                            />
-                            <Label
-                                htmlFor="ban-user"
-                                className={`text-sm font-medium ${
-                                    !canEditBan ? "opacity-50" : ""
-                                }`}
-                            >
-                                Banir usuário
-                            </Label>
+                        <div className="col-span-6 space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    id="ban-user"
+                                    checked={ban}
+                                    onCheckedChange={setBan}
+                                    disabled={!canEditBan}
+                                />
+                                <Label
+                                    htmlFor="ban-user"
+                                    className={`text-sm font-medium ${
+                                        !canEditBan ? "opacity-50" : ""
+                                    }`}
+                                >
+                                    Banir usuário
+                                </Label>
+                            </div>
+
+                            {ban && (
+                                <div className="space-y-2 mt-1">
+                                    <Label className="text-xs font-medium text-muted-foreground block">
+                                        Motivo do banimento
+                                    </Label>
+                                    <div className="flex flex-col gap-2">
+                                        <Select
+                                            value={
+                                                banReasonSource === "preset"
+                                                    ? presetBanReason
+                                                    : "custom"
+                                            }
+                                            onValueChange={(value) => {
+                                                if (value === "custom") {
+                                                    setBanReasonSource(
+                                                        "custom"
+                                                    );
+                                                } else {
+                                                    setBanReasonSource(
+                                                        "preset"
+                                                    );
+                                                    setPresetBanReason(value);
+                                                }
+                                            }}
+                                            disabled={!canEditBan}
+                                        >
+                                            <SelectTrigger className="h-9 w-full max-w-xs">
+                                                <SelectValue placeholder="Selecione o motivo" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {BAN_REASON_OPTIONS.map(
+                                                    (reason) => (
+                                                        <SelectItem
+                                                            key={reason}
+                                                            value={reason}
+                                                        >
+                                                            {reason}
+                                                        </SelectItem>
+                                                    )
+                                                )}
+                                                <SelectItem value="custom">
+                                                    Outro motivo (digitar)
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+
+                                        {banReasonSource === "custom" && (
+                                            <Input
+                                                placeholder="Descreva o motivo do banimento"
+                                                value={customBanReason}
+                                                onChange={(e) =>
+                                                    setCustomBanReason(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="h-9 max-w-xs"
+                                                disabled={!canEditBan}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
