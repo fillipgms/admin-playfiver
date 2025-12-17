@@ -188,6 +188,8 @@ export async function updateUser(userData: UpdateUserPayload) {
             delete payload.password;
         }
 
+        console.log("Updating user with payload:", payload);
+
         const { data } = await axios.put(
             `${process.env.API_ROUTES_BASE}/user`,
             payload,
