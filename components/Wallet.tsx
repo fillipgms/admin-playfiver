@@ -56,7 +56,7 @@ const CreateGgrForm = ({
             tax,
             above,
             revendedor: revendedor ? "1" : "0",
-            type: wallet.name_wallet,
+            type: wallet.id.toString(),
         });
         onClose();
     };
@@ -125,7 +125,11 @@ const CreateGgrForm = ({
                 >
                     Cancelar
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1"
+                >
                     {isSubmitting ? "Criando..." : "Criar GGR"}
                 </Button>
             </div>
