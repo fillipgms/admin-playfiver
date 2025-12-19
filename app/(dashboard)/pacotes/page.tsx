@@ -6,21 +6,18 @@ import { getWalletsData } from "@/actions/carteiras";
 import { getOrdersData } from "@/actions/order";
 import { getSignaturesData } from "@/actions/signatures";
 import { getGgrData } from "@/actions/ggr";
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
     title: "Pacotes",
     description: "Gerenciamento de carteiras, pedidos e assinaturas",
 };
 
-type PacotesSearchParams = Record<
-    string,
-    string | string[] | undefined
+type PacotesSearchParams = Promise<
+    Record<string, string | string[] | undefined>
 >;
 
 const getParamValue = (value?: string | string[]) =>
@@ -67,6 +64,13 @@ export default async function PacotesPage({
 }: {
     searchParams: PacotesSearchParams;
 }) {
+    // Add fallback to empty object
+    const searchParamsRes = (await searchParams) ?? {};
+
+    const walletsQueryKeys = {
+        page: "walletsPage",
+    };
+
     const ordersQueryKeys = {
         page: "ordersPage",
         users: "ordersUser",
@@ -81,34 +85,56 @@ export default async function PacotesPage({
         filter: "signaturesFilter",
     };
 
+    const walletsFilters = {
+        page: parseInt(
+            getParamValue(searchParamsRes[walletsQueryKeys.page]) || "1",
+            10
+        ),
+    };
+
     const ordersFilters = {
-        page: parseInt(getParamValue(searchParams[ordersQueryKeys.page]) || "1", 10),
-        users: parseArrayParam(searchParams[ordersQueryKeys.users]),
-        wallets: parseArrayParam(searchParams[ordersQueryKeys.wallets]),
-        dateStart: getParamValue(searchParams[ordersQueryKeys.dateStart]) || undefined,
-        dateEnd: getParamValue(searchParams[ordersQueryKeys.dateEnd]) || undefined,
+        page: parseInt(
+            getParamValue(searchParamsRes[ordersQueryKeys.page]) || "1",
+            10
+        ),
+        users: parseArrayParam(searchParamsRes[ordersQueryKeys.users]),
+        wallets: parseArrayParam(searchParamsRes[ordersQueryKeys.wallets]),
+        dateStart:
+            getParamValue(searchParamsRes[ordersQueryKeys.dateStart]) ||
+            undefined,
+        dateEnd:
+            getParamValue(searchParamsRes[ordersQueryKeys.dateEnd]) ||
+            undefined,
     };
 
     const signaturesFilters = {
         page: parseInt(
-            getParamValue(searchParams[signaturesQueryKeys.page]) || "1",
+            getParamValue(searchParamsRes[signaturesQueryKeys.page]) || "1",
             10
         ),
-        users: parseArrayParam(searchParams[signaturesQueryKeys.users]),
-        filter: getParamValue(searchParams[signaturesQueryKeys.filter]) || undefined,
+        users: parseArrayParam(searchParamsRes[signaturesQueryKeys.users]),
+        filter:
+            getParamValue(searchParamsRes[signaturesQueryKeys.filter]) ||
+            undefined,
     };
 
-    const [wallets, ordersResponse, signaturesResponse, ggrData] =
+    // Debug logging
+    console.log("Search params:", searchParams);
+    console.log("Wallets page:", walletsFilters.page);
+
+    const [walletsResponse, ordersResponse, signaturesResponse, ggrData] =
         await Promise.all([
-            getWalletsData(),
+            getWalletsData(walletsFilters.page),
             getOrdersData(ordersFilters),
             getSignaturesData(signaturesFilters),
             getGgrData(),
         ]);
 
-    const walletsList = wallets.data.data;
+    const walletsList = walletsResponse.data.data;
     const ggrList = ggrData.data;
-    const ordersList = normalizeCollection<AdminOrderProps>(ordersResponse.data);
+    const ordersList = normalizeCollection<AdminOrderProps>(
+        ordersResponse.data
+    );
     const signaturesList = normalizeCollection<AdminSignatureProps>(
         signaturesResponse.data
     );
@@ -122,7 +148,12 @@ export default async function PacotesPage({
                     <TabsTrigger value="signatures">Assinaturas</TabsTrigger>
                 </TabsList>
                 <TabsContent value="wallets">
-                    <WalletsClient wallets={walletsList} ggrData={ggrList} />
+                    <WalletsClient
+                        wallets={walletsList}
+                        ggrData={ggrList}
+                        pagination={walletsResponse.data as PaginationMeta}
+                        queryKeys={walletsQueryKeys}
+                    />
                 </TabsContent>
                 <TabsContent value="orders">
                     <OrdersClient
