@@ -64,7 +64,6 @@ export default async function PacotesPage({
 }: {
     searchParams: PacotesSearchParams;
 }) {
-    // Add fallback to empty object
     const searchParamsRes = (await searchParams) ?? {};
 
     const walletsQueryKeys = {
