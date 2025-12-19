@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Wallet from "@/components/Wallet";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { createGGR, deleteGGR } from "@/actions/ggr";
+import PaginationControls from "@/components/PaginationControls";
 
 interface WalletGgrProps {
     id: number;
@@ -15,16 +16,38 @@ interface WalletGgrProps {
     revendedor: number;
 }
 
+interface PaginationMeta {
+    current_page: number;
+    last_page: number;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+}
+
 const WalletsClient = ({
     wallets,
     ggrData,
+    pagination,
+    queryKeys,
 }: {
     wallets: AdminWalletProps[];
     ggrData: WalletGgrProps[];
+    pagination: PaginationMeta;
+    queryKeys: {
+        page: string;
+    };
 }) => {
     const { loading, hasPermission } = usePermissions();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const searchParamsRecord = useMemo(() => {
+        const record: Record<string, string> = {};
+        searchParams.forEach((value, key) => {
+            record[key] = value;
+        });
+        return record;
+    }, [searchParams]);
 
     const canViewWallets = hasPermission(["wallet_view", "ggr_view"], {
         any: true,
@@ -93,6 +116,17 @@ const WalletsClient = ({
                         isSubmitting={isSubmitting}
                     />
                 ))}
+            </div>
+            <div className="px-2 sm:px-4 lg:px-0">
+                <PaginationControls
+                    baseUrl="/pacotes"
+                    currentPage={pagination.current_page}
+                    lastPage={pagination.last_page}
+                    hasNextPage={!!pagination.next_page_url}
+                    hasPrevPage={!!pagination.prev_page_url}
+                    searchParams={searchParamsRecord}
+                    paramKey={queryKeys.page}
+                />
             </div>
         </section>
     );
