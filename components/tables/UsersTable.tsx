@@ -172,6 +172,10 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                       field: "id",
                       pinned: "left",
                       sortable: true,
+                      width: 40,
+                      minWidth: 1,
+                      maxWidth: 40,
+                      suppressSizeToFit: true,
                   } as ColDef<UserProps>,
               ]
             : []),
