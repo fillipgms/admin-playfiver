@@ -48,8 +48,6 @@ export default function AgentTransactionsClient({
     const searchParams = useSearchParams();
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    console.log(initialData);
-
     const getParamValue = (param?: string | string[]) =>
         Array.isArray(param) ? param[0] : param;
 

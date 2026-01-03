@@ -18,7 +18,7 @@
         "@radix-ui/react-slot": "^1.2.4",
         "@radix-ui/react-switch": "^1.2.6",
         "@types/chroma-js": "^3.1.2",
-        "ag-grid-react": "^34.3.1",
+        "ag-grid-react": "^35.0.0",
         "axios": "^1.13.2",
         "chroma-js": "^3.1.2",
         "class-variance-authority": "^0.7.1",
