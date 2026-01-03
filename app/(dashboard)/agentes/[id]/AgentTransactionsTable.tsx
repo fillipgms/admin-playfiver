@@ -6,9 +6,10 @@ import {
     ColDef,
     ICellRendererParams,
 } from "ag-grid-community";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { CheckIcon, StarIcon, XIcon } from "@phosphor-icons/react";
+import type { GridApi, GridReadyEvent } from "ag-grid-community";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -171,6 +172,21 @@ const cols: ColDef<TransactionItem>[] = [
         minWidth: 120,
     },
     {
+        headerName: "Observação",
+        field: "obs",
+        minWidth: 120,
+        suppressSizeToFit: true,
+        cellRenderer: (p: ICellRendererParams) => {
+            if (!p.value)
+                return (
+                    <div className="flex justify-center">
+                        <p className="text-center text-foreground/50">-</p>
+                    </div>
+                );
+            return p.value;
+        },
+    },
+    {
         headerName: "Data e Hora",
         field: "created_at",
         flex: 1,
@@ -195,6 +211,21 @@ const AgentTransactionsTable = ({
     transactions: TransactionItem[];
 }) => {
     const gridRef = useRef<AgGridReact<TransactionItem>>(null);
+    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+
+    useEffect(() => {
+        if (transactions && transactions.length) {
+            gridApi?.autoSizeColumns(["obs"]);
+        }
+    }, [transactions]);
+
+    const onGridReady = (params: GridReadyEvent) => {
+        setGridApi(params.api);
+
+        if (transactions.length) {
+            params.api.autoSizeColumns(["obs"]);
+        }
+    };
 
     return (
         <div className="w-full overflow-hidden">
@@ -220,6 +251,7 @@ const AgentTransactionsTable = ({
                                 "bg-background-secondary text-foreground/50 font-semibold",
                         }}
                         suppressMenuHide={true}
+                        onGridReady={onGridReady}
                     />
                 </div>
             </div>
