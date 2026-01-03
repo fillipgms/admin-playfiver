@@ -301,6 +301,7 @@ const AgentTransactionsTable = ({
                             <p className="text-center text-foreground/50">-</p>
                         </div>
                     );
+
                 return p.value;
             },
         },
