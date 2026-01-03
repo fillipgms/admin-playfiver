@@ -54,12 +54,10 @@ export default function AgentTransactionsClient({
     const parsePlayerArray = (param?: string | string[]): string[] => {
         const raw = getParamValue(param);
         if (!raw) return [];
-        // Handle format like "[118325,119799]"
         if (raw.startsWith("[") && raw.endsWith("]")) {
             const content = raw.slice(1, -1);
             return content ? content.split(",").map((id) => id.trim()) : [];
         }
-        // Handle single value
         return [raw];
     };
 

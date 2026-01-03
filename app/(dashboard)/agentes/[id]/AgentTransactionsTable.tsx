@@ -33,11 +33,11 @@ const DetailRenderer = (props: any) => {
                 </p>
                 <div className="flex gap-2">
                     <span className="text-foreground/50">Antes:</span>
-                    <span>{d.balance_player_before}</span>
+                    <span>R$ {d.balance_player_before}</span>
                 </div>
                 <div className="flex gap-2">
                     <span className="text-foreground/50">Depois:</span>
-                    <span>{d.balance_player_after}</span>
+                    <span>R$ {d.balance_player_after}</span>
                 </div>
             </div>
 
@@ -47,11 +47,11 @@ const DetailRenderer = (props: any) => {
                 </p>
                 <div className="flex gap-2">
                     <span className="text-foreground/50">Antes:</span>
-                    <span>{d.balance_wallet_before}</span>
+                    <span>R$ {d.balance_wallet_before}</span>
                 </div>
                 <div className="flex gap-2">
                     <span className="text-foreground/50">Depois:</span>
-                    <span>{d.balance_wallet_after}</span>
+                    <span>R$ {d.balance_wallet_after}</span>
                 </div>
             </div>
         </div>
