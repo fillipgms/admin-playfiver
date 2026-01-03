@@ -253,7 +253,7 @@ export default async function UserPage({
                 <div className="bg-linear-to-br from-[#2460e8] to-[#1e51da] text-white p-6 rounded-lg shadow-lg">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-white/80 text-sm font-medium">
-                            Saldo Gasto
+                            Total Gasto
                         </p>
                         <WalletIcon size={20} className="text-white/60" />
                     </div>
