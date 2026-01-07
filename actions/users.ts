@@ -149,7 +149,7 @@ export async function updatePlayer(params: {
     }
 }
 
-export async function getSpcificUser(id: string) {
+export async function getSpecificUserInfos(id: string) {
     const session = await getSession();
     const myIp = await getClientIp();
 
@@ -163,7 +163,364 @@ export async function getSpcificUser(id: string) {
 
     try {
         const { data } = await axios.get(
-            `${process.env.API_ROUTES_BASE}/user/details/${id}`,
+            `${process.env.API_ROUTES_BASE}/user/details/infos/${id}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserOverview(id: string) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/overview/${id}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserAgents(id: string, page = 1) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/agentes/${id}?page=${page}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserOrders(id: string) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/orders/${id}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserWallets(id: string) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/wallets/${id}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserIps(id: string, page = 1) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/ips/${id}?page=${page}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserUsers(id: string, page = 1) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/users/${id}?page=${page}`,
+            {
+                timeout: 10000,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                    myip: myIp,
+                },
+            }
+        );
+
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+        const apiMessage = (error as { response?: { data?: { msg?: string } } })
+            ?.response?.data?.msg;
+
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
+            redirect("/login");
+        }
+
+        return {
+            data: null,
+            error:
+                apiMessage ||
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
+        };
+    }
+}
+
+export async function getSpecificUserBets(id: string) {
+    const session = await getSession();
+    const myIp = await getClientIp();
+
+    if (!session) {
+        redirect("/login");
+    }
+
+    if (!id) {
+        throw new Error("id incorreto");
+    }
+
+    try {
+        const { data } = await axios.get(
+            `${process.env.API_ROUTES_BASE}/user/details/bets/${id}`,
             {
                 timeout: 10000,
                 headers: {

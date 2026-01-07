@@ -793,3 +793,121 @@ interface PlayerItem {
     agentCode: string | null;
     status: string;
 }
+
+interface UserInfosResponse {
+    status: number;
+    data: {
+        user: UserInfos;
+        infos: InfosData;
+    };
+}
+
+interface UserData {
+    id: number;
+    name: string;
+    email: string;
+    email_verified_at: null | string;
+    ban: 0 | 1;
+    created_at: string;
+    updated_at: string;
+    latest_ip: null | string;
+    role: string[];
+}
+
+interface InfosData {
+    balance_total: number;
+    fichas_total: number;
+    agentes_count: number;
+    influencers_agents: number;
+    orders: number;
+}
+
+interface UserOverviewResponse {
+    status: number;
+    data: UserOverview;
+}
+
+interface UserOverview {
+    winTotal: string;
+    betTotal: string;
+    last24HoursWins: string;
+    last24HoursBets: string;
+}
+
+interface UserAgentData {
+    current_page: number;
+    data: UserAgent[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: {
+        url: null | string;
+        label: string;
+        active: boolean;
+    }[];
+}
+
+interface UserOrdersResponse {
+    status: number;
+    data: SpecificUserOrder[];
+}
+
+interface UserWalletResponse {
+    status: number;
+    data: SpecifcUserWallet[];
+}
+
+interface IpResponse {
+    data: IpResponseProps;
+}
+
+interface IpResponseProps {
+    current_page: number;
+    data: IpProps[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: {
+        url: null | string;
+        label: string;
+        active: boolean;
+    }[];
+    next_page_url: null | string;
+    path: string;
+    per_page: number;
+    prev_page_url: null | string;
+    to: number;
+    total: number;
+}
+
+interface IpProps {
+    id: number;
+    ip: string;
+    created_at: string;
+}
+
+interface RelatedResponse {
+    data: RelatedResponseProps;
+}
+
+interface RelatedResponseProps {
+    current_page: number;
+    data: UserProps[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: {
+        url: null | string;
+        label: string;
+        active: boolean;
+    }[];
+    next_page_url: null | string;
+    path: string;
+    per_page: number;
+    prev_page_url: null | string;
+    to: number;
+    total: number;
+}
