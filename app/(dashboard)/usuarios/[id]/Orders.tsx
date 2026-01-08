@@ -74,7 +74,7 @@ const Orders = async ({ id }: { id: string }) => {
                                                 Valor do Pedido
                                             </p>
                                             <p className="text-base font-semibold">
-                                                {formatCurrency(order.amount)}
+                                                {order.amount}
                                             </p>
                                         </div>
                                         <div className="space-y-1">
@@ -82,9 +82,7 @@ const Orders = async ({ id }: { id: string }) => {
                                                 Fichas Adicionadas
                                             </p>
                                             <p className="text-base font-bold text-primary">
-                                                {formatCurrency(
-                                                    order.amount_add
-                                                )}
+                                                {order.amount_add}
                                             </p>
                                         </div>
                                         <div className="space-y-1">
