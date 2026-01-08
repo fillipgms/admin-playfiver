@@ -25,8 +25,10 @@ const Overview = async ({ id }: { id: string }) => {
         }).format(num);
     }
 
+    console.log(data);
+
     return (
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2  gap-4">
             <Card>
                 <CardHeader>
                     <Icon>
@@ -35,9 +37,7 @@ const Overview = async ({ id }: { id: string }) => {
                     Vitórias Totais
                 </CardHeader>
                 <CardContent>
-                    <span className="text-2xl font-bold">
-                        {formatCurrency(data.winTotal)}
-                    </span>
+                    <span className="text-2xl font-bold">{data.winTotal}</span>
                 </CardContent>
             </Card>
 
@@ -49,9 +49,7 @@ const Overview = async ({ id }: { id: string }) => {
                     Apostas Totais
                 </CardHeader>
                 <CardContent>
-                    <span className="text-2xl font-bold">
-                        {formatCurrency(data.betTotal)}
-                    </span>
+                    <span className="text-2xl font-bold">{data.betTotal}</span>
                 </CardContent>
             </Card>
 
@@ -64,7 +62,7 @@ const Overview = async ({ id }: { id: string }) => {
                 </CardHeader>
                 <CardContent>
                     <span className="text-2xl font-bold">
-                        {formatCurrency(data.last24HoursWins)}
+                        {data.last24HoursWins}
                     </span>
                 </CardContent>
             </Card>
@@ -78,7 +76,7 @@ const Overview = async ({ id }: { id: string }) => {
                 </CardHeader>
                 <CardContent>
                     <span className="text-2xl font-bold">
-                        {formatCurrency(data.last24HoursBets)}
+                        {data.last24HoursBets}
                     </span>
                 </CardContent>
             </Card>
