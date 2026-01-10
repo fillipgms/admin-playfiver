@@ -57,8 +57,10 @@ const DetailRenderer = (props: any) => {
 };
 
 const AgentTransactionsTable = ({
+    name,
     transactions,
 }: {
+    name?: string;
     transactions: TransactionItem[];
 }) => {
     const cols: ColDef<TransactionItem>[] = [
@@ -363,7 +365,9 @@ const AgentTransactionsTable = ({
     return (
         <div className="w-full overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:justify-between bg-background-primary items-start sm:items-center p-4 rounded-t-md border-b border-b-foreground/20 gap-4">
-                <h2 className="font-semibold">Transações do Agente</h2>
+                <h2 className="font-semibold">
+                    Transações do {name ? name : "Agente"}
+                </h2>
             </div>
             <div className="overflow-x-auto">
                 <div className="ag-theme-quartz" style={{ height: "auto" }}>

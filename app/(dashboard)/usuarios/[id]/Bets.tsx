@@ -37,7 +37,10 @@ const Bets = async ({
         <div className="space-y-6">
             <FiltersClient userId={id} params={searchParamsRecord} />
 
-            <AgentTransactionsTable transactions={data.data.data} />
+            <AgentTransactionsTable
+                name={"Usuário"}
+                transactions={data.data.data}
+            />
 
             <PaginationControls
                 currentPage={current_page}
