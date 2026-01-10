@@ -506,7 +506,14 @@ export async function getSpecificUserUsers(id: string, page = 1) {
     }
 }
 
-export async function getSpecificUserBets(id: string) {
+export async function getSpecificUserBets(
+    id: string,
+    page = 1,
+    filter?: string,
+    dateStart?: string,
+    dateEnd?: string,
+    search?: string
+) {
     const session = await getSession();
     const myIp = await getClientIp();
 
@@ -519,17 +526,36 @@ export async function getSpecificUserBets(id: string) {
     }
 
     try {
-        const { data } = await axios.get(
-            `${process.env.API_ROUTES_BASE}/user/details/bets/${id}`,
-            {
-                timeout: 10000,
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${session.accessToken}`,
-                    myip: myIp,
-                },
-            }
-        );
+        const query = new URLSearchParams();
+        query.set("page", page.toString());
+
+        if (filter) {
+            query.set("filter", filter);
+        }
+
+        if (dateStart) {
+            query.set("dateStart", dateStart);
+        }
+
+        if (dateEnd) {
+            query.set("dateEnd", dateEnd);
+        }
+
+        if (search) {
+            query.set("search", search);
+        }
+
+        const queryString = query.toString();
+        const url = `${process.env.API_ROUTES_BASE}/user/details/bets/${id}?${queryString}`;
+
+        const { data } = await axios.get(url, {
+            timeout: 10000,
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${session.accessToken}`,
+                myip: myIp,
+            },
+        });
 
         if (!data) {
             throw new Error("No valid data received from API");

@@ -66,9 +66,6 @@ export async function createGGR(formData: {
         redirect("/login");
     }
 
-    console.log(`Bearer ${session.accessToken}`);
-    console.log(formData);
-
     try {
         const { data } = await axios.post(
             `${process.env.API_ROUTES_BASE}/ggr`,

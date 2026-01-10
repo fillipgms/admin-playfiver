@@ -5,9 +5,7 @@ import {
     CoinIcon,
     GraphIcon,
     MoneyWavyIcon,
-    ShoppingCartIcon,
     TrophyIcon,
-    WalletIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
 const Overview = async ({ id }: { id: string }) => {
@@ -24,8 +22,6 @@ const Overview = async ({ id }: { id: string }) => {
             currency: "BRL",
         }).format(num);
     }
-
-    console.log(data);
 
     return (
         <section className="grid grid-cols-1 sm:grid-cols-2  gap-4">

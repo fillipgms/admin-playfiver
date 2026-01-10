@@ -117,10 +117,6 @@ export default async function PacotesPage({
             undefined,
     };
 
-    // Debug logging
-    console.log("Search params:", searchParams);
-    console.log("Wallets page:", walletsFilters.page);
-
     const [walletsResponse, ordersResponse, signaturesResponse, ggrData] =
         await Promise.all([
             getWalletsData(walletsFilters.page),

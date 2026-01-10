@@ -23,8 +23,6 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 const DetailRenderer = (props: any) => {
     const d = props.data;
 
-    console.log("DetailRenderer props:", d.balance_player_before);
-
     return (
         <div className="px-6 py-4 bg-background-secondary border-t border-foreground/10 grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
             <div className="text-foreground">
