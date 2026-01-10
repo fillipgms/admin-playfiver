@@ -7,6 +7,7 @@ import Orders from "./Orders";
 import Wallets from "./Wallets";
 import Ips from "./Ips";
 import Related from "./Related";
+import Bets from "./Bets";
 
 export const metadata: Metadata = {
     title: "Usuário",
@@ -53,6 +54,7 @@ export default async function UserPage({
                     <TabsTrigger value="related">
                         Usuários Relacionados
                     </TabsTrigger>
+                    <TabsTrigger value="bets">Apostas</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="mt-6 space-y-6">
@@ -85,6 +87,14 @@ export default async function UserPage({
 
                 <TabsContent value="related" className="mt-6">
                     <Related
+                        id={id}
+                        key={searchParamsRecord.page}
+                        searchParamsRecord={searchParamsRecord}
+                    />
+                </TabsContent>
+
+                <TabsContent value="bets" className="mt-6">
+                    <Bets
                         id={id}
                         key={searchParamsRecord.page}
                         searchParamsRecord={searchParamsRecord}
