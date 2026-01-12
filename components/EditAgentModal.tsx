@@ -77,9 +77,7 @@ const EditAgentModal = ({ agent }: { agent: Agent }) => {
                 limit_enable: canEditLimits ? (limitEnable ? 1 : 0) : undefined,
                 limite_amount: canEditLimits ? limiteAmount : undefined,
                 limit_hours: canEditLimits ? limitHours : undefined,
-                influencers: canEditInfluencers
-                    ? Number(influencers) || 0
-                    : undefined,
+                influencers: Number(influencers) || 0,
                 hide: canEditHide ? (hide ? 1 : 0) : undefined,
             } as any;
 

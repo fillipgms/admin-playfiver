@@ -65,8 +65,8 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
     const [users, setUsers] = useState<string[]>(
         parseArrayFromParam(searchParams.get(queryKeys.users))
     );
-    const [walletsInput, setWalletsInput] = useState(
-        formatArrayForInput(searchParams.get(queryKeys.wallets))
+    const [walletsInput, setWalletsInput] = useState<string[]>(
+        parseArrayFromParam(searchParams.get(queryKeys.wallets))
     );
     const [dateStartValue, setDateStartValue] = useState(
         searchParams.get(queryKeys.dateStart) ?? ""
@@ -75,7 +75,6 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
         searchParams.get(queryKeys.dateEnd) ?? ""
     );
 
-    // User search state
     const [userSearchTerm, setUserSearchTerm] = useState("");
     const [foundUsers, setFoundUsers] = useState<
         Array<{ id: number | string; name: string; email: string }>
@@ -83,10 +82,15 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
     const [isUserSearching, setIsUserSearching] = useState(false);
     const userSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    const [walletSearchTerm, setWalletSearchTerm] = useState("");
+    const [foundWallets, setFoundWallets] = useState<AdminWalletProps[]>([]);
+    const [isWalletSearching, setIsWalletSearching] = useState(false);
+    const walletSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
         setUsers(parseArrayFromParam(searchParams.get(queryKeys.users)));
         setWalletsInput(
-            formatArrayForInput(searchParams.get(queryKeys.wallets))
+            parseArrayFromParam(searchParams.get(queryKeys.wallets))
         );
         setDateStartValue(searchParams.get(queryKeys.dateStart) ?? "");
         setDateEndValue(searchParams.get(queryKeys.dateEnd) ?? "");
@@ -171,6 +175,30 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
         }, 300);
     }, []);
 
+    const handleWalletSearch = useCallback((value: string) => {
+        setWalletSearchTerm(value);
+
+        if (walletSearchTimeoutRef.current) {
+            clearTimeout(walletSearchTimeoutRef.current);
+        }
+
+        if (value.length < 3) {
+            setFoundWallets([]);
+            return;
+        }
+
+        walletSearchTimeoutRef.current = setTimeout(async () => {
+            setIsWalletSearching(true);
+            try {
+                const result = await searchUser(value);
+            } catch (error) {
+                setFoundWallets([]);
+            } finally {
+                setIsWalletSearching(false);
+            }
+        }, 300);
+    }, []);
+
     const handleUserSelect = useCallback(
         (user: { id: number | string; name: string; email: string }) => {
             const userId = user.id.toString();
@@ -204,12 +232,11 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
 
     const applyFilters = () => {
         const updates: Record<string, string | undefined> = {};
-        const wallets = parseInputValues(walletsInput);
 
         updates[queryKeys.users] =
             users.length > 0 ? `[${users.join(",")}]` : undefined;
         updates[queryKeys.wallets] =
-            wallets.length > 0 ? `[${wallets.join(",")}]` : undefined;
+            walletsInput.length > 0 ? `[${walletsInput.join(",")}]` : undefined;
         updates[queryKeys.dateStart] = dateStartValue || undefined;
         updates[queryKeys.dateEnd] = dateEndValue || undefined;
 
@@ -220,7 +247,7 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
         setUsers([]);
         setUserSearchTerm("");
         setFoundUsers([]);
-        setWalletsInput("");
+        setWalletsInput([]);
         setDateStartValue("");
         setDateEndValue("");
 
@@ -381,13 +408,65 @@ const OrdersClient = ({ orders, pagination, queryKeys }: OrdersClientProps) => {
                                 <label className="text-sm font-medium">
                                     Carteiras
                                 </label>
-                                <Input
-                                    value={walletsInput}
-                                    onChange={(event) =>
-                                        setWalletsInput(event.target.value)
-                                    }
-                                    placeholder="Ex.: main,oficial"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        value={walletSearchTerm}
+                                        onChange={(e) =>
+                                            handleWalletSearch(e.target.value)
+                                        }
+                                        placeholder="Ex.: main,oficial"
+                                    />
+                                    {(foundWallets.length > 0 ||
+                                        isWalletSearching) &&
+                                        walletSearchTerm.length >= 3 && (
+                                            <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
+                                                {isWalletSearching && (
+                                                    <div className="flex items-center justify-center p-3 text-sm text-muted-foreground">
+                                                        Buscando...
+                                                    </div>
+                                                )}
+                                                {foundWallets.map((wallet) => (
+                                                    <div
+                                                        key={wallet.id}
+                                                        className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
+                                                        // onClick={() =>
+                                                        //     handleUserSelect(
+                                                        //         user
+                                                        //     )
+                                                        // }
+                                                    >
+                                                        <span className="font-medium">
+                                                            {wallet.name}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {foundUsers.length === 0 &&
+                                                    !isUserSearching && (
+                                                        <div className="p-3 text-sm text-muted-foreground">
+                                                            Nenhum usuário
+                                                            encontrado.
+                                                        </div>
+                                                    )}
+                                            </div>
+                                        )}
+                                </div>
+                                {walletsInput.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                        {walletsInput.map((userId) => (
+                                            <Badge
+                                                key={userId}
+                                                variant="secondary"
+                                                className="gap-1 cursor-pointer"
+                                                onClick={() =>
+                                                    handleRemoveUser(userId)
+                                                }
+                                            >
+                                                Usuário: {userId}
+                                                <XIcon className="size-3 " />
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">

@@ -49,12 +49,9 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [ban, setBan] = useState(user.ban === 1);
     const [roles, setRoles] = useState<string[]>(user.role || []);
     const [permissions, setPermissions] = useState<string[]>(
-        // backend may provide permissions array on the user
-        // fall back to empty array if not present
         (user as any).permissions || []
     );
 
-    // Ban reason state (predefined + custom)
     const BAN_REASON_OPTIONS = [
         "Praticar bug para aumentar saldo",
         "Não recarregar os agentes",
@@ -89,7 +86,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const canEditPermissions = hasPermission("user_edit_permission");
     const canEditWallet = hasPermission("user_edit_wallet");
 
-    // State for permissions data from API
     const [permissionsData, setPermissionsData] = useState<{
         status: boolean;
         data: Array<{
@@ -121,7 +117,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         canEditPermissions ||
         canEditWallet;
 
-    // Fetch permissions when modal opens
     useEffect(() => {
         if (isOpen && canEditPermissions) {
             getPermissions()
@@ -135,7 +130,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         }
     }, [isOpen, canEditPermissions]);
 
-    // Calculate required permissions based on user roles
     const requiredPermissions = useMemo(() => {
         if (!permissionsData || !roles.length) return [];
 
@@ -153,7 +147,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         return required;
     }, [permissionsData, roles]);
 
-    // Ensure required permissions are always included
     useEffect(() => {
         if (requiredPermissions.length > 0 && canEditPermissions) {
             setPermissions((prev) => {
@@ -186,16 +179,13 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         );
     };
 
-    // Handle permissions change - prevent removing required permissions
     const handlePermissionsChange = (newPermissions: string[]) => {
-        // Always include required permissions
         const combined = [
             ...new Set([...requiredPermissions, ...newPermissions]),
         ];
         setPermissions(combined);
     };
 
-    // Build permissions options with disabled state for required permissions
     const permissionOptions = useMemo(() => {
         const allPermissions = [
             { label: "user_view", value: "user_view" },
