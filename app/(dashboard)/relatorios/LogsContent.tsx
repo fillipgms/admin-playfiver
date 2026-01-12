@@ -114,8 +114,12 @@ function getTypeLabel(type?: string): string {
     if (!type) return "";
 
     const labelMap: Record<string, string> = {
-        game_callback: "LOGS DE CALLBACK",
-        game_open: "LOGS DE JOGOS",
+        game_callback: "Callback",
+        game_open: "Jogos",
+        attempted_robbery: "Apostas sem Recarga",
+        "game_callback&error": "Erro de Jogo",
+        logs_check_wallet: "Antifraude",
+        "game_callbak&limit": "Limite de Jogo",
     };
 
     return labelMap[type] || type;

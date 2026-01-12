@@ -201,6 +201,8 @@ export async function updateUser(userData: UpdateUserPayload) {
             }
         );
 
+        console.log(payload);
+
         if (!data) {
             throw new Error("No valid data received from API");
         }
