@@ -119,7 +119,7 @@ function getTypeLabel(type?: string): string {
         attempted_robbery: "Apostas sem Recarga",
         "game_callback&error": "Erro de Jogo",
         logs_check_wallet: "Antifraude",
-        "game_callbak&limit": "Limite de Jogo",
+        "game_callback&limit": "Limite de Jogo",
     };
 
     return labelMap[type] || type;
