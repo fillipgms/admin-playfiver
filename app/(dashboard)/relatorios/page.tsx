@@ -37,8 +37,6 @@ export default async function RelatoriosPage({
 
     let logsData = null;
     let agentsDataResult = null;
-    // GGR data is now fetched client-side for better performance
-    const ggrDataResult = null;
 
     if (activeTab === "logs") {
         logsData = await getLogsData({

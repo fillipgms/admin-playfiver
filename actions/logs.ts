@@ -32,11 +32,15 @@ export async function getLogsData(filters: GetLogsParams = {}) {
         }
 
         if (filters.users && filters.users.length > 0) {
-            params.set("user", `[${filters.users.join(",")}]`);
+            const formattedUsers = filters.users.map((u) => `"${u}"`).join(",");
+            params.set("user", `[${formattedUsers}]`);
         }
 
         if (filters.agents && filters.agents.length > 0) {
-            params.set("agent", `[${filters.agents.join(",")}]`);
+            const formattedAgents = filters.agents
+                .map((a) => `"${a}"`)
+                .join(",");
+            params.set("agent", `[${formattedAgents}]`);
         }
 
         if (filters.dateStart) {
@@ -48,14 +52,23 @@ export async function getLogsData(filters: GetLogsParams = {}) {
         }
 
         if (filters.gravity && filters.gravity.length > 0) {
-            params.set("gravity", `[${filters.gravity.join(",")}]`);
+            const formattedGravity = filters.gravity
+                .map((g) => `"${g}"`)
+                .join(",");
+            params.set("gravity", `[${formattedGravity}]`);
         }
 
         if (filters.type && filters.type.length > 0) {
-            params.set("type", `[${filters.type.join(",")}]`);
+            const formattedType = filters.type.map((t) => `"${t}"`).join(",");
+            params.set("type", `[${formattedType}]`);
         }
 
-        const queryString = params.toString();
+        const queryString = params
+            .toString()
+            .replace(/%5B/g, "[")
+            .replace(/%5D/g, "]")
+            .replace(/%22/g, '"')
+            .replace(/%2C/g, ",");
 
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/logs${

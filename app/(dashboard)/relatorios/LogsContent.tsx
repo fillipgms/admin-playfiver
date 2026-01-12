@@ -95,30 +95,45 @@ function getInitials(name?: string, email?: string): string {
     return "?";
 }
 
+function getFixedGravity(type?: string): string | null {
+    if (!type) return null;
+
+    const typeMap: Record<string, string> = {
+        game_callback: "info",
+        game_open: "info",
+        "game_callback&error": "error",
+        "game_callback&limit": "warning",
+        attempted_robbery: "error",
+        logs_check_wallet: "info",
+    };
+
+    return typeMap[type] || null;
+}
+
+function getTypeLabel(type?: string): string {
+    if (!type) return "";
+
+    const labelMap: Record<string, string> = {
+        game_callback: "LOGS DE CALLBACK",
+        game_open: "LOGS DE JOGOS",
+    };
+
+    return labelMap[type] || type;
+}
+
 function getGravityVariant(
-    gravity?: string
+    gravity?: string,
+    type?: string
 ): "default" | "destructive" | "outline" {
-    if (!gravity) return "outline";
-    const lower = gravity.toLowerCase();
+    const fixedGravity = getFixedGravity(type);
+    const effectiveGravity = fixedGravity || gravity;
+
+    if (!effectiveGravity) return "outline";
+    const lower = effectiveGravity.toLowerCase();
     if (lower.includes("error") || lower.includes("critical"))
         return "destructive";
     if (lower.includes("warning")) return "outline";
     return "default";
-}
-
-function getGravityIcon(gravity?: string) {
-    if (!gravity) return <InfoIcon className="size-4" />;
-    const lower = gravity.toLowerCase();
-    if (lower.includes("error") || lower.includes("critical")) {
-        return <XCircleIcon className="size-4" />;
-    }
-    if (lower.includes("warning")) {
-        return <WarningCircleIcon className="size-4" />;
-    }
-    if (lower.includes("success")) {
-        return <CheckCircleIcon className="size-4" />;
-    }
-    return <InfoIcon className="size-4" />;
 }
 
 export default function LogsContent({ initialData, params }: LogsContentProps) {
@@ -169,7 +184,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     const [isInitialized, setIsInitialized] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
 
-    // User search state
     const [userSearchTerm, setUserSearchTerm] = useState("");
     const [foundUsers, setFoundUsers] = useState<
         Array<{ id: number | string; name: string; email: string }>
@@ -177,7 +191,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     const [isUserSearching, setIsUserSearching] = useState(false);
     const userSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Agent search state
     const [agentSearchTerm, setAgentSearchTerm] = useState("");
     const [foundAgents, setFoundAgents] = useState<
         Array<{ id: number; code: string; memo: string }>
@@ -185,13 +198,11 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     const [isAgentSearching, setIsAgentSearching] = useState(false);
     const agentSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Update data when initialData changes
     useEffect(() => {
         setData(initialData.data);
     }, [initialData]);
 
-    // Group logs by date
-    const groupedLogs = useMemo(() => {
+    const filteredGroupedLogs = useMemo(() => {
         const groups: Record<string, LogEntryProps[]> = {};
         data.forEach((log) => {
             const dateGroup = formatDateGroup(log.created_at);
@@ -203,97 +214,46 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         return groups;
     }, [data]);
 
-    // Filter logs
-    const filteredLogs = useMemo(() => {
-        let filtered = data;
-
-        // Filter by gravity
-        if (gravities.length > 0) {
-            filtered = filtered.filter((log) =>
-                gravities.some((g) =>
-                    log.gravity?.toLowerCase().includes(g.toLowerCase())
-                )
-            );
-        }
-
-        // Filter by type
-        if (types.length > 0) {
-            filtered = filtered.filter((log) =>
-                types.some((t) => log.type?.toLowerCase() === t.toLowerCase())
-            );
-        }
-
-        // Filter by date range (for client-side refinement)
-        if (dateStart || dateEnd) {
-            filtered = filtered.filter((log) => {
-                const logDate = new Date(log.created_at).getTime();
-                if (dateStart) {
-                    const start = new Date(dateStart).getTime();
-                    if (logDate < start) return false;
-                }
-                if (dateEnd) {
-                    const end = new Date(dateEnd).getTime();
-                    if (logDate > end) return false;
-                }
-                return true;
-            });
-        }
-
-        return filtered;
-    }, [data, gravities, types, dateStart, dateEnd]);
-
-    // Group filtered logs
-    const filteredGroupedLogs = useMemo(() => {
-        const groups: Record<string, LogEntryProps[]> = {};
-        filteredLogs.forEach((log) => {
-            const dateGroup = formatDateGroup(log.created_at);
-            if (!groups[dateGroup]) {
-                groups[dateGroup] = [];
-            }
-            groups[dateGroup].push(log);
-        });
-        return groups;
-    }, [filteredLogs]);
-
-    // Get unique gravities and types for filter options
     const uniqueGravities = useMemo(() => {
         const gravities = new Set<string>();
+
+        const fixedGravities = ["hight", "normal"];
+
+        fixedGravities.forEach((gravity) => gravities.add(gravity));
+
         data.forEach((log) => {
             if (log.gravity) gravities.add(log.gravity);
         });
+
         return Array.from(gravities).sort();
     }, [data]);
 
     const uniqueTypes = useMemo(() => {
         const types = new Set<string>();
+
+        const fixedTypes = [
+            "game_callback",
+            "game_open",
+            "game_callback&error",
+            "game_callback&limit",
+            "attempted_robbery",
+            "logs_check_wallet",
+        ];
+
+        fixedTypes.forEach((type) => types.add(type));
+
         data.forEach((log) => {
             if (log.type) types.add(log.type);
         });
+
         return Array.from(types).sort();
     }, [data]);
 
-    // Count statistics
     const isResolved = (log: LogEntryProps) => {
         if (!log.data) return false;
-        if (Array.isArray(log.data)) return false; // Array data doesn't have status
+        if (Array.isArray(log.data)) return false;
         return log.data.status === 1;
     };
-
-    const stats = useMemo(() => {
-        const all = data.length;
-        const errors = data.filter(
-            (log) =>
-                log.gravity?.toLowerCase().includes("error") ||
-                log.gravity?.toLowerCase().includes("critical")
-        ).length;
-        const warnings = data.filter((log) =>
-            log.gravity?.toLowerCase().includes("warning")
-        ).length;
-        const resolved = data.filter((log) => isResolved(log)).length;
-        const unresolved = all - resolved;
-
-        return { all, errors, warnings, resolved, unresolved };
-    }, [data]);
 
     const hasActiveFilters = useMemo(() => {
         return !!(
@@ -477,18 +437,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         [agents, updateUrlParams]
     );
 
-    const handleUserFilterClear = useCallback(() => {
-        setUsers([]);
-        setUserSearchTerm("");
-        updateUrlParams({ user: "" });
-    }, [updateUrlParams]);
-
-    const handleAgentFilterClear = useCallback(() => {
-        setAgents([]);
-        setAgentSearchTerm("");
-        updateUrlParams({ agent: "" });
-    }, [updateUrlParams]);
-
     const clearAllFilters = useCallback(() => {
         setGravities([]);
         setTypes([]);
@@ -542,7 +490,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         });
     }, []);
 
-    // Auto-expand all groups on initialization
     useEffect(() => {
         if (!isInitialized && Object.keys(filteredGroupedLogs).length > 0) {
             setExpandedDates(new Set(Object.keys(filteredGroupedLogs)));
@@ -550,7 +497,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         }
     }, [filteredGroupedLogs, isInitialized]);
 
-    // Cleanup timeouts
     useEffect(() => {
         return () => {
             if (userSearchTimeoutRef.current) {
@@ -562,7 +508,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         };
     }, []);
 
-    // Sync state with URL params when they change
     useEffect(() => {
         const newUsers = parseArrayParam(params.user) || [];
         const newAgents = parseArrayParam(params.agent) || [];
@@ -577,7 +522,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">
@@ -589,7 +533,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 </div>
             </div>
 
-            {/* Filters Toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div />
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -620,9 +563,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             {showFilters && (
                 <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
                     <div className="space-y-4">
-                        {/* User and Agent Search */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {/* User Search */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-medium text-muted-foreground ml-1">
                                     Filtrar por Usuário
@@ -692,7 +633,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                 )}
                             </div>
 
-                            {/* Agent Search */}
                             <div className="space-y-1.5">
                                 <label className="text-xs font-medium text-muted-foreground ml-1">
                                     Filtrar por Agente
@@ -763,9 +703,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                             </div>
                         </div>
 
-                        {/* Filter Chips */}
                         <div className="flex flex-wrap gap-2 items-center">
-                            {/* Gravity Filter Popover */}
                             {uniqueGravities.length > 0 && (
                                 <Popover>
                                     <PopoverTrigger asChild>
@@ -824,7 +762,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                 </Popover>
                             )}
 
-                            {/* Type Filter Popover */}
                             {uniqueTypes.length > 0 && (
                                 <Popover>
                                     <PopoverTrigger asChild>
@@ -871,7 +808,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                             }
                                                         />
                                                         <span className="text-sm font-medium flex-1">
-                                                            {type}
+                                                            {getTypeLabel(type)}
                                                         </span>
                                                     </label>
                                                 ))}
@@ -881,7 +818,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                 </Popover>
                             )}
 
-                            {/* Date Filters */}
                             <div className="flex gap-2 ml-auto">
                                 <div className="flex items-center gap-2">
                                     <label className="text-xs font-medium text-muted-foreground">
@@ -913,7 +849,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                 </div>
                             </div>
 
-                            {/* Clear Filters */}
                             {(gravities.length > 0 ||
                                 types.length > 0 ||
                                 users.length > 0 ||
@@ -932,7 +867,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                             )}
                         </div>
 
-                        {/* Active Filters Display */}
                         {(gravities.length > 0 ||
                             types.length > 0 ||
                             dateStart ||
@@ -943,17 +877,12 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         key={gravity}
                                         variant="secondary"
                                         className="gap-1"
+                                        onClick={() =>
+                                            handleGravityChange(gravity, false)
+                                        }
                                     >
                                         {gravity}
-                                        <XIcon
-                                            className="size-3 cursor-pointer hover:text-destructive"
-                                            onClick={() =>
-                                                handleGravityChange(
-                                                    gravity,
-                                                    false
-                                                )
-                                            }
-                                        />
+                                        <XIcon className="size-3 cursor-pointer hover:text-destructive" />
                                     </Badge>
                                 ))}
                                 {types.map((type) => (
@@ -961,42 +890,34 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         key={type}
                                         variant="secondary"
                                         className="gap-1"
+                                        onClick={() =>
+                                            handleTypeChange(type, false)
+                                        }
                                     >
-                                        {type}
-                                        <XIcon
-                                            className="size-3 cursor-pointer hover:text-destructive"
-                                            onClick={() =>
-                                                handleTypeChange(type, false)
-                                            }
-                                        />
+                                        {getTypeLabel(type)}
+                                        <XIcon className="size-3 cursor-pointer hover:text-destructive" />
                                     </Badge>
                                 ))}
                                 {dateStart && (
                                     <Badge
                                         variant="secondary"
                                         className="gap-1"
+                                        onClick={() =>
+                                            handleDateStartChange("")
+                                        }
                                     >
                                         De: {dateStart}
-                                        <XIcon
-                                            className="size-3 cursor-pointer hover:text-destructive"
-                                            onClick={() =>
-                                                handleDateStartChange("")
-                                            }
-                                        />
+                                        <XIcon className="size-3 cursor-pointer hover:text-destructive" />
                                     </Badge>
                                 )}
                                 {dateEnd && (
                                     <Badge
                                         variant="secondary"
                                         className="gap-1"
+                                        onClick={() => handleDateEndChange("")}
                                     >
                                         Até: {dateEnd}
-                                        <XIcon
-                                            className="size-3 cursor-pointer hover:text-destructive"
-                                            onClick={() =>
-                                                handleDateEndChange("")
-                                            }
-                                        />
+                                        <XIcon className="size-3 cursor-pointer hover:text-destructive" />
                                     </Badge>
                                 )}
                             </div>
@@ -1005,7 +926,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 </Card>
             )}
 
-            {/* Timeline */}
             <div className="space-y-4">
                 {Object.keys(filteredGroupedLogs).length === 0 ? (
                     <Card className="p-12 text-center border-dashed">
@@ -1027,7 +947,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 ) : (
                     Object.entries(filteredGroupedLogs)
                         .sort(([dateA], [dateB]) => {
-                            // Sort dates: Today first, then by date descending
                             if (dateA === "Hoje") return -1;
                             if (dateB === "Hoje") return 1;
                             if (dateA === "Ontem") return -1;
@@ -1044,7 +963,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
 
                             return (
                                 <div key={dateGroup} className="space-y-3">
-                                    {/* Date Header */}
                                     <button
                                         onClick={() =>
                                             toggleDateGroup(dateGroup)
@@ -1072,7 +990,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         </Badge>
                                     </button>
 
-                                    {/* Logs List */}
                                     {isExpanded && (
                                         <div className="space-y-2 pl-2">
                                             {sortedLogs.map((log, index) => {
@@ -1144,15 +1061,14 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                     <div className="flex items-center gap-2 flex-wrap justify-end">
                                                                         <Badge
                                                                             variant={getGravityVariant(
-                                                                                log.gravity
+                                                                                log.gravity,
+                                                                                log.type
                                                                             )}
                                                                             className="gap-1"
                                                                         >
-                                                                            {getGravityIcon(
+                                                                            {
                                                                                 log.gravity
-                                                                            )}
-                                                                            {log.gravity ||
-                                                                                "Info"}
+                                                                            }
                                                                         </Badge>
                                                                         {isLogResolved ? (
                                                                             <Badge
@@ -1331,9 +1247,9 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                                     Tipo:
                                                                                 </span>{" "}
                                                                                 <span className="font-medium text-foreground/80">
-                                                                                    {
+                                                                                    {getTypeLabel(
                                                                                         log.type
-                                                                                    }
+                                                                                    )}
                                                                                 </span>
                                                                             </span>
                                                                         </>
