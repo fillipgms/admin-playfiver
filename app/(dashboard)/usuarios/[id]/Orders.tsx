@@ -93,6 +93,15 @@ const Orders = async ({ id }: { id: string }) => {
                                                 {order.getaway}
                                             </p>
                                         </div>
+
+                                        <div className="space-y-1">
+                                            <p className="text-xs text-foreground/60">
+                                                Carteira
+                                            </p>
+                                            <p className="text-sm font-medium">
+                                                {order.wallet}
+                                            </p>
+                                        </div>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-3 text-xs text-foreground/60 pt-2 border-t border-foreground/10">
                                         {order.type_wallet && (
