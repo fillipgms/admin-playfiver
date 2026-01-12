@@ -635,9 +635,13 @@ interface SpecificUserAgent {
 interface SpecificUserOrder {
     id: number;
     amount: number;
-    status: number;
-    getaway: string;
     amount_add: number;
+    getaway: string;
+    type: string;
+    expired: string;
+    quantity: string;
+    wallet: string;
+    status: number;
     created_at: string;
     payment_id: string;
     type_wallet: string | null;
