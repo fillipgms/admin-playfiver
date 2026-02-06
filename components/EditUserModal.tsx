@@ -49,7 +49,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [ban, setBan] = useState(user.ban === 1);
     const [roles, setRoles] = useState<string[]>(user.role || []);
     const [permissions, setPermissions] = useState<string[]>(
-        (user as any).permissions || []
+        (user as any).permissions || [],
     );
 
     const BAN_REASON_OPTIONS = [
@@ -63,17 +63,19 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         existingBanReason && BAN_REASON_OPTIONS.includes(existingBanReason);
 
     const [banReasonSource, setBanReasonSource] = useState<"preset" | "custom">(
-        isExistingPreset ? "preset" : existingBanReason ? "custom" : "preset"
+        isExistingPreset ? "preset" : existingBanReason ? "custom" : "preset",
     );
     const [presetBanReason, setPresetBanReason] = useState<string>(
-        isExistingPreset ? (existingBanReason as string) : BAN_REASON_OPTIONS[0]
+        isExistingPreset
+            ? (existingBanReason as string)
+            : BAN_REASON_OPTIONS[0],
     );
     const [customBanReason, setCustomBanReason] = useState<string>(
-        !isExistingPreset && existingBanReason ? existingBanReason : ""
+        !isExistingPreset && existingBanReason ? existingBanReason : "",
     );
 
     const [wallets, setWallets] = useState<UserWalletProps[]>(
-        user.wallets || []
+        user.wallets || [],
     );
     const [walletSearch, setWalletSearch] = useState("");
     const router = useRouter();
@@ -161,13 +163,13 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const filteredWallets = useMemo(() => {
         if (!walletSearch) return wallets;
         return wallets.filter((w) =>
-            w.wallet.toLowerCase().includes(walletSearch.toLowerCase())
+            w.wallet.toLowerCase().includes(walletSearch.toLowerCase()),
         );
     }, [wallets, walletSearch]);
 
     const handleWalletBalanceChange = (
         walletId: string,
-        newBalance: string
+        newBalance: string,
     ) => {
         setWallets((prev) =>
             prev.map((w) => {
@@ -175,7 +177,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                     return { ...w, saldo: newBalance };
                 }
                 return w;
-            })
+            }),
         );
     };
 
@@ -265,7 +267,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                         : undefined
                     : (user as any).motived_ban,
                 role: canEditRole ? roles : user.role,
-                permissions: canEditPermissions
+                permission: canEditPermissions
                     ? permissions
                     : (user as any).permissions || [],
                 wallets: canEditWallet ? wallets : user.wallets,
@@ -387,21 +389,21 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                         newRoles.forEach((roleName) => {
                                             const role =
                                                 permissionsData.data.find(
-                                                    (r) => r.name === roleName
+                                                    (r) => r.name === roleName,
                                                 );
                                             if (role) {
                                                 role.permissions.forEach(
                                                     (perm) => {
                                                         if (
                                                             !newRequired.includes(
-                                                                perm.name
+                                                                perm.name,
                                                             )
                                                         ) {
                                                             newRequired.push(
-                                                                perm.name
+                                                                perm.name,
                                                             );
                                                         }
-                                                    }
+                                                    },
                                                 );
                                             }
                                         });
@@ -475,11 +477,11 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                             onValueChange={(value) => {
                                                 if (value === "custom") {
                                                     setBanReasonSource(
-                                                        "custom"
+                                                        "custom",
                                                     );
                                                 } else {
                                                     setBanReasonSource(
-                                                        "preset"
+                                                        "preset",
                                                     );
                                                     setPresetBanReason(value);
                                                 }
@@ -498,7 +500,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                                         >
                                                             {reason}
                                                         </SelectItem>
-                                                    )
+                                                    ),
                                                 )}
                                                 <SelectItem value="custom">
                                                     Outro motivo (digitar)
@@ -512,7 +514,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                                 value={customBanReason}
                                                 onChange={(e) =>
                                                     setCustomBanReason(
-                                                        e.target.value
+                                                        e.target.value,
                                                     )
                                                 }
                                                 className="h-9 max-w-xs"
@@ -587,7 +589,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                         <div className="flex items-center gap-3">
                                             <div className="hidden sm:block text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
                                                 {formatCurrencyBRL(
-                                                    Number(wallet.saldo)
+                                                    Number(wallet.saldo),
                                                 )}
                                             </div>
 
@@ -604,7 +606,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                                     onChange={(e) =>
                                                         handleWalletBalanceChange(
                                                             wallet.id,
-                                                            e.target.value
+                                                            e.target.value,
                                                         )
                                                     }
                                                     placeholder="0.00"
