@@ -24,7 +24,7 @@ export async function getUser() {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         return data as User;
@@ -33,7 +33,7 @@ export async function getUser() {
             if (error.response?.status === 401) {
                 await clearExpiredSession();
                 throw new Error(
-                    "Sessão expirada. Por favor, faça login novamente."
+                    "Sessão expirada. Por favor, faça login novamente.",
                 );
             }
         }
@@ -107,7 +107,7 @@ export async function createUser({
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -147,7 +147,7 @@ export async function createUser({
         } else {
             errorMessage = getFriendlyHttpErrorMessage(
                 error,
-                "Falha ao criar essa usuário de IP"
+                "Falha ao criar essa usuário de IP",
             );
         }
 
@@ -167,7 +167,7 @@ interface UpdateUserPayload {
     ban?: number;
     role?: any[];
     motived_ban?: string;
-    permissions?: string[];
+    permission?: string[];
     wallets: UserWalletProps[];
     nationality?: string;
     country?: string;
@@ -234,7 +234,7 @@ export async function updateUser(userData: UpdateUserPayload) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -273,7 +273,7 @@ export async function updateUser(userData: UpdateUserPayload) {
         } else {
             errorMessage = getFriendlyHttpErrorMessage(
                 error,
-                "Falha ao criar essa usuário de IP"
+                "Falha ao criar essa usuário de IP",
             );
         }
 
@@ -308,7 +308,7 @@ export async function updateUserLimits(userId: number, limitsData: any) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         return { success: true, data };
@@ -349,7 +349,7 @@ export async function deleteUserLimits(userId: number) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         return { success: true, data };
@@ -390,7 +390,7 @@ export async function deleteUser(userId: number) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -414,7 +414,7 @@ export async function deleteUser(userId: number) {
 
         errorMessage = getFriendlyHttpErrorMessage(
             error,
-            "Falha ao deletar essa usuário "
+            "Falha ao deletar essa usuário ",
         );
 
         return {
@@ -434,7 +434,7 @@ export async function searchUser(query: string) {
     try {
         const { data } = await axios.get(
             `${process.env.API_ROUTES_BASE}/users?search=${encodeURIComponent(
-                query
+                query,
             )}`,
             {
                 timeout: 10000,
@@ -443,7 +443,7 @@ export async function searchUser(query: string) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -466,7 +466,7 @@ export async function searchUser(query: string) {
 
         errorMessage = getFriendlyHttpErrorMessage(
             error,
-            "Falha ao buscar esse usuário"
+            "Falha ao buscar esse usuário",
         );
 
         return {
