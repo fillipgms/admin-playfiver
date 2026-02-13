@@ -126,13 +126,17 @@ async function fetchAndProcessCountryData() {
             return result;
         } catch (err) {
             console.error(err);
-            countryDataPromise = null;
+            countryDataPromise = null; // Reset promise on error
             throw err;
         }
     })();
 
     return countryDataPromise;
 }
+
+// ============================================================================
+// OPTIMIZATION 2: Extract formatting functions outside component
+// ============================================================================
 
 const formatCPF = (value: string): string => {
     const numbers = value.replace(/\D/g, "");
@@ -159,6 +163,10 @@ const formatCurrencyBRL = (value: number): string =>
         style: "currency",
         currency: "BRL",
     }).format(value);
+
+// ============================================================================
+// OPTIMIZATION 3: Memoize permission options
+// ============================================================================
 
 const ALL_PERMISSION_OPTIONS = [
     { label: "user_view", value: "user_view" },
@@ -229,19 +237,9 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [ban, setBan] = useState(user.ban === 1);
     const [roles, setRoles] = useState<string[]>(user.role || []);
     const [permissions, setPermissions] = useState<string[]>(
-        // backend may provide permissions array on the user
-        // fall back to empty array if not present
-        (user as any).permissions || []
+        (user as any).permissions || [],
     );
 
-<<<<<<< Updated upstream
-    // Ban reason state (predefined + custom)
-    const BAN_REASON_OPTIONS = [
-        "Praticar bug para aumentar saldo",
-        "Não recarregar os agentes",
-        "Integração errada causado vários erros",
-    ];
-=======
     const [countries, setCountries] = useState<Country[]>([]);
     const [languages, setLanguages] = useState<Language[]>([]);
     const [countryCodes, setCountryCodes] = useState<CountryCode[]>([]);
@@ -254,28 +252,23 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const [selectedLang, setSelectedLang] = useState(user.lang || "");
     const [phone, setPhone] = useState(user.phone || "");
     const [document, setDocument] = useState("");
->>>>>>> Stashed changes
 
     const existingBanReason = (user as any).motived_ban as string | undefined;
     const isExistingPreset =
         existingBanReason && BAN_REASON_OPTIONS.includes(existingBanReason);
 
     const [banReasonSource, setBanReasonSource] = useState<"preset" | "custom">(
-        isExistingPreset ? "preset" : existingBanReason ? "custom" : "preset"
+        isExistingPreset ? "preset" : existingBanReason ? "custom" : "preset",
     );
     const [presetBanReason, setPresetBanReason] = useState<string>(
-<<<<<<< Updated upstream
-        isExistingPreset ? (existingBanReason as string) : BAN_REASON_OPTIONS[0]
-=======
         isExistingPreset ? existingBanReason : BAN_REASON_OPTIONS[0],
->>>>>>> Stashed changes
     );
     const [customBanReason, setCustomBanReason] = useState<string>(
-        !isExistingPreset && existingBanReason ? existingBanReason : ""
+        !isExistingPreset && existingBanReason ? existingBanReason : "",
     );
 
     const [wallets, setWallets] = useState<UserWalletProps[]>(
-        user.wallets || []
+        user.wallets || [],
     );
     const [walletSearch, setWalletSearch] = useState("");
 
@@ -292,7 +285,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
     const canEditLang = hasPermission("user_edit_lang");
     const canEditDocument = hasPermission("user_edit_document");
 
-    // State for permissions data from API
     const [permissionsData, setPermissionsData] = useState<{
         status: boolean;
         data: Array<{
@@ -329,7 +321,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         canEditLang ||
         canEditDocument;
 
-    // Fetch permissions when modal opens
     useEffect(() => {
         if (!isOpen) return;
 
@@ -366,7 +357,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         loadData();
     }, [isOpen, canEditPermissions]);
 
-    // Calculate required permissions based on user roles
     const requiredPermissions = useMemo(() => {
         if (!permissionsData || !roles.length) return [];
 
@@ -384,9 +374,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         return required;
     }, [permissionsData, roles]);
 
-<<<<<<< Updated upstream
-    // Ensure required permissions are always included
-=======
     const filteredWallets = useMemo(() => {
         if (!walletSearch) return wallets;
         const searchLower = walletSearch.toLowerCase();
@@ -406,6 +393,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         () => selectedNationality === "Brazil",
         [selectedNationality],
     );
+
     useEffect(() => {
         if (
             selectedNationality &&
@@ -426,7 +414,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         }
     }, [selectedNationality, countryCodes, countries, selectedCountryCode]);
 
->>>>>>> Stashed changes
     useEffect(() => {
         if (requiredPermissions.length > 0 && canEditPermissions) {
             setPermissions((prev) => {
@@ -438,94 +425,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         }
     }, [requiredPermissions, canEditPermissions]);
 
-<<<<<<< Updated upstream
-    const filteredWallets = useMemo(() => {
-        if (!walletSearch) return wallets;
-        return wallets.filter((w) =>
-            w.wallet.toLowerCase().includes(walletSearch.toLowerCase())
-        );
-    }, [wallets, walletSearch]);
-
-    const handleWalletBalanceChange = (
-        walletId: string,
-        newBalance: string
-    ) => {
-        setWallets((prev) =>
-            prev.map((w) => {
-                if (w.id === walletId) {
-                    return { ...w, saldo: newBalance };
-                }
-                return w;
-            })
-        );
-    };
-
-    // Handle permissions change - prevent removing required permissions
-    const handlePermissionsChange = (newPermissions: string[]) => {
-        // Always include required permissions
-        const combined = [
-            ...new Set([...requiredPermissions, ...newPermissions]),
-        ];
-        setPermissions(combined);
-    };
-
-    // Build permissions options with disabled state for required permissions
-    const permissionOptions = useMemo(() => {
-        const allPermissions = [
-            { label: "user_view", value: "user_view" },
-            { label: "user_edit_name", value: "user_edit_name" },
-            { label: "user_edit_email", value: "user_edit_email" },
-            { label: "user_edit_password", value: "user_edit_password" },
-            { label: "user_edit_banned", value: "user_edit_banned" },
-            { label: "user_edit_role", value: "user_edit_role" },
-            { label: "user_edit_wallet", value: "user_edit_wallet" },
-            { label: "user_create", value: "user_create" },
-            { label: "user_delete", value: "user_delete" },
-            { label: "user_view_report", value: "user_view_report" },
-            { label: "agent_view", value: "agent_view" },
-            { label: "agent_edit_password", value: "agent_edit_password" },
-            { label: "agent_edit_rtp", value: "agent_edit_rtp" },
-            { label: "agent_edit_rtp_user", value: "agent_edit_rtp_user" },
-            {
-                label: "agent_edit_influencers",
-                value: "agent_edit_influencers",
-            },
-            { label: "agent_edit_describe", value: "agent_edit_describe" },
-            { label: "agent_edit_webhook", value: "agent_edit_webhook" },
-            { label: "agent_edit_hide", value: "agent_edit_hide" },
-            { label: "agent_edit_limits", value: "agent_edit_limits" },
-            { label: "agent_view_report", value: "agent_view_report" },
-            { label: "orders_view", value: "orders_view" },
-            { label: "signature_view", value: "signature_view" },
-            { label: "signature_create", value: "signature_create" },
-            { label: "ggr_view", value: "ggr_view" },
-            { label: "ggr_edit", value: "ggr_edit" },
-            { label: "ggr_create", value: "ggr_create" },
-            { label: "ggr_delete", value: "ggr_delete" },
-            { label: "games_view", value: "games_view" },
-            { label: "games_edit_name", value: "games_edit_name" },
-            { label: "games_edit_game_code", value: "games_edit_game_code" },
-            { label: "games_edit_status", value: "games_edit_status" },
-            { label: "games_edit_link_image", value: "games_edit_link_image" },
-            { label: "games_edit_provider", value: "games_edit_provider" },
-            {
-                label: "games_edit_distributor",
-                value: "games_edit_distributor",
-            },
-            { label: "provider_view", value: "provider_view" },
-            { label: "provider_edit", value: "provider_edit" },
-            { label: "distributor_view", value: "distributor_view" },
-            { label: "distributor_edit", value: "distributor_edit" },
-            { label: "wallet_view", value: "wallet_view" },
-            { label: "wallet_edit_status", value: "wallet_edit_status" },
-            { label: "logs_view", value: "logs_view" },
-            { label: "logs_agent_view", value: "logs_agent_view" },
-            { label: "logs_ggr_view", value: "logs_ggr_view" },
-            { label: "setting_view", value: "setting_view" },
-            { label: "setting_edit", value: "setting_edit" },
-            { label: "user_edit_permission", value: "user_edit_permission" },
-        ];
-=======
     const handleWalletBalanceChange = useCallback(
         (walletId: string, newBalance: string) => {
             setWallets((prev) =>
@@ -595,7 +494,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         },
         [permissionsData],
     );
->>>>>>> Stashed changes
 
     const handleSave = async () => {
         setIsLoading(true);
@@ -615,7 +513,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                         : undefined
                     : (user as any).motived_ban,
                 role: canEditRole ? roles : user.role,
-                permissions: canEditPermissions
+                permission: canEditPermissions
                     ? permissions
                     : (user as any).permissions || [],
                 wallets: canEditWallet ? wallets : user.wallets,
@@ -732,166 +630,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
 
                             <div className="h-px bg-border w-full" />
 
-<<<<<<< Updated upstream
-                    <div className="grid grid-cols-12 gap-4">
-                        <div className="col-span-6">
-                            <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
-                                Cargos
-                            </Label>
-                            <MultiSelect
-                                options={[
-                                    { label: "Admin", value: "admin" },
-                                    {
-                                        label: "Revendedor",
-                                        value: "revendedor",
-                                    },
-                                    { label: "Suporte", value: "suporte" },
-                                ]}
-                                onValueChange={(newRoles) => {
-                                    setRoles(newRoles);
-                                    // Update required permissions when roles change
-                                    if (
-                                        permissionsData &&
-                                        newRoles.length > 0
-                                    ) {
-                                        const newRequired: string[] = [];
-                                        newRoles.forEach((roleName) => {
-                                            const role =
-                                                permissionsData.data.find(
-                                                    (r) => r.name === roleName
-                                                );
-                                            if (role) {
-                                                role.permissions.forEach(
-                                                    (perm) => {
-                                                        if (
-                                                            !newRequired.includes(
-                                                                perm.name
-                                                            )
-                                                        ) {
-                                                            newRequired.push(
-                                                                perm.name
-                                                            );
-                                                        }
-                                                    }
-                                                );
-                                            }
-                                        });
-                                        // Ensure required permissions are always included
-                                        setPermissions((prev) => {
-                                            const combined = [
-                                                ...new Set([
-                                                    ...newRequired,
-                                                    ...prev,
-                                                ]),
-                                            ];
-                                            return combined;
-                                        });
-                                    }
-                                }}
-                                defaultValue={roles}
-                                placeholder="Selecione os cargos"
-                                className="h-9"
-                                disabled={!canEditRole}
-                            />
-                        </div>
-                        <div className="col-span-6">
-                            <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
-                                Permissões
-                                {requiredPermissions.length > 0 && (
-                                    <span className="text-[10px] text-muted-foreground ml-2">
-                                        ({requiredPermissions.length}{" "}
-                                        obrigatórias por cargo)
-                                    </span>
-                                )}
-                            </Label>
-                            <MultiSelect
-                                options={permissionOptions}
-                                onValueChange={handlePermissionsChange}
-                                defaultValue={permissions}
-                                placeholder="Selecione permissões"
-                                className="h-9"
-                                disabled={!canEditPermissions}
-                            />
-                        </div>
-                        <div className="col-span-6 space-y-2">
-                            <div className="flex items-center gap-2">
-                                <Switch
-                                    id="ban-user"
-                                    checked={ban}
-                                    onCheckedChange={setBan}
-                                    disabled={!canEditBan}
-                                />
-                                <Label
-                                    htmlFor="ban-user"
-                                    className={`text-sm font-medium ${
-                                        !canEditBan ? "opacity-50" : ""
-                                    }`}
-                                >
-                                    Banir usuário
-                                </Label>
-                            </div>
-
-                            {ban && (
-                                <div className="space-y-2 mt-1">
-                                    <Label className="text-xs font-medium text-muted-foreground block">
-                                        Motivo do banimento
-                                    </Label>
-                                    <div className="flex flex-col gap-2">
-                                        <Select
-                                            value={
-                                                banReasonSource === "preset"
-                                                    ? presetBanReason
-                                                    : "custom"
-                                            }
-                                            onValueChange={(value) => {
-                                                if (value === "custom") {
-                                                    setBanReasonSource(
-                                                        "custom"
-                                                    );
-                                                } else {
-                                                    setBanReasonSource(
-                                                        "preset"
-                                                    );
-                                                    setPresetBanReason(value);
-                                                }
-                                            }}
-                                            disabled={!canEditBan}
-                                        >
-                                            <SelectTrigger className="h-9 w-full max-w-xs">
-                                                <SelectValue placeholder="Selecione o motivo" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {BAN_REASON_OPTIONS.map(
-                                                    (reason) => (
-                                                        <SelectItem
-                                                            key={reason}
-                                                            value={reason}
-                                                        >
-                                                            {reason}
-                                                        </SelectItem>
-                                                    )
-                                                )}
-                                                <SelectItem value="custom">
-                                                    Outro motivo (digitar)
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-
-                                        {banReasonSource === "custom" && (
-                                            <Input
-                                                placeholder="Descreva o motivo do banimento"
-                                                value={customBanReason}
-                                                onChange={(e) =>
-                                                    setCustomBanReason(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="h-9 max-w-xs"
-                                                disabled={!canEditBan}
-                                            />
-                                        )}
-                                    </div>
-=======
                             <div className="grid grid-cols-12 gap-4 items-center">
                                 <div className="col-span-6">
                                     <Label className="text-xs font-medium text-muted-foreground block mb-1.5">
@@ -1024,7 +762,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                             </div>
                                         </div>
                                     )}
->>>>>>> Stashed changes
                                 </div>
                             </div>
 
@@ -1056,37 +793,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                     </Select>
                                 </div>
 
-<<<<<<< Updated upstream
-                                        <div className="flex items-center gap-3">
-                                            <div className="hidden sm:block text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">
-                                                {formatCurrencyBRL(
-                                                    Number(wallet.saldo)
-                                                )}
-                                            </div>
-
-                                            <div className="relative w-32">
-                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
-                                                    R$
-                                                </span>
-                                                <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    className="h-8 pl-7 text-right font-mono text-sm"
-                                                    value={wallet.saldo}
-                                                    onChange={(e) =>
-                                                        handleWalletBalanceChange(
-                                                            wallet.id,
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    placeholder="0.00"
-                                                    disabled={!canEditWallet}
-                                                    readOnly={!canEditWallet}
-                                                />
-                                            </div>
-                                        </div>
-=======
                                 <div className="col-span-12 md:col-span-6">
                                     <label className="text-xs font-medium text-muted-foreground block mb-1.5">
                                         Idioma
@@ -1172,7 +878,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                 </div>
 
                                 {isBrazilian && (
-                                    <div className="col-span-12 ">
+                                    <div className="col-span-12">
                                         <label className="text-xs font-medium text-muted-foreground block mb-1.5">
                                             CPF (opcional)
                                         </label>
@@ -1185,7 +891,6 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
                                             className="h-9"
                                             disabled={!canEditDocument}
                                         />
->>>>>>> Stashed changes
                                     </div>
                                 )}
                             </div>
