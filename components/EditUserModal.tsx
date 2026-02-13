@@ -126,17 +126,13 @@ async function fetchAndProcessCountryData() {
             return result;
         } catch (err) {
             console.error(err);
-            countryDataPromise = null; // Reset promise on error
+            countryDataPromise = null;
             throw err;
         }
     })();
 
     return countryDataPromise;
 }
-
-// ============================================================================
-// OPTIMIZATION 2: Extract formatting functions outside component
-// ============================================================================
 
 const formatCPF = (value: string): string => {
     const numbers = value.replace(/\D/g, "");
@@ -163,10 +159,6 @@ const formatCurrencyBRL = (value: number): string =>
         style: "currency",
         currency: "BRL",
     }).format(value);
-
-// ============================================================================
-// OPTIMIZATION 3: Memoize permission options
-// ============================================================================
 
 const ALL_PERMISSION_OPTIONS = [
     { label: "user_view", value: "user_view" },
@@ -215,6 +207,11 @@ const ALL_PERMISSION_OPTIONS = [
     { label: "setting_view", value: "setting_view" },
     { label: "setting_edit", value: "setting_edit" },
     { label: "user_edit_permission", value: "user_edit_permission" },
+    { label: "user_edit_nationality", value: "user_edit_nationality" },
+    { label: "user_edit_country", value: "user_edit_country" },
+    { label: "user_edit_phone", value: "user_edit_phone" },
+    { label: "user_edit_lang", value: "user_edit_lang" },
+    { label: "user_edit_document", value: "user_edit_document" },
 ];
 
 const BAN_REASON_OPTIONS = [
