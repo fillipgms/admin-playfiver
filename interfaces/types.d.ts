@@ -586,6 +586,10 @@ interface UserProps {
         limit_amount?: string;
         limit_hours?: string;
     } | null;
+    country: string | null;
+    lang: string | null;
+    nationality: string | null;
+    phone: string | null;
 }
 
 interface UserWalletProps {
