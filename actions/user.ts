@@ -169,23 +169,59 @@ interface UpdateUserPayload {
     motived_ban?: string;
     permission?: string[];
     wallets: UserWalletProps[];
+    nationality?: string;
+    country?: string;
+    phone?: string;
+    lang?: string;
+    document?: string;
 }
-
 export async function updateUser(userData: UpdateUserPayload) {
     const session = await getSession();
     const myIp = await getClientIp();
-
     if (!session) {
         redirect("/login");
     }
-
     try {
-        const payload = {
-            ...userData,
+        const payload: any = {
+            id_user: userData.id_user,
+            name: userData.name,
+            email: userData.email,
+            wallets: userData.wallets,
         };
 
-        if (!payload.password) {
-            delete payload.password;
+        // Only add optional fields if they have values
+        if (userData.password) {
+            payload.password = userData.password;
+        }
+        if (userData.saldo !== undefined) {
+            payload.saldo = userData.saldo;
+        }
+        if (userData.ban !== undefined) {
+            payload.ban = userData.ban;
+        }
+        if (userData.motived_ban) {
+            payload.motived_ban = userData.motived_ban;
+        }
+        if (userData.role && userData.role.length > 0) {
+            payload.role = userData.role;
+        }
+        if (userData.permission && userData.permission.length > 0) {
+            payload.permission = userData.permission;
+        }
+        if (userData.nationality) {
+            payload.nationality = userData.nationality;
+        }
+        if (userData.country) {
+            payload.country = userData.country;
+        }
+        if (userData.phone) {
+            payload.phone = userData.phone;
+        }
+        if (userData.lang) {
+            payload.lang = userData.lang;
+        }
+        if (userData.document) {
+            payload.document = userData.document;
         }
 
         console.log(payload);
@@ -223,7 +259,6 @@ export async function updateUser(userData: UpdateUserPayload) {
         }
 
         let errorMessage = "Falha ao atualizar esse usuário";
-
         if (apiMessage) {
             if (
                 apiMessage.toLowerCase().includes("duplicate") ||

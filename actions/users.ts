@@ -50,7 +50,7 @@ export async function getUsersData({
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -72,7 +72,7 @@ export async function getUsersData({
 
         throw new Error(
             apiMessage ||
-                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores")
+                getFriendlyHttpErrorMessage(error, "Falha ao buscar jogadores"),
         );
     }
 }
@@ -108,7 +108,7 @@ export async function updatePlayer(params: {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         return {
@@ -143,7 +143,7 @@ export async function updatePlayer(params: {
                 apiMessage ||
                 getFriendlyHttpErrorMessage(
                     error,
-                    "Falha ao atualizar jogador"
+                    "Falha ao atualizar jogador",
                 ),
         } as const;
     }
@@ -171,7 +171,7 @@ export async function getSpecificUserInfos(id: string) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -222,7 +222,7 @@ export async function getSpecificUserOverview(id: string) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -273,7 +273,7 @@ export async function getSpecificUserAgents(id: string, page = 1) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -324,7 +324,7 @@ export async function getSpecificUserOrders(id: string) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -377,7 +377,7 @@ export async function getSpecificUserWallets(id: string) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -428,7 +428,7 @@ export async function getSpecificUserIps(id: string, page = 1) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -479,7 +479,7 @@ export async function getSpecificUserUsers(id: string, page = 1) {
                     Authorization: `Bearer ${session.accessToken}`,
                     myip: myIp,
                 },
-            }
+            },
         );
 
         if (!data) {
@@ -514,7 +514,7 @@ export async function getSpecificUserBets(
     filter?: string,
     dateStart?: string,
     dateEnd?: string,
-    search?: string
+    search?: string,
 ) {
     const session = await getSession();
     const myIp = await getClientIp();
