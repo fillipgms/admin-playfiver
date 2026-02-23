@@ -48,7 +48,6 @@ const DistribuidoresClient = ({
         const distribuidor = distribuidores.find((d) => d.id === id);
         if (!distribuidor) return;
 
-        // Prepare payload: all values as string, update status
         const payload: Record<string, string> = {};
         Object.entries({ ...distribuidor, status }).forEach(([key, value]) => {
             payload[key] =

@@ -5,7 +5,7 @@ import Wallet from "@/components/Wallet";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { createGGR, deleteGGR } from "@/actions/ggr";
+import { createGGR, deleteGGR, editGGR } from "@/actions/ggr";
 import PaginationControls from "@/components/PaginationControls";
 
 interface WalletGgrProps {
@@ -76,7 +76,7 @@ const WalletsClient = ({
             toast.error(
                 error instanceof Error
                     ? error.message
-                    : "Ocorreu um erro ao criar a regra de GGR."
+                    : "Ocorreu um erro ao criar a regra de GGR.",
             );
         } finally {
             setIsSubmitting(false);
@@ -93,7 +93,30 @@ const WalletsClient = ({
             toast.error(
                 error instanceof Error
                     ? error.message
-                    : "Ocorreu um erro ao deletar a regra de GGR."
+                    : "Ocorreu um erro ao deletar a regra de GGR.",
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleGgredited = async (ggrData: {
+        id: string;
+        tax: string;
+        above: string;
+        revendedor: string;
+        type: string;
+    }) => {
+        setIsSubmitting(true);
+        try {
+            await editGGR(ggrData);
+            toast.success("Regra de GGR editada com sucesso!");
+            router.refresh();
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Ocorreu um erro ao editar a regra de GGR.",
             );
         } finally {
             setIsSubmitting(false);
@@ -113,6 +136,7 @@ const WalletsClient = ({
                         ggrData={ggrData}
                         onGgrAdded={handleGgrAdded}
                         onGgrDeleted={handleGgrDeleted}
+                        onGgrEdited={handleGgredited}
                         isSubmitting={isSubmitting}
                     />
                 ))}
