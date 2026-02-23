@@ -212,6 +212,13 @@ const ALL_PERMISSION_OPTIONS = [
     { label: "user_edit_phone", value: "user_edit_phone" },
     { label: "user_edit_lang", value: "user_edit_lang" },
     { label: "user_edit_document", value: "user_edit_document" },
+    { label: "ticket_view", value: "ticket_view" },
+    { label: "ticket_create", value: "ticket_create" },
+    { label: "ticket_resolved", value: "ticket_resolved" },
+    { label: "ticket_decline", value: "ticket_decline" },
+    { label: "ticket_checked", value: "ticket_checked" },
+    { label: "ticket_create_internal", value: "ticket_create_internal" },
+    { label: "ticket_view_internal", value: "ticket_view_internal" },
 ];
 
 const BAN_REASON_OPTIONS = [
@@ -268,6 +275,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         user.wallets || [],
     );
     const [walletSearch, setWalletSearch] = useState("");
+    const [prevRoles, setPrevRoles] = useState<string[]>(user.role || []);
 
     const canEditName = hasPermission("user_edit_name");
     const canEditEmail = hasPermission("user_edit_email");
@@ -303,6 +311,10 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
             }>;
         }>;
     } | null>(null);
+
+    const [requiredPermissions, setRequiredPermissions] = useState<string[]>(
+        [],
+    );
 
     const hasEditPermission =
         canEditName ||
@@ -354,9 +366,31 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         loadData();
     }, [isOpen, canEditPermissions]);
 
-    const requiredPermissions = useMemo(() => {
+    function getRequiredPermissions(
+        permissionsData: {
+            status: boolean;
+            data: {
+                id: number;
+                name: string;
+                guard_name: string;
+                created_at: string;
+                updated_at: string;
+                permissions: {
+                    id: number;
+                    name: string;
+                    guard_name: string;
+                    created_at: string;
+                    updated_at: string;
+                    pivot: {
+                        role_id: number;
+                        permission_id: number;
+                    };
+                }[];
+            }[];
+        } | null,
+        roles: string[],
+    ): string[] {
         if (!permissionsData || !roles.length) return [];
-
         const required: string[] = [];
         roles.forEach((roleName) => {
             const role = permissionsData.data.find((r) => r.name === roleName);
@@ -369,7 +403,7 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
             }
         });
         return required;
-    }, [permissionsData, roles]);
+    }
 
     const filteredWallets = useMemo(() => {
         if (!walletSearch) return wallets;
@@ -464,33 +498,47 @@ const EditUserModal = ({ user }: { user: UserProps }) => {
         [],
     );
 
-    const handleRolesChange = useCallback(
-        (newRoles: string[]) => {
-            setRoles(newRoles);
+    const handleRolesChange = (newRoles: string[]) => {
+        setPrevRoles(roles);
+        setRoles(newRoles);
 
-            if (permissionsData && newRoles.length > 0) {
-                const newRequired: string[] = [];
-                newRoles.forEach((roleName) => {
-                    const role = permissionsData.data.find(
-                        (r) => r.name === roleName,
-                    );
-                    if (role) {
-                        role.permissions.forEach((perm) => {
-                            if (!newRequired.includes(perm.name)) {
-                                newRequired.push(perm.name);
-                            }
-                        });
-                    }
-                });
+        if (permissionsData && newRoles.length > 0) {
+            const newRequired: string[] = [];
+            newRoles.forEach((roleName) => {
+                const role = permissionsData.data.find(
+                    (r) => r.name === roleName,
+                );
+                if (role) {
+                    role.permissions.forEach((perm) => {
+                        if (!newRequired.includes(perm.name)) {
+                            newRequired.push(perm.name);
+                        }
+                    });
+                }
+            });
 
-                setPermissions((prev) => {
-                    const combined = [...new Set([...newRequired, ...prev])];
-                    return combined;
-                });
-            }
-        },
-        [permissionsData],
-    );
+            setPermissions((prev) => {
+                const combined = [...new Set([...newRequired, ...prev])];
+                return combined;
+            });
+        }
+    };
+
+    useEffect(() => {
+        const newRequired = getRequiredPermissions(permissionsData, roles);
+        const prevRequired = getRequiredPermissions(permissionsData, prevRoles);
+
+        const removedRequired = prevRequired.filter(
+            (perm) => !newRequired.includes(perm),
+        );
+
+        setPermissions((prev) =>
+            prev.filter((perm) => !removedRequired.includes(perm)),
+        );
+
+        setRequiredPermissions(newRequired);
+        setPrevRoles(roles);
+    }, [permissionsData, roles]);
 
     const handleSave = async () => {
         setIsLoading(true);
