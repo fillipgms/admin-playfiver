@@ -6,31 +6,34 @@ import { CheckCircleIcon, XCircleIcon } from "@phosphor-icons/react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { editSettingsData } from "@/actions/settings";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface ConfiguracoesClientProps {
     config: ConfiguracoesProps;
 }
 
-// Componentes fora do render
 const ToggleSwitch = ({
     label,
     checked,
     onChange,
+    canEdit,
 }: {
     label: string;
     checked: boolean;
     onChange: () => void;
+    canEdit: boolean;
 }) => (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between ">
         <label className="text-sm font-medium text-foreground">{label}</label>
-        <label className="relative inline-flex items-center cursor-pointer">
+        <label className=" relative inline-flex items-center cursor-pointer ">
             <input
                 type="checkbox"
                 className="sr-only peer"
                 checked={checked}
                 onChange={onChange}
+                disabled={!canEdit}
             />
-            <div className="relative w-11 h-6 bg-foreground/20 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            <div className="peer-disabled:opacity-50 peer-disabled:cursor-not-allowed relative w-11 h-6 bg-foreground/20 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
         </label>
     </div>
 );
@@ -41,12 +44,14 @@ const InputField = ({
     onChange,
     type = "text",
     step,
+    canEdit,
 }: {
     label: string;
     value: string | number;
     onChange: (value: string) => void;
     type?: string;
     step?: string;
+    canEdit: boolean;
 }) => (
     <div className="space-y-2">
         <label
@@ -61,7 +66,8 @@ const InputField = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             step={step}
-            className="w-full h-10 px-3 border border-foreground/20 rounded-lg bg-background-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            disabled={!canEdit}
+            className="disabled:opacity-50 disabled:cursor-not-allowed w-full h-10 px-3 border border-foreground/20 rounded-lg bg-background-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
         />
     </div>
 );
@@ -71,10 +77,16 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
     const [isSaving, setIsSaving] = useState(false);
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { hasPermission, loading } = usePermissions();
+
+    const canViewSettings = hasPermission("setting_view");
+    const canEditSettings = false;
+
+    if (loading) return null;
 
     const handleInputChange = (
         field: keyof ConfiguracoesProps,
-        value: string | number
+        value: string | number,
     ) => {
         setFormData((prev) => ({
             ...prev,
@@ -110,6 +122,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
             setIsSaving(false);
         }
     };
+
+    if (!canViewSettings) {
+        return <p>Você não tem permissão para ver esse conteúdo</p>;
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -158,6 +174,7 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={() =>
                                                 handleToggle("limit_enable")
                                             }
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantidade de horas"
@@ -165,10 +182,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limit_hours",
-                                                    value
+                                                    value,
                                                 )
                                             }
                                             type="number"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantia de limite"
@@ -176,11 +194,12 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limite_amount",
-                                                    value
+                                                    value,
                                                 )
                                             }
                                             type="number"
                                             step="0.01"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantia máxima somada ao saldo"
@@ -188,11 +207,12 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limit_max",
-                                                    value
+                                                    value,
                                                 )
                                             }
                                             type="number"
                                             step="0.01"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Horas do bônus"
@@ -200,10 +220,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limit_hours_bonus",
-                                                    parseInt(value) || 0
+                                                    parseInt(value) || 0,
                                                 )
                                             }
                                             type="number"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Horas das rodadas grátis"
@@ -211,10 +232,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "number_of_hours",
-                                                    parseInt(value) || 0
+                                                    parseInt(value) || 0,
                                                 )
                                             }
                                             type="number"
+                                            canEdit={canEditSettings}
                                         />
                                     </div>
                                 </section>
@@ -238,9 +260,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             }
                                             onChange={() =>
                                                 handleToggle(
-                                                    "limit_enable_distribuidor"
+                                                    "limit_enable_distribuidor",
                                                 )
                                             }
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Horas das distribuidoras"
@@ -250,10 +273,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limit_hours_distribuidor",
-                                                    value
+                                                    value,
                                                 )
                                             }
                                             type="number"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantia de limite"
@@ -263,11 +287,12 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limite_amount_distribuidor",
-                                                    value
+                                                    value,
                                                 )
                                             }
                                             type="number"
                                             step="0.01"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantia máxima somada ao saldo"
@@ -277,11 +302,12 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limit_max_distribuidor",
-                                                    value
+                                                    value,
                                                 )
                                             }
                                             type="number"
                                             step="0.01"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantidade de bônus"
@@ -291,10 +317,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "limit_quantity_bonus",
-                                                    parseInt(value) || 0
+                                                    parseInt(value) || 0,
                                                 )
                                             }
                                             type="number"
+                                            canEdit={canEditSettings}
                                         />
                                         <InputField
                                             label="Quantidade de rodadas grátis"
@@ -304,10 +331,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                             onChange={(value) =>
                                                 handleInputChange(
                                                     "quantity_rounds_free",
-                                                    parseInt(value) || 0
+                                                    parseInt(value) || 0,
                                                 )
                                             }
                                             type="number"
+                                            canEdit={canEditSettings}
                                         />
                                     </div>
                                 </section>
@@ -341,6 +369,7 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={() =>
                                             handleToggle("maintenance_api")
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                 </div>
                                 <div className="rounded-xl border border-foreground/10 p-4 bg-background-primary/80">
@@ -352,6 +381,7 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={() =>
                                             handleToggle("maintenance_panel")
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                 </div>
                             </div>
@@ -393,9 +423,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "ezzepay_client_id",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Segredo do cliente EzzePay"
@@ -403,10 +434,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "ezzepay_client_secret",
-                                                value
+                                                value,
                                             )
                                         }
                                         type="password"
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Usuário Webhook"
@@ -414,9 +446,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "ezzepay_user",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Senha Webhook"
@@ -424,10 +457,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "ezzepay_senha",
-                                                value
+                                                value,
                                             )
                                         }
                                         type="password"
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="URL EzzePay"
@@ -435,9 +469,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "ezzepay_uri",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                 </section>
 
@@ -457,9 +492,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "suitpay_client_id",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Segredo do cliente Suitpay"
@@ -467,10 +503,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "suitpay_client_secret",
-                                                value
+                                                value,
                                             )
                                         }
                                         type="password"
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="URL SuitPay"
@@ -478,13 +515,13 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "suitpay_uri",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                 </section>
 
-                                {/* NowPayment */}
                                 <section className="rounded-xl border border-foreground/10 bg-background-primary/80 p-5 space-y-4">
                                     <header>
                                         <h4 className="font-semibold">
@@ -500,10 +537,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "nowpayment_id",
-                                                value
+                                                value,
                                             )
                                         }
                                         type="password"
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Api Key NowPayment"
@@ -511,10 +549,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "nowpayment_secretNow",
-                                                value
+                                                value,
                                             )
                                         }
                                         type="password"
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="URL NowPayment"
@@ -522,13 +561,13 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "nowpayment_uriNow",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                 </section>
 
-                                {/* DigitoPay */}
                                 <section className="rounded-xl border border-foreground/10 bg-background-primary/80 p-5 space-y-4">
                                     <header>
                                         <h4 className="font-semibold">
@@ -544,9 +583,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "digitopay_cliente_id",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Segredo do cliente DigitoPay"
@@ -556,10 +596,11 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "digitopay_cliente_secret",
-                                                value
+                                                value,
                                             )
                                         }
                                         type="password"
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="Id da conta DigitoPay"
@@ -567,9 +608,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "digitopay_id_conta",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="URL DigitoPay"
@@ -577,9 +619,10 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange(
                                                 "digitopay_uri",
-                                                value
+                                                value,
                                             )
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                     <InputField
                                         label="API Pix principal"
@@ -587,6 +630,7 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
                                         onChange={(value) =>
                                             handleInputChange("primary", value)
                                         }
+                                        canEdit={canEditSettings}
                                     />
                                 </section>
                             </div>

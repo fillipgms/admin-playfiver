@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { getSettingsData } from "@/actions/settings";
 import ConfiguracoesClient from "./ConfiguracoesClient";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export const metadata: Metadata = {
     title: "Configurações",
