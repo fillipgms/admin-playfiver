@@ -31,8 +31,8 @@ const ProvedorCard = ({
         image_url: provedor.image_url || "",
         status: String(provedor.status),
         provedor: String(provedor.id),
-        distribuidor: "", // This may need to be set from context or parent
-        game_code: "", // This may need to be set from context or parent
+        distribuidor: "",
+        game_code: "",
     });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -92,8 +92,26 @@ const ProvedorCard = ({
     return (
         <Card className={!isActive ? "opacity-50" : ""}>
             <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col sm:justify-between gap-3 w-full">
                     <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
+                            <label
+                                className={`relative inline-flex items-center ${
+                                    canEdit
+                                        ? "cursor-pointer"
+                                        : "cursor-default"
+                                }`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={isActive}
+                                    onChange={handleStatusChange}
+                                    disabled={!canEdit || editMode}
+                                />
+                                <div className="relative w-11 h-6 bg-foreground/20 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
                         <div className="relative w-12 h-12 rounded-md overflow-hidden bg-background-secondary border border-foreground/10 shrink-0">
                             {form.image_url ? (
                                 <Image
@@ -139,38 +157,16 @@ const ProvedorCard = ({
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <Badge
-                            variant={isActive ? "default" : "destructive"}
-                            className="w-fit"
+                    {!editMode && canEdit && (
+                        <Button
+                            variant="outline"
+                            onClick={handleEdit}
+                            disabled={loading}
+                            className="w-full"
                         >
-                            {isActive ? "Ativo" : "Inativo"}
-                        </Badge>
-                        <label
-                            className={`relative inline-flex items-center ${
-                                canEdit ? "cursor-pointer" : "cursor-default"
-                            }`}
-                        >
-                            <input
-                                type="checkbox"
-                                className="sr-only peer"
-                                checked={isActive}
-                                onChange={handleStatusChange}
-                                disabled={!canEdit || editMode}
-                            />
-                            <div className="relative w-11 h-6 bg-foreground/20 rounded-full peer peer-focus:ring-4 peer-focus:ring-primary/20 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-foreground/20 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                        </label>
-                        {!editMode && canEdit && (
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={handleEdit}
-                                disabled={loading}
-                            >
-                                Editar
-                            </Button>
-                        )}
-                    </div>
+                            Editar
+                        </Button>
+                    )}
                 </div>
             </CardHeader>
 
