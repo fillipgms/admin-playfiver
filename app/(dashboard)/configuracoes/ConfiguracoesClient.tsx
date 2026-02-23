@@ -80,7 +80,7 @@ const ConfiguracoesClient = ({ config }: ConfiguracoesClientProps) => {
     const { hasPermission, loading } = usePermissions();
 
     const canViewSettings = hasPermission("setting_view");
-    const canEditSettings = false;
+    const canEditSettings = hasPermission("setting_edit");
 
     if (loading) return null;
 
