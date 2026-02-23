@@ -91,7 +91,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
 
             if (result.success) {
                 toast.success(
-                    `Usuário ${userToDelete.name} excluído com sucesso`
+                    `Usuário ${userToDelete.name} excluído com sucesso`,
                 );
                 router.refresh();
             } else {
@@ -159,9 +159,10 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
         "user_edit_password",
         "user_edit_banned",
         "user_edit_role",
-        "user_edit_wallet"
+        "user_edit_wallet",
     );
     const canDelete = hasPermission("user_delete");
+
     const hasAnyAction = canViewReport || canEdit || canDelete;
 
     const cols: ColDef<UserProps>[] = [
@@ -219,8 +220,8 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                     value > 0
                         ? "text-[#95BD2B]"
                         : value < 0
-                        ? "text-[#E53935]"
-                        : "text-foreground";
+                          ? "text-[#E53935]"
+                          : "text-foreground";
                 return `bg-background-primary ${colorClass}`;
             },
             suppressMovable: true,
@@ -244,7 +245,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                                 }`,
                                 isBanned
                                     ? "bg-[#E53935]/20 text-[#E53935]"
-                                    : "bg-[#95BD2B]/20 text-[#95BD2B]"
+                                    : "bg-[#95BD2B]/20 text-[#95BD2B]",
                             )}
                         >
                             {isBanned ? "Banido" : "Ativo"}
@@ -293,7 +294,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                                         ? "py-0.5 px-2 text-xs"
                                         : "py-1 px-3 text-sm"
                                 }`,
-                                badgeClass
+                                badgeClass,
                             )}
                         >
                             {roles.length > 0
@@ -333,7 +334,7 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
                                 }`,
                                 hasLimit
                                     ? "bg-primary/20 text-primary"
-                                    : "bg-foreground/10 text-foreground/50"
+                                    : "bg-foreground/10 text-foreground/50",
                             )}
                         >
                             {hasLimit ? "Sim" : "Não"}
@@ -385,10 +386,12 @@ const UsersTable = ({ users }: { users: UserProps[] }) => {
 
                         {canEdit && <EditUserModal user={user} />}
 
-                        <UserLimits
-                            userId={user.id}
-                            initialData={user.limits || {}}
-                        />
+                        {
+                            <UserLimits
+                                userId={user.id}
+                                initialData={user.limits || {}}
+                            />
+                        }
 
                         {canDelete && (
                             <Button
