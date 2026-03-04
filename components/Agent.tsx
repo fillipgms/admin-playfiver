@@ -27,8 +27,10 @@ const Agent = React.forwardRef<
         "agent_edit_webhook",
         "agent_edit_hide",
         "agent_edit_limits",
-        "agent_edit_influencers"
+        "agent_edit_influencers",
     );
+
+    console.log(agent);
 
     const canViewTransactions = hasAnyPermission("agent_view_report");
     return (
@@ -66,7 +68,6 @@ const Agent = React.forwardRef<
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
-                {/* User Information */}
                 <section className="flex items-center gap-2 p-3 bg-background-secondary rounded border">
                     <UserIcon className="text-primary" size={20} />
                     <div className="flex flex-col flex-1">
@@ -77,7 +78,7 @@ const Agent = React.forwardRef<
                             {agent.usuario_email}
                         </p>
                     </div>
-                    {agent.hide === 1 && (
+                    {agent.hide && (
                         <Badge className="w-fit border-[#E53935]/30 text-[#E53935] bg-[#E53935]/10">
                             Oculto
                         </Badge>
@@ -113,7 +114,7 @@ const Agent = React.forwardRef<
                                 type="button"
                                 onClick={() =>
                                     navigator.clipboard.writeText(
-                                        agent.agent_secret
+                                        agent.agent_secret,
                                     )
                                 }
                                 className="absolute top-1/2 -translate-y-1/2 right-2 text-xs px-2 py-1 rounded border bg-background hover:bg-background/80"
@@ -134,7 +135,7 @@ const Agent = React.forwardRef<
                                 type="button"
                                 onClick={() =>
                                     navigator.clipboard.writeText(
-                                        agent.agent_token
+                                        agent.agent_token,
                                     )
                                 }
                                 className="absolute top-1/2 -translate-y-1/2 right-2 text-xs px-2 py-1 rounded border bg-background hover:bg-background/80"
@@ -147,7 +148,6 @@ const Agent = React.forwardRef<
                     </div>
                 </section>
 
-                {/* Password */}
                 <section className="flex flex-col">
                     <p className="text-sm text-foreground/50">Senha</p>
                     <p className="font-mono text-sm bg-background-secondary p-2 rounded border">
@@ -155,7 +155,6 @@ const Agent = React.forwardRef<
                     </p>
                 </section>
 
-                {/* Callback URL */}
                 <section className="flex flex-col">
                     <p className=" text-sm text-foreground/50">Callback URL</p>
                     <Link
@@ -170,7 +169,6 @@ const Agent = React.forwardRef<
                     </Link>
                 </section>
 
-                {/* Limits Configuration */}
                 <section className="flex flex-col gap-1">
                     <p className="text-sm text-foreground/50">
                         Limite Habilitado
@@ -186,7 +184,6 @@ const Agent = React.forwardRef<
                     )}
                 </section>
 
-                {/* Limit Details */}
                 {agent.limit_enable && (
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex flex-col">
@@ -208,12 +205,11 @@ const Agent = React.forwardRef<
                     </section>
                 )}
 
-                {/* Footer Info */}
                 <section className="flex justify-between items-center text-foreground/50 text-sm pt-2 border-t border-foreground/10">
                     <div>
                         Criado em:{" "}
                         {new Date(agent.created_date).toLocaleDateString(
-                            "pt-BR"
+                            "pt-BR",
                         )}
                     </div>
                     <div>
