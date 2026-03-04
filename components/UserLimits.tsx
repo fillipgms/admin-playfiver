@@ -56,7 +56,6 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
         quantity_rounds_free: initialData.quantity_rounds_free || "",
     });
 
-    // Update form data when initialData changes
     useEffect(() => {
         setFormData({
             limit_enable: initialData.limit_enable === 1,
@@ -195,7 +194,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onCheckedChange={(v) =>
                                             handleChange(
                                                 "limit_enable_distribuidor",
-                                                v
+                                                v,
                                             )
                                         }
                                     />
@@ -214,7 +213,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limit_hours",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         disabled={!formData.limit_enable}
@@ -231,7 +230,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limite_amount",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         disabled={!formData.limit_enable}
@@ -254,7 +253,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limit_hours_distribuidor",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         disabled={
@@ -275,7 +274,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limite_amount_distribuidor",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         disabled={
@@ -299,7 +298,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limit_max",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
@@ -315,7 +314,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limit_max_distribuidor",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
@@ -334,7 +333,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limit_hours_bonus",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
@@ -349,7 +348,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "limit_quantity_bonus",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
@@ -368,7 +367,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "number_of_hours",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
@@ -383,7 +382,7 @@ const UserLimits = ({ userId, initialData = {} }: UserLimitsModalProps) => {
                                         onChange={(e) =>
                                             handleChange(
                                                 "quantity_rounds_free",
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
