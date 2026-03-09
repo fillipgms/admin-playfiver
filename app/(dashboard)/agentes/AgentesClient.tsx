@@ -66,7 +66,7 @@ export default function AgentesClient({
     const [isPending, startTransition] = useTransition();
 
     const [searchValue, setSearchValue] = useState(
-        searchParams.get("search") ?? ""
+        searchParams.get("search") ?? "",
     );
     const [showFilters, setShowFilters] = useState(false);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -79,7 +79,7 @@ export default function AgentesClient({
 
     const currentUserId = searchParams.get("user");
     const currentUserName = usersOptions.find(
-        (u) => String(u.value) === currentUserId
+        (u) => String(u.value) === currentUserId,
     )?.label;
 
     useEffect(() => {
@@ -110,11 +110,11 @@ export default function AgentesClient({
             startTransition(() => {
                 router.replace(
                     queryString ? `${pathname}?${queryString}` : pathname,
-                    { scroll: false }
+                    { scroll: false },
                 );
             });
         },
-        [pathname, router, searchParams, startTransition]
+        [pathname, router, searchParams, startTransition],
     );
 
     const handleSearch = (value: string) => {
@@ -168,7 +168,7 @@ export default function AgentesClient({
                             id: u.id,
                             name: u.email,
                             email: u.email,
-                        })) as FoundUser[]
+                        })) as FoundUser[],
                     );
                 } else {
                     setFoundUsers([]);
@@ -296,10 +296,8 @@ export default function AgentesClient({
                     </div>
                 </div>
 
-                {/* Collapsible Filters Area */}
                 {showFilters && (
                     <div className="grid grid-cols-1 gap-4 rounded-lg border border-border/50 bg-muted/20 p-4 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-top-2">
-                        {/* NOVO CAMPO DE PESQUISA DE USUÁRIOS */}
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-muted-foreground ml-1">
                                 Filtrar por Usuário
@@ -315,13 +313,11 @@ export default function AgentesClient({
                                     className="bg-background h-9"
                                 />
 
-                                {/* Dropdown/Scrollarea for Results */}
                                 {(foundUsers.length > 0 || isUserSearching) &&
                                     userSearchTerm.length >= 3 && (
                                         <div className="absolute z-10 w-full mt-1 border rounded-md bg-popover shadow-lg max-h-48 overflow-y-auto">
                                             {isUserSearching && (
                                                 <div className="flex items-center justify-center p-3 text-sm text-muted-foreground">
-                                                    {/* <Loader2 className="animate-spin h-4 w-4 mr-2" /> */}
                                                     Buscando...
                                                 </div>
                                             )}

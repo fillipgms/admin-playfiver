@@ -450,6 +450,8 @@ export async function searchUser(query: string) {
             },
         );
 
+        console.log(data);
+
         if (!data) {
             throw new Error("No valid data received from API");
         }

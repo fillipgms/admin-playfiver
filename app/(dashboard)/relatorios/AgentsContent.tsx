@@ -64,13 +64,11 @@ const parseArrayParam = (param?: string | string[]): string[] => {
     }
 };
 
-// Opções de tipos disponíveis para filtro
 const typeOptions = [
     {
         label: "Agentes com Mais Erros",
         value: "bigError",
     },
-    // Adicione mais tipos aqui conforme necessário
 ];
 
 export default function AgentsContent({
@@ -88,14 +86,14 @@ export default function AgentsContent({
         useState<RelatorioAgentesResponse | null>(initialData);
 
     const [users, setUsers] = useState<string[]>(
-        parseArrayParam(params.user) || []
+        parseArrayParam(params.user) || [],
     );
     const [dateStart, setDateStart] = useState(
-        getParamValue(params.dateStart) || ""
+        getParamValue(params.dateStart) || "",
     );
     const [dateEnd, setDateEnd] = useState(getParamValue(params.dateEnd) || "");
     const [types, setTypes] = useState<string[]>(
-        parseArrayParam(params.type) || []
+        parseArrayParam(params.type) || [],
     );
     const [showFilters, setShowFilters] = useState(false);
 
@@ -132,7 +130,7 @@ export default function AgentsContent({
             router.replace(`/relatorios?${params.toString()}`);
             router.refresh();
         },
-        [searchParams, router]
+        [searchParams, router],
     );
 
     const handleUserSearch = useCallback((value: string) => {
@@ -161,7 +159,7 @@ export default function AgentsContent({
                             id: u.id,
                             name: u.name || u.email,
                             email: u.email,
-                        }))
+                        })),
                     );
                 } else {
                     setFoundUsers([]);
@@ -189,7 +187,7 @@ export default function AgentsContent({
             setUserSearchTerm("");
             setFoundUsers([]);
         },
-        [users, updateUrlParams]
+        [users, updateUrlParams],
     );
 
     const handleRemoveUser = useCallback(
@@ -205,7 +203,7 @@ export default function AgentsContent({
                 user: newUsers.length > 0 ? newUsers : [],
             });
         },
-        [users, updateUrlParams]
+        [users, updateUrlParams],
     );
 
     const handleDateStartChange = (value: string) => {
@@ -339,7 +337,7 @@ export default function AgentsContent({
                                                         key={user.id}
                                                         onClick={() =>
                                                             handleUserSelect(
-                                                                user
+                                                                user,
                                                             )
                                                         }
                                                         className="w-full text-left px-4 py-2 hover:bg-accent text-sm"
@@ -372,7 +370,7 @@ export default function AgentsContent({
                                                         <button
                                                             onClick={() =>
                                                                 handleRemoveUser(
-                                                                    userId
+                                                                    userId,
                                                                 )
                                                             }
                                                             className="ml-1 hover:text-destructive"
@@ -395,7 +393,7 @@ export default function AgentsContent({
                                         value={dateStart}
                                         onChange={(e) =>
                                             handleDateStartChange(
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                     />
@@ -455,7 +453,7 @@ export default function AgentsContent({
         Array.from(searchParams?.entries() || []).map(([key, value]) => [
             key,
             Array.isArray(value) ? value[0] : value,
-        ])
+        ]),
     );
 
     return (
@@ -638,11 +636,11 @@ export default function AgentsContent({
                                         href={`/relatorios?tab=logs&user=${encodeURIComponent(
                                             JSON.stringify([
                                                 agent.usuario_id.toString(),
-                                            ])
+                                            ]),
                                         )}&agent=${encodeURIComponent(
                                             JSON.stringify([
                                                 agent.id.toString(),
-                                            ])
+                                            ]),
                                         )}`}
                                     >
                                         <Button variant="outline">

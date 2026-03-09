@@ -24,7 +24,6 @@ export default function FornecedoresTabsWrapper({
         const params = new URLSearchParams();
         params.set("tab", value);
 
-        // Reset page and search when changing tabs
         params.set("page", "1");
 
         router.replace(`/fornecedores?${params.toString()}`);
