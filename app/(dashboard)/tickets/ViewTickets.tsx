@@ -80,6 +80,17 @@ function TicketsKanBan({ tickets }: { tickets: Ticket[] }) {
         "9060704073": (id) => resolveTicket(id, 2),
     };
 
+    function handleUpdateCard(cardId: string, updates: Partial<Ticket>) {
+        setColumns((prev) =>
+            prev.map((column) => ({
+                ...column,
+                items: column.items.map((item) =>
+                    String(item.id) === cardId ? { ...item, ...updates } : item,
+                ),
+            })),
+        );
+    }
+
     function handleDeleteCard(cardId: string) {
         setColumns((prev) =>
             prev.map((column) =>
@@ -315,6 +326,7 @@ function TicketsKanBan({ tickets }: { tickets: Ticket[] }) {
                             onCardKeyDown={handleCardKeyDown}
                             onDeleteCard={handleDeleteCard}
                             onMoveCardToColumn={handleMoveCardToColumn}
+                            onUpdateCard={handleUpdateCard}
                         />
                     ) : (
                         <KanbanBoardColumnSkeleton key={column.id} />

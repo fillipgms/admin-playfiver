@@ -24,6 +24,7 @@ export function MyKanbanBoardColumn({
     onCardKeyDown,
     onDeleteCard,
     onMoveCardToColumn,
+    onUpdateCard,
 }: {
     activeCardId: string;
     column: Column;
@@ -31,6 +32,7 @@ export function MyKanbanBoardColumn({
     onCardKeyDown: (event: KeyboardEvent<HTMLButtonElement>, cardId: string) => void;
     onDeleteCard: (cardId: string) => void;
     onMoveCardToColumn: (columnId: string, index: number, card: Ticket) => void;
+    onUpdateCard: (cardId: string, updates: Partial<Ticket>) => void;
 }) {
     const listReference = useRef<HTMLUListElement>(null);
     const { onDragCancel, onDragEnd } = useDndEvents();
@@ -91,6 +93,7 @@ export function MyKanbanBoardColumn({
                             onCardBlur={onCardBlur}
                             onCardKeyDown={onCardKeyDown}
                             onDeleteCard={onDeleteCard}
+                            onUpdateCard={onUpdateCard}
                         />
                     </KanbanBoardColumnListItem>
                 ))}
