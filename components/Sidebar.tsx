@@ -15,6 +15,7 @@ import {
     CreditCardIcon,
     VectorThreeIcon,
     ChartLineIcon,
+    FilesIcon,
 } from "@phosphor-icons/react";
 import type { IconProps } from "@phosphor-icons/react";
 import GridIcon from "@/public/GridIcon";
@@ -105,6 +106,20 @@ const links: Array<{
                 ],
                 requireAny: true,
             },
+            {
+                icon: FilesIcon,
+                iconProps: { size: 24 },
+                name: "Tickets",
+                url: "/tickets",
+                requiredPermissions: [
+                    "logs_view",
+                    "logs_agent_view",
+                    "logs_ggr_view",
+                    "agent_view_report",
+                    "ggr_view",
+                ],
+                requireAny: true,
+            },
         ],
     },
     {
@@ -176,7 +191,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         items.filter((item) =>
             hasPermission(item.requiredPermissions, {
                 any: item.requireAny,
-            })
+            }),
         );
 
     return (
@@ -219,7 +234,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                 : links
                                       .map((linkGroup) => {
                                           const visibleItems = getVisibleItems(
-                                              linkGroup.items
+                                              linkGroup.items,
                                           );
                                           if (visibleItems.length === 0) {
                                               return null;
@@ -254,7 +269,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                                                           item.customIcon
                                                                       ) {
                                                                           return item.customIcon(
-                                                                              isActive
+                                                                              isActive,
                                                                           );
                                                                       }
 
@@ -293,7 +308,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                                                       }
                                                                       id={`link-${item.url.replace(
                                                                           "/",
-                                                                          ""
+                                                                          "",
                                                                       )}`}
                                                                   >
                                                                       {isActive && (
@@ -317,7 +332,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                                                                       </Link>
                                                                   </li>
                                                               );
-                                                          }
+                                                          },
                                                       )}
                                                   </ul>
                                               </div>

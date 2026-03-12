@@ -919,3 +919,49 @@ interface RelatedResponseProps {
     to: number;
     total: number;
 }
+
+interface TicketUser {
+    id: number;
+    name: string;
+    email: string;
+    email_verified_at: string | null;
+    google2fa_secret: string;
+    phone: string;
+    country: string;
+    nationality: string;
+    lang: string;
+    role: string[];
+    ban: number;
+    latest_ip: string;
+    verification_code: string | null;
+    verify_google2fa: string;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Ticket {
+    id: number;
+    subject: string;
+    details: string;
+    category: "ALL" | "BUG" | "UPDATE" | "INTERNAL";
+    checked: number;
+    resolved: number;
+    resolved_by: string | null;
+    resolved_user_id: number | null;
+    message_checked: string | null;
+    message_resolved: string | null;
+    contact: string;
+    user_id: number;
+    created_user_id: number;
+    user: TicketUser;
+    created_by: User;
+    created_at: string;
+    updated_at: string;
+}
+
+interface Column {
+    id: string;
+    title: string;
+    color: KanbanBoardCircleColor;
+    items: Ticket[];
+}
