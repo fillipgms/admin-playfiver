@@ -20,8 +20,6 @@ export default async function TicketsPage({
 
     const res = await getTickets(user_id, created_user_id, resolved, category);
 
-    console.log(res);
-
     return (
         <main className="space-y-8">
             <Tabs defaultValue="send" className="flex flex-col min-w-0">

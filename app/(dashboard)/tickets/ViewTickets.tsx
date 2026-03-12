@@ -11,9 +11,10 @@ import {
     KanbanBoardProvider,
     useDndEvents,
 } from "@/components/kanban";
-import { checkTicket, resolveTicket } from "@/actions/tickets";
+import { checkTicket, deleteTicket, resolveTicket } from "@/actions/tickets";
 import { useJsLoaded } from "@/hooks/use-js-loaded";
 import { MyKanbanBoardColumn } from "./kanban/MyKanbanBoardColumn";
+import { useRouter } from "next/navigation";
 
 const ViewTickets = ({
     tickets,
@@ -80,7 +81,9 @@ function TicketsKanBan({ tickets }: { tickets: Ticket[] }) {
         "9060704073": (id) => resolveTicket(id, 2),
     };
 
-    function handleUpdateCard(cardId: string, updates: Partial<Ticket>) {
+    const router = useRouter();
+
+    async function handleUpdateCard(cardId: string, updates: Partial<Ticket>) {
         setColumns((prev) =>
             prev.map((column) => ({
                 ...column,
@@ -91,7 +94,7 @@ function TicketsKanBan({ tickets }: { tickets: Ticket[] }) {
         );
     }
 
-    function handleDeleteCard(cardId: string) {
+    async function handleDeleteCard(cardId: string) {
         setColumns((prev) =>
             prev.map((column) =>
                 column.items.some((card) => String(card.id) === cardId)
@@ -104,6 +107,24 @@ function TicketsKanBan({ tickets }: { tickets: Ticket[] }) {
                     : column,
             ),
         );
+
+        try {
+            const res = await deleteTicket(cardId);
+
+            if (res.success && res.success === false) {
+                toast.error(res.error);
+            } else {
+                toast.success("Ticket Excluído com Sucesso");
+            }
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Ocorreu um erro ao Excluir o Ticket.",
+            );
+        }
+
+        router.refresh();
     }
 
     function handleMoveCardToColumn(
@@ -140,16 +161,20 @@ function TicketsKanBan({ tickets }: { tickets: Ticket[] }) {
         );
 
         if (columnChanged && COLUMN_ACTIONS[columnId]) {
-            COLUMN_ACTIONS[columnId](card.id).then((result) => {
-                const res = result as { success?: boolean; error?: string } | undefined;
-                if (res && res.success === false) {
+            COLUMN_ACTIONS[columnId](card.id)
+                .then((result) => {
+                    const res = result as
+                        | { success?: boolean; error?: string }
+                        | undefined;
+                    if (res && res.success === false) {
+                        setColumns(previousColumns);
+                        toast.error(res.error ?? "Erro ao mover ticket");
+                    }
+                })
+                .catch(() => {
                     setColumns(previousColumns);
-                    toast.error(res.error ?? "Erro ao mover ticket");
-                }
-            }).catch(() => {
-                setColumns(previousColumns);
-                toast.error("Erro ao mover ticket");
-            });
+                    toast.error("Erro ao mover ticket");
+                });
         }
     }
 

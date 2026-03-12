@@ -55,8 +55,6 @@ export async function getTickets(
         return data;
     } catch (error: unknown) {
         if (error) {
-            console.error("Failed to create agent:", error);
-
             const apiMessage = (
                 error as { response?: { data?: { msg?: string } } }
             )?.response?.data?.msg;
@@ -129,12 +127,18 @@ export async function resolveTicket(id: number, resolved: 1 | 2) {
 
         return data;
     } catch (error: unknown) {
-        if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
             redirect("/login");
         }
         return {
             success: false,
-            error: getFriendlyHttpErrorMessage(error, "Falha ao resolver ticket"),
+            error: getFriendlyHttpErrorMessage(
+                error,
+                "Falha ao resolver ticket",
+            ),
         };
     }
 }
@@ -165,17 +169,23 @@ export async function checkTicket(id: number, checked: 0 | 1 | 2 | 3) {
 
         return data;
     } catch (error: unknown) {
-        if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
             redirect("/login");
         }
         return {
             success: false,
-            error: getFriendlyHttpErrorMessage(error, "Falha ao atualizar ticket"),
+            error: getFriendlyHttpErrorMessage(
+                error,
+                "Falha ao atualizar ticket",
+            ),
         };
     }
 }
 
-export async function deleteTicket(id: number) {
+export async function deleteTicket(id: string) {
     const session = await getSession();
 
     if (!session) {
@@ -183,6 +193,8 @@ export async function deleteTicket(id: number) {
     }
 
     try {
+        console.log("isDeleting");
+
         const { data } = await axios.delete(`${BASE_URL}/ticket/${id}`, {
             timeout: 30000,
             headers: {
@@ -191,14 +203,24 @@ export async function deleteTicket(id: number) {
             },
         });
 
+        if (!data) {
+            throw new Error("No valid data received from API");
+        }
+
         return data;
     } catch (error: unknown) {
-        if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
             redirect("/login");
         }
         return {
             success: false,
-            error: getFriendlyHttpErrorMessage(error, "Falha ao deletar ticket"),
+            error: getFriendlyHttpErrorMessage(
+                error,
+                "Falha ao deletar ticket",
+            ),
         };
     }
 }
@@ -233,7 +255,10 @@ export async function updateTicket(formData: {
 
         return data;
     } catch (error: unknown) {
-        if (axios.isAxiosError(error) && (error.response?.status === 401 || error.response?.status === 403)) {
+        if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+        ) {
             redirect("/login");
         }
         return {
@@ -255,8 +280,6 @@ export async function createTicket(formData: {
     if (!session) {
         redirect("/login");
     }
-
-    console.log(formData);
 
     try {
         const { data } = await axios.post(`${BASE_URL}/ticket`, formData, {

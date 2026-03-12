@@ -2,13 +2,17 @@
 
 import {
     KanbanBoardCard,
-    KanbanBoardCardButton,
-    KanbanBoardCardButtonGroup,
     KanbanBoardCardDescription,
     KanbanBoardCardTitle,
 } from "@/components/kanban";
 
-import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "react";
+import {
+    useEffect,
+    useRef,
+    useState,
+    useTransition,
+    type KeyboardEvent,
+} from "react";
 import { Trash2Icon } from "lucide-react";
 import {
     Credenza,
@@ -31,6 +35,19 @@ import {
 } from "@/components/ui/select";
 import { updateTicket } from "@/actions/tickets";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const CATEGORY_LABELS: Record<Ticket["category"], string> = {
     ALL: "Geral",
@@ -79,8 +96,9 @@ function InlineEditField({
     if (editing) {
         const sharedProps = {
             value: draft,
-            onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                setDraft(e.target.value),
+            onChange: (
+                e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+            ) => setDraft(e.target.value),
             onBlur: commit,
             onKeyDown: handleKeyDown,
             className: `w-full bg-transparent outline-none resize-none border-b border-border focus:border-primary transition-colors ${className}`,
@@ -107,7 +125,7 @@ function InlineEditField({
             tabIndex={0}
             onClick={() => setEditing(true)}
             onKeyDown={(e) => e.key === "Enter" && setEditing(true)}
-            className={`cursor-text hover:opacity-70 transition-opacity ${className}`}
+            className={`cursor-text indent-4 hover:opacity-70 transition-opacity ${className}`}
             title="Clique para editar"
         >
             {value}
@@ -171,7 +189,11 @@ export function MyKanbanBoardCard({
         return `${day} às ${time}`;
     }
 
-    function saveField(updates: Partial<Pick<Ticket, "category" | "subject" | "details" | "contact">>) {
+    function saveField(
+        updates: Partial<
+            Pick<Ticket, "category" | "subject" | "details" | "contact">
+        >,
+    ) {
         const payload = {
             id: card.id,
             user_id: card.user_id,
@@ -212,7 +234,7 @@ export function MyKanbanBoardCard({
 
     return (
         <Credenza>
-            <CredenzaTrigger className="w-full">
+            <CredenzaTrigger className="w-full" asChild>
                 <KanbanBoardCard
                     data={{ ...card, id: String(card.id) }}
                     isActive={isActive}
@@ -236,28 +258,50 @@ export function MyKanbanBoardCard({
                     <KanbanBoardCardDescription>
                         {card.user.name}
                     </KanbanBoardCardDescription>
-                    <KanbanBoardCardButtonGroup
-                        className="bg-transparent"
-                        disabled={isActive}
-                    >
-                        <KanbanBoardCardButton
-                            className="text-destructive"
-                            onClick={() => onDeleteCard(String(card.id))}
-                            tooltip="Excluir ticket"
-                        >
-                            <Trash2Icon />
-                            <span className="sr-only">Excluir ticket</span>
-                        </KanbanBoardCardButton>
-                    </KanbanBoardCardButtonGroup>
                 </KanbanBoardCard>
             </CredenzaTrigger>
             <CredenzaContent className="bg-background-primary p-0 xl:max-w-5xl">
                 <div>
                     <div className="p-4 border-b flex gap-4 items-center">
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button size="icon" variant="destructive">
+                                    <Trash2Icon />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-background-primary">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Tem certeza que deseja prosseguir?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        <p>
+                                            A ação de excluir o ticket{" "}
+                                            {card.subject} não pode ser desfeita
+                                        </p>
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                        Cancelar
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() =>
+                                            onDeleteCard(String(card.id))
+                                        }
+                                    >
+                                        Continuar
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+
                         <Select
                             value={card.category}
                             onValueChange={(val) =>
-                                saveField({ category: val as Ticket["category"] })
+                                saveField({
+                                    category: val as Ticket["category"],
+                                })
                             }
                             disabled={isPending}
                         >
@@ -265,13 +309,15 @@ export function MyKanbanBoardCard({
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                {(Object.keys(CATEGORY_LABELS) as Ticket["category"][]).map(
-                                    (key) => (
-                                        <SelectItem key={key} value={key}>
-                                            {CATEGORY_LABELS[key]}
-                                        </SelectItem>
-                                    ),
-                                )}
+                                {(
+                                    Object.keys(
+                                        CATEGORY_LABELS,
+                                    ) as Ticket["category"][]
+                                ).map((key) => (
+                                    <SelectItem key={key} value={key}>
+                                        {CATEGORY_LABELS[key]}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                         <div className="bg-input/30 border w-fit py-1 px-4 rounded text-sm">
@@ -285,7 +331,9 @@ export function MyKanbanBoardCard({
                                 <CredenzaTitle className="text-2xl font-bold">
                                     <InlineEditField
                                         value={card.subject}
-                                        onSave={(val) => saveField({ subject: val })}
+                                        onSave={(val) =>
+                                            saveField({ subject: val })
+                                        }
                                         className="text-2xl font-bold"
                                     />
                                 </CredenzaTitle>
@@ -332,7 +380,9 @@ export function MyKanbanBoardCard({
                                             </div>
                                             <InlineEditField
                                                 value={card.contact}
-                                                onSave={(val) => saveField({ contact: val })}
+                                                onSave={(val) =>
+                                                    saveField({ contact: val })
+                                                }
                                             />
                                         </div>
                                     )}
@@ -343,10 +393,12 @@ export function MyKanbanBoardCard({
                                     <TextAlignLeftIcon />
                                     <h5 className="font-bold">Descrição</h5>
                                 </div>
-                                <div className="pl-6">
+                                <div>
                                     <InlineEditField
                                         value={card.details}
-                                        onSave={(val) => saveField({ details: val })}
+                                        onSave={(val) =>
+                                            saveField({ details: val })
+                                        }
                                         multiline
                                     />
                                 </div>

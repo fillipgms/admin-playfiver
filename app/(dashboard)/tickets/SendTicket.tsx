@@ -132,7 +132,7 @@ const SendTicket = () => {
             toast.error(
                 error instanceof Error
                     ? error.message
-                    : "Ocorreu um erro ao criar a regra de GGR.",
+                    : "Ocorreu um erro ao criar o Ticket.",
             );
         } finally {
             setIsSubmitting(false);
