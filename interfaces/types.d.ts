@@ -954,7 +954,7 @@ interface Ticket {
     user_id: number;
     created_user_id: number;
     user: TicketUser;
-    created_by: User;
+    created_by: TicketUser;
     created_at: string;
     updated_at: string;
 }
