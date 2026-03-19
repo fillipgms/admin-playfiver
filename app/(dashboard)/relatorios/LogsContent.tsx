@@ -127,7 +127,7 @@ function getTypeLabel(type?: string): string {
 
 function getGravityVariant(
     gravity?: string,
-    type?: string
+    type?: string,
 ): "default" | "destructive" | "outline" {
     const fixedGravity = getFixedGravity(type);
     const effectiveGravity = fixedGravity || gravity;
@@ -166,22 +166,22 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
     };
 
     const [users, setUsers] = useState<string[]>(
-        parseArrayParam(params.user) || []
+        parseArrayParam(params.user) || [],
     );
     const [agents, setAgents] = useState<string[]>(
-        parseArrayParam(params.agent) || []
+        parseArrayParam(params.agent) || [],
     );
     const [gravities, setGravities] = useState<string[]>(
-        parseArrayParam(params.gravity) || []
+        parseArrayParam(params.gravity) || [],
     );
     const [types, setTypes] = useState<string[]>(
-        parseArrayParam(params.type) || []
+        parseArrayParam(params.type) || [],
     );
     const [dateStart, setDateStart] = useState<string>(
-        getParamValue(params.dateStart) || ""
+        getParamValue(params.dateStart) || "",
     );
     const [dateEnd, setDateEnd] = useState<string>(
-        getParamValue(params.dateEnd) || ""
+        getParamValue(params.dateEnd) || "",
     );
     const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
     const [data, setData] = useState<LogEntryProps[]>(initialData.data);
@@ -287,7 +287,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
 
             router.replace(`/relatorios?${params.toString()}`);
         },
-        [searchParams, router]
+        [searchParams, router],
     );
 
     const handleGravityChange = useCallback(
@@ -302,7 +302,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                     newGravities.length > 0 ? JSON.stringify(newGravities) : "",
             });
         },
-        [gravities, updateUrlParams]
+        [gravities, updateUrlParams],
     );
 
     const handleTypeChange = useCallback(
@@ -316,7 +316,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 type: newTypes.length > 0 ? JSON.stringify(newTypes) : "",
             });
         },
-        [types, updateUrlParams]
+        [types, updateUrlParams],
     );
 
     const handleDateStartChange = useCallback(
@@ -324,7 +324,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             setDateStart(date);
             updateUrlParams({ dateStart: date });
         },
-        [updateUrlParams]
+        [updateUrlParams],
     );
 
     const handleDateEndChange = useCallback(
@@ -332,7 +332,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             setDateEnd(date);
             updateUrlParams({ dateEnd: date });
         },
-        [updateUrlParams]
+        [updateUrlParams],
     );
 
     const handleUserSearch = useCallback((value: string) => {
@@ -361,7 +361,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                             id: u.id,
                             name: u.name || u.email,
                             email: u.email,
-                        }))
+                        })),
                     );
                 } else {
                     setFoundUsers([]);
@@ -396,7 +396,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                             id: agent.id,
                             code: agent.agent_code,
                             memo: agent.agent_memo || agent.agent_code,
-                        }))
+                        })),
                     );
                 } else {
                     setFoundAgents([]);
@@ -422,7 +422,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             setUserSearchTerm("");
             setFoundUsers([]);
         },
-        [users, updateUrlParams]
+        [users, updateUrlParams],
     );
 
     const handleAgentSelect = useCallback(
@@ -438,7 +438,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
             setAgentSearchTerm("");
             setFoundAgents([]);
         },
-        [agents, updateUrlParams]
+        [agents, updateUrlParams],
     );
 
     const clearAllFilters = useCallback(() => {
@@ -468,7 +468,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 user: newUsers.length > 0 ? JSON.stringify(newUsers) : "",
             });
         },
-        [users, updateUrlParams]
+        [users, updateUrlParams],
     );
 
     const handleRemoveAgent = useCallback(
@@ -479,7 +479,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 agent: newAgents.length > 0 ? JSON.stringify(newAgents) : "",
             });
         },
-        [agents, updateUrlParams]
+        [agents, updateUrlParams],
     );
 
     const toggleDateGroup = useCallback((dateGroup: string) => {
@@ -596,7 +596,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                         className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
                                                         onClick={() =>
                                                             handleUserSelect(
-                                                                user
+                                                                user,
                                                             )
                                                         }
                                                     >
@@ -665,7 +665,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                         className="p-3 cursor-pointer hover:bg-accent hover:text-accent-foreground text-sm flex flex-col transition-colors"
                                                         onClick={() =>
                                                             handleAgentSelect(
-                                                                agent
+                                                                agent,
                                                             )
                                                         }
                                                     >
@@ -744,13 +744,13 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                 type="checkbox"
                                                                 className="w-4 h-4 rounded border-input"
                                                                 checked={gravities.includes(
-                                                                    gravity
+                                                                    gravity,
                                                                 )}
                                                                 onChange={(e) =>
                                                                     handleGravityChange(
                                                                         gravity,
                                                                         e.target
-                                                                            .checked
+                                                                            .checked,
                                                                     )
                                                                 }
                                                             />
@@ -758,7 +758,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                 {gravity}
                                                             </span>
                                                         </label>
-                                                    )
+                                                    ),
                                                 )}
                                             </div>
                                         </ScrollArea>
@@ -801,13 +801,13 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                             type="checkbox"
                                                             className="w-4 h-4 rounded border-input"
                                                             checked={types.includes(
-                                                                type
+                                                                type,
                                                             )}
                                                             onChange={(e) =>
                                                                 handleTypeChange(
                                                                     type,
                                                                     e.target
-                                                                        .checked
+                                                                        .checked,
                                                                 )
                                                             }
                                                         />
@@ -832,7 +832,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                         value={dateStart}
                                         onChange={(e) =>
                                             handleDateStartChange(
-                                                e.target.value
+                                                e.target.value,
                                             )
                                         }
                                         className="px-2 py-1 text-sm border border-input rounded-md bg-background hover:bg-accent/50 transition-colors cursor-pointer"
@@ -958,11 +958,12 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                             return dateB.localeCompare(dateA);
                         })
                         .map(([dateGroup, logs]) => {
+                            console.log(logs);
                             const isExpanded = expandedDates.has(dateGroup);
                             const sortedLogs = [...logs].sort(
                                 (a, b) =>
                                     new Date(b.created_at).getTime() -
-                                    new Date(a.created_at).getTime()
+                                    new Date(a.created_at).getTime(),
                             );
 
                             return (
@@ -1005,16 +1006,16 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                     log.user?.email || "";
                                                 const initials = getInitials(
                                                     userName,
-                                                    userEmail
+                                                    userEmail,
                                                 );
                                                 const isLogResolved =
                                                     isResolved(log);
                                                 const timeAgo =
                                                     formatRelativeTime(
-                                                        log.created_at
+                                                        log.created_at,
                                                     );
                                                 const time = formatTime(
-                                                    log.created_at
+                                                    log.created_at,
                                                 );
 
                                                 return (
@@ -1023,16 +1024,13 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                         className="p-4 hover:shadow-md transition-all duration-200 border-l-4 border-l-primary/40 hover:border-l-primary bg-card/50 hover:bg-card/80 backdrop-blur-sm"
                                                     >
                                                         <div className="flex gap-4">
-                                                            {/* Avatar */}
                                                             <div className="shrink-0">
                                                                 <div className="size-10 rounded-full bg-linear-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-semibold text-sm shadow-md">
                                                                     {initials}
                                                                 </div>
                                                             </div>
 
-                                                            {/* Content */}
                                                             <div className="flex-1 min-w-0 space-y-2">
-                                                                {/* Header */}
                                                                 <div className="flex flex-wrap items-start justify-between gap-2">
                                                                     <div className="flex-1 min-w-0">
                                                                         <p className="font-semibold text-foreground">
@@ -1066,7 +1064,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                         <Badge
                                                                             variant={getGravityVariant(
                                                                                 log.gravity,
-                                                                                log.type
+                                                                                log.type,
                                                                             )}
                                                                             className="gap-1"
                                                                         >
@@ -1095,11 +1093,10 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                     </div>
                                                                 </div>
 
-                                                                {/* Message */}
                                                                 {log.type ===
                                                                     "logs_check_wallet" &&
                                                                 Array.isArray(
-                                                                    log.data
+                                                                    log.data,
                                                                 ) ? (
                                                                     <div className="bg-muted/30 rounded-lg p-3 border border-muted/50">
                                                                         <p className="font-medium text-sm text-foreground mb-3">
@@ -1131,7 +1128,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                                     {log.data.map(
                                                                                         (
                                                                                             item,
-                                                                                            idx
+                                                                                            idx,
                                                                                         ) => (
                                                                                             <tr
                                                                                                 key={
@@ -1148,7 +1145,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                                                     {typeof item.diferenca ===
                                                                                                     "number"
                                                                                                         ? item.diferenca.toLocaleString(
-                                                                                                              "pt-BR"
+                                                                                                              "pt-BR",
                                                                                                           )
                                                                                                         : item.diferenca}
                                                                                                 </td>
@@ -1160,33 +1157,33 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                                                               {
                                                                                                                   minimumFractionDigits: 2,
                                                                                                                   maximumFractionDigits: 2,
-                                                                                                              }
+                                                                                                              },
                                                                                                           )
                                                                                                         : parseFloat(
                                                                                                               String(
-                                                                                                                  item.total_recarga
-                                                                                                              )
+                                                                                                                  item.total_recarga,
+                                                                                                              ),
                                                                                                           ).toLocaleString(
                                                                                                               "pt-BR",
                                                                                                               {
                                                                                                                   minimumFractionDigits: 2,
                                                                                                                   maximumFractionDigits: 2,
-                                                                                                              }
+                                                                                                              },
                                                                                                           )}
                                                                                                 </td>
                                                                                                 <td className="py-2 px-3 text-right text-foreground">
                                                                                                     {parseFloat(
-                                                                                                        item.saldo_carteira
+                                                                                                        item.saldo_carteira,
                                                                                                     ).toLocaleString(
                                                                                                         "pt-BR",
                                                                                                         {
                                                                                                             minimumFractionDigits: 2,
                                                                                                             maximumFractionDigits: 8,
-                                                                                                        }
+                                                                                                        },
                                                                                                     )}
                                                                                                 </td>
                                                                                             </tr>
-                                                                                        )
+                                                                                        ),
                                                                                     )}
                                                                                 </tbody>
                                                                             </table>
@@ -1195,13 +1192,45 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                 ) : (
                                                                     log.data &&
                                                                     !Array.isArray(
-                                                                        log.data
+                                                                        log.data,
                                                                     ) &&
                                                                     (log.data
                                                                         ?.titulo ||
                                                                         log.data
                                                                             ?.mensagem) && (
                                                                         <div className="bg-muted/30 rounded-lg p-3 border border-muted/50 space-y-1">
+                                                                            {log
+                                                                                .data
+                                                                                ?.game && (
+                                                                                <p className="text-sm text-foreground/80 leading-relaxed">
+                                                                                    <span className="font-bold">
+                                                                                        Jogo:{" "}
+                                                                                    </span>
+                                                                                    {
+                                                                                        log
+                                                                                            .data
+                                                                                            .game
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+
+                                                                            {log
+                                                                                .data
+                                                                                ?.original !==
+                                                                                undefined && (
+                                                                                <p className="text-sm text-foreground/80 leading-relaxed">
+                                                                                    <span className="font-bold">
+                                                                                        Original:{" "}
+                                                                                    </span>
+                                                                                    {log
+                                                                                        .data
+                                                                                        .original ===
+                                                                                    1
+                                                                                        ? "Sim"
+                                                                                        : "Não"}
+                                                                                </p>
+                                                                            )}
+
                                                                             {log
                                                                                 .data
                                                                                 ?.titulo && (
@@ -1228,7 +1257,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                     )
                                                                 )}
 
-                                                                {/* Metadata */}
                                                                 <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-muted-foreground border-t border-muted/30">
                                                                     <span className="font-medium">
                                                                         {time}
@@ -1252,7 +1280,7 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                                 </span>{" "}
                                                                                 <span className="font-medium text-foreground/80">
                                                                                     {getTypeLabel(
-                                                                                        log.type
+                                                                                        log.type,
                                                                                     )}
                                                                                 </span>
                                                                             </span>
@@ -1272,7 +1300,6 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                 )}
             </div>
 
-            {/* Pagination */}
             {initialData.last_page > 1 && (
                 <PaginationControls
                     currentPage={initialData.current_page}

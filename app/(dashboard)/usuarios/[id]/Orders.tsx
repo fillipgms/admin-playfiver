@@ -57,7 +57,7 @@ const Orders = async ({ id }: { id: string }) => {
                                                 order.status === 1
                                                     ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20"
                                                     : "bg-[#f59e0b]/10 text-[#f59e0b] border-[#f59e0b]/20",
-                                                "px-3 py-1 rounded-lg border text-xs font-medium"
+                                                "px-3 py-1 rounded-lg border text-xs font-medium",
                                             )}
                                         >
                                             {order.status === 1
@@ -117,12 +117,7 @@ const Orders = async ({ id }: { id: string }) => {
                                             <>
                                                 <span>•</span>
                                                 <span className="font-mono">
-                                                    ID:{" "}
-                                                    {order.payment_id.slice(
-                                                        0,
-                                                        8
-                                                    )}
-                                                    ...
+                                                    ID: {order.payment_id}
                                                 </span>
                                             </>
                                         )}
