@@ -423,8 +423,10 @@ interface LogEntryProps {
     type?: string;
     data?:
         | {
+              game?: string;
               titulo?: string;
               mensagem?: string;
+              original?: 0 | 1;
               status?: number;
               body?: {
                   msg?: string;
