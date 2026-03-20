@@ -524,6 +524,8 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.user, params.agent]);
 
+    console.log(LogsContent);
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1194,64 +1196,35 @@ export default function LogsContent({ initialData, params }: LogsContentProps) {
                                                                     !Array.isArray(
                                                                         log.data,
                                                                     ) &&
-                                                                    (log.data
-                                                                        ?.titulo ||
-                                                                        log.data
-                                                                            ?.mensagem) && (
+                                                                    Object.keys(
+                                                                        log.data,
+                                                                    ).length >
+                                                                        0 && (
                                                                         <div className="bg-muted/30 rounded-lg p-3 border border-muted/50 space-y-1">
-                                                                            {log
-                                                                                .data
-                                                                                ?.game && (
-                                                                                <p className="text-sm text-foreground/80 leading-relaxed">
-                                                                                    <span className="font-bold">
-                                                                                        Jogo:{" "}
-                                                                                    </span>
-                                                                                    {
-                                                                                        log
-                                                                                            .data
-                                                                                            .game
-                                                                                    }
-                                                                                </p>
-                                                                            )}
-
-                                                                            {log
-                                                                                .data
-                                                                                ?.original !==
-                                                                                undefined && (
-                                                                                <p className="text-sm text-foreground/80 leading-relaxed">
-                                                                                    <span className="font-bold">
-                                                                                        Original:{" "}
-                                                                                    </span>
-                                                                                    {log
-                                                                                        .data
-                                                                                        .original ===
-                                                                                    1
-                                                                                        ? "Sim"
-                                                                                        : "Não"}
-                                                                                </p>
-                                                                            )}
-
-                                                                            {log
-                                                                                .data
-                                                                                ?.titulo && (
-                                                                                <p className="font-medium text-sm text-foreground">
-                                                                                    {
-                                                                                        log
-                                                                                            .data
-                                                                                            .titulo
-                                                                                    }
-                                                                                </p>
-                                                                            )}
-                                                                            {log
-                                                                                .data
-                                                                                ?.mensagem && (
-                                                                                <p className="text-sm text-foreground/80 leading-relaxed">
-                                                                                    {
-                                                                                        log
-                                                                                            .data
-                                                                                            .mensagem
-                                                                                    }
-                                                                                </p>
+                                                                            {Object.entries(
+                                                                                log.data,
+                                                                            ).map(
+                                                                                ([
+                                                                                    key,
+                                                                                    value,
+                                                                                ]) => (
+                                                                                    <p
+                                                                                        key={
+                                                                                            key
+                                                                                        }
+                                                                                        className="text-sm text-foreground/80 leading-relaxed"
+                                                                                    >
+                                                                                        <span className="font-bold capitalize">
+                                                                                            {
+                                                                                                key
+                                                                                            }
+                                                                                            :{" "}
+                                                                                        </span>
+                                                                                        {String(
+                                                                                            value,
+                                                                                        )}
+                                                                                    </p>
+                                                                                ),
                                                                             )}
                                                                         </div>
                                                                     )
